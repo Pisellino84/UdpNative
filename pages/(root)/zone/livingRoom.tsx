@@ -6,7 +6,7 @@ import icons from "../../../constants/icons";
 import Slider from "@react-native-community/slider"; // https://github.com/callstack/react-native-slider
 import { Dropdown } from "react-native-element-dropdown"; // https://github.com/hoaphantn7604/react-native-element-dropdown
 
-export default function livingRoom() {
+export default function LivingRoom() {
   const Sources = [
     { label: "Tuner", value: "tuner" },
     { label: "MP3", value: "mp3" },
@@ -44,8 +44,8 @@ export default function livingRoom() {
             <Text
               className={
                 power
-                  ? "text-primary-300 font-rubik"
-                  : "text-black-50 font-rubik-light"
+                  ? "text-primary-300 font-base"
+                  : "text-black-50 font-light"
               }
             >
               Power
@@ -70,8 +70,8 @@ export default function livingRoom() {
             <Text
               className={
                 mute
-                  ? "text-primary-300 font-rubik"
-                  : "text-black-50 font-rubik-light"
+                  ? "text-primary-300 font"
+                  : "text-black-50 font-light"
               }
             >
               Mute
@@ -96,8 +96,8 @@ export default function livingRoom() {
             <Text
               className={
                 night
-                  ? "text-primary-300 font-rubik"
-                  : "text-black-50 font-rubik-light"
+                  ? "text-primary-300 font"
+                  : "text-black-50 font-light"
               }
             >
               Night
@@ -105,9 +105,9 @@ export default function livingRoom() {
           </TouchableOpacity>
         </View>
         <View className="my-2.5">
-          <Text className="text-black-300 text-lg font-rubik-medium mb-1">
+          <Text className="text-black-300 text-lg font-medium mb-1">
             Volume:{" "}
-            <Text className="text-2xl font-rubik-extrabold text-primary-300">
+            <Text className="text-2xl font-extrabold text-primary-300">
               {volume}
             </Text>
           </Text>
@@ -124,7 +124,7 @@ export default function livingRoom() {
           />
         </View>
         <View className="my-2.5">
-          <Text className="text-black-300 text-lg font-rubik-medium mb-1">
+          <Text className="text-black-300 text-lg font-medium mb-1">
             Source:
           </Text>
           <Dropdown

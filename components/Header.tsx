@@ -2,6 +2,7 @@ import { View, Image, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import icons from "../constants/icons";
 import { router } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 
 interface Props {
   icon?: any;
@@ -28,13 +29,14 @@ export function MainHeader({ icon = icons.standard, title }: Props) {
 }
 
 export function SecondaryHeader({ title }: Props) {
+  const navigation = useNavigation()
   return (
     <>
       <View className="flex flex-row justify-between items-center border-b pb-5 border-primary-200">
         <View className="flex flex-row gap-3 items-center">
           <TouchableOpacity
             className="bg-primary-200 rounded-full p-3"
-            onPress={() => {router.back() ?? router.push('/')}}
+            onPress={() => {navigation.goBack()}}
           >
             <Image source={icons.backArrow} className="size-6 " />
           </TouchableOpacity>

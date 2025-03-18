@@ -3,14 +3,19 @@ import {sendThreeBytes} from '../../../lib/udpProtocol';
 import '../../../global.css';
 import {MainHeader} from '../../../components/Header';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
-import {router} from 'expo-router';
 import icons from '../../../constants/icons';
 
-import {NavigationContainer} from '@react-navigation/native'
+import {NavigationContainer, useNavigation, NavigationProp} from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 
+type RootStackParamList = {
+  LivingRoom: undefined;
+  // add other routes here
+};
+
 const Zone = ()  => {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
       <AndroidSafeArea>
         <MainHeader title="Zone" icon={icons.zone}/>
@@ -36,10 +41,8 @@ const Zone = ()  => {
             </TouchableOpacity>
           </View>
           <TouchableOpacity
-            onPress={() => {
-              router.push('./zone/livingRoom');
-            }}
-            className="flex flex-row border-b p-5 border-black-50 justify-between items-center">
+            className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
+            onPress={() => {navigation.navigate('LivingRoom')}}>
             <Text className="text-xl font-medium">Living Room</Text>
             <Image source={icons.rightArrow} className="size-6" />
           </TouchableOpacity>

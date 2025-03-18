@@ -5,17 +5,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {sendThreeBytes} from '../../../lib/udpProtocol';
+import { sendThreeBytes } from '../../../lib/udpProtocol';
 import '../../../global.css';
-import {MainHeader} from '../../../components/Header';
+import { MainHeader } from '../../../components/Header';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
-import {router} from 'expo-router';
+import { router } from 'expo-router';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import icons from '../../../constants/icons';
 
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Scenario from './scenario';
 import Zone from './zone';
+import LivingRoom from '../zone/livingRoom';
 
 const TabIcon = ({
   focused,
@@ -35,57 +38,64 @@ const TabIcon = ({
     />
     <Text
       className={`${
-        focused
-          ? 'text-primary-300 font-extrabold'
-          : 'text-black-200'
-      } text-base w-full text-center mt-1`}>
+        focused ? 'text-primary-300 font-extrabold' : 'text-black-200'
+      } text-base w-full text-center mt-1`}
+    >
       {title}
     </Text>
   </View>
 );
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function ZoneTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: 'white',
+          position: 'absolute',
+          borderTopColor: '#0061FF1A',
+          borderTopWidth: 1,
+          minHeight: 70,
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Zone"
+        component={Zone}
+        options={{
+          title: 'Zone',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={icons.zone} title="Zone" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Scenario"
+        component={Scenario}
+        options={{
+          title: 'Scenario',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={icons.scenario} title="Scenario" />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 const App = () => {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            backgroundColor: 'white',
-            position: 'absolute',
-            borderTopColor: '#0061FF1A',
-            borderTopWidth: 1,
-            minHeight: 70,
-          },
-        }}>
-        <Tab.Screen
-          name="Zone"
-          component={Zone}
-          options={{
-            title: 'Zone',
-            headerShown: false,
-            tabBarIcon: ({focused}) => (
-              <TabIcon focused={focused} icon={icons.zone} title="Zone" />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Scenario"
-          component={Scenario}
-          options={{
-            title: 'Scenario',
-            headerShown: false,
-            tabBarIcon: ({focused}) => (
-              <TabIcon
-                focused={focused}
-                icon={icons.scenario}
-                title="Scenario"
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+      <Stack.Navigator>
+        <Stack.Screen name="ZoneStack" component={ZoneTabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="LivingRoom" component={LivingRoom} options={{ headerShown: false }}/>
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
