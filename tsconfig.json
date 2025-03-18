@@ -1,3 +1,10 @@
 {
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    // altre opzioni...
+  },
   "extends": "@react-native/typescript-config/tsconfig.json"
 }
