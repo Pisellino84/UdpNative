@@ -15,10 +15,10 @@ export function MainHeader({ icon = icons.standard, title }: Props) {
       <View className="flex flex-row gap-3 items-center">
         <Image source={icon} className="size-11 " />
         <View className="flex flex-col">
-          <Text className="text-black-100 text-sm font-rubik-light">
+          <Text className="text-black-100 text-sm font-light">
             Tutondo LiveMT
           </Text>
-          <Text className="font-rubik-bold text-2xl">{title}</Text>
+          <Text className="font-bold text-2xl">{title}</Text>
         </View>
       </View>
 
@@ -39,10 +39,10 @@ export function SecondaryHeader({ title }: Props) {
             <Image source={icons.backArrow} className="size-6 " />
           </TouchableOpacity>
           <View className="flex flex-col">
-            <Text className="text-black-100 text-sm font-rubik-light">
+            <Text className="text-black-100 text-sm font-light">
               Tutondo LiveMT
             </Text>
-            <Text className="font-rubik-bold text-2xl">{title}</Text>
+            <Text className="font-bold text-2xl">{title}</Text>
           </View>
         </View>
 
