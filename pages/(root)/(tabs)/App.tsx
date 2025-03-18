@@ -1,4 +1,10 @@
-import {Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {sendThreeBytes} from '../../../lib/udpProtocol';
 import '../../../global.css';
 import {MainHeader} from '../../../components/Header';
@@ -6,56 +12,82 @@ import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import {router} from 'expo-router';
 import icons from '../../../constants/icons';
 
-export default function Index() {
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Scenario from './scenario';
+import Zone from './zone';
+
+const TabIcon = ({
+  focused,
+  icon,
+  title,
+}: {
+  focused: boolean;
+  icon: ImageSourcePropType;
+  title: string;
+}) => (
+  <View className="flex-1 mt-1 flex flex-col items-center">
+    <Image
+      source={icon}
+      tintColor={focused ? '#0061FF' : '#666876'}
+      resizeMode="contain"
+      className={`size-6 `}
+    />
+    <Text
+      className={`${
+        focused
+          ? 'text-primary-300 font-extrabold'
+          : 'text-black-200'
+      } text-base w-full text-center mt-1`}>
+      {title}
+    </Text>
+  </View>
+);
+
+const Tab = createBottomTabNavigator();
+const App = () => {
   return (
-    <SafeAreaView>
-      <AndroidSafeArea>
-        <MainHeader title="Zone" icon={icons.zone}/>
-        <View className="my-5 flex flex-col gap-3">
-          <View className="flex flex-row justify-between items-center">
-            <TouchableOpacity>
-              <Text
-                className="text-primary-300 font-light"
-                onPress={() => {
-                  for (let i = 1; i <= 6; i++) sendThreeBytes(4, i, 1);
-                }}>
-                Turn all Zones ON
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                className="text-primary-300 font-light"
-                onPress={() => {
-                  for (let i = 1; i <= 6; i++) sendThreeBytes(4, i, 0);
-                }}>
-                Turn all Zones OFF
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              router.push('./zone/livingRoom');
-            }}
-            className="flex flex-row border-b p-5 border-black-50 justify-between items-center">
-            <Text className="text-xl font-medium">Living Room</Text>
-            <Image source={icons.rightArrow} className="size-6" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center">
-            <Text className="text-xl font-medium">Kitchen</Text>
-            <Image source={icons.rightArrow} className="size-6" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center">
-            <Text className="text-xl font-medium">Bathroom</Text>
-            <Image source={icons.rightArrow} className="size-6" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center">
-            <Text className="text-xl font-medium text-primary-300">
-              Current ON Zones
-            </Text>
-            <Image source={icons.rightArrow} className="size-6" />
-          </TouchableOpacity>
-        </View>
-      </AndroidSafeArea>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            backgroundColor: 'white',
+            position: 'absolute',
+            borderTopColor: '#0061FF1A',
+            borderTopWidth: 1,
+            minHeight: 70,
+          },
+        }}>
+        <Tab.Screen
+          name="Zone"
+          component={Zone}
+          options={{
+            title: 'Zone',
+            headerShown: false,
+            tabBarIcon: ({focused}) => (
+              <TabIcon focused={focused} icon={icons.zone} title="Zone" />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Scenario"
+          component={Scenario}
+          options={{
+            title: 'Scenario',
+            headerShown: false,
+            tabBarIcon: ({focused}) => (
+              <TabIcon
+                focused={focused}
+                icon={icons.scenario}
+                title="Scenario"
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
-}
+};
+
+export default App;
