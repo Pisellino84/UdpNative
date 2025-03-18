@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "expo-router": "^4.0.19",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-native": "0.78.0",

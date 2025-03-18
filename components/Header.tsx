@@ -1,6 +1,7 @@
 import { View, Image, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import icons from "constants/icons";
+import icons from "../constants/icons";
+import { router } from "expo-router";
 
 interface Props {
   icon?: any;
