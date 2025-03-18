@@ -4,7 +4,7 @@
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import App from '../App';
+import App from '../pages/App'; // Adjust the path as necessary
 
 test('renders correctly', async () => {
   await ReactTestRenderer.act(() => {

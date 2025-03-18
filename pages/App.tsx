@@ -1,5 +1,6 @@
 import {Text, TouchableOpacity, View} from 'react-native';
-import { sendThreeBytes } from './lib/udpProtocol';
+import { sendThreeBytes } from '../lib/udpProtocol';
+import "../global.css"
 
 
 
