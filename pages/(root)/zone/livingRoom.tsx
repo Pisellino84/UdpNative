@@ -1,28 +1,39 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SecondaryHeader } from "../../../components/Header";
-import icons from "../../../constants/icons";
+
 import Slider from "@react-native-community/slider"; // https://github.com/callstack/react-native-slider
 import { Dropdown } from "react-native-element-dropdown"; // https://github.com/hoaphantn7604/react-native-element-dropdown
+
+import AndroidSafeArea from "../../../components/AndroidSafeArea";
+import icons from "../../../constants/icons";
+import { SecondaryHeader } from "../../../components/Header";
+import { leggiStatoZona, sendThreeBytes } from "../../../lib/udpProtocol";
 
 export default function LivingRoom() {
   const Sources = [
     { label: "Tuner", value: "tuner" },
-    { label: "MP3", value: "mp3" },
+    { label: "CD", value: "cd" },
+    { label: "DVD", value: "dvd" },
+    { label: "SAT", value: "sat" },
     { label: "PC", value: "pc" },
-    { label: "Aux", value: "aux" },
-    { label: "Bluetooth", value: "bluetooth" },
+    { label: "Multi CD", value: "multiCd" },
+    { label: "Multi DVD", value: "multiDvd" },
+    { label: "TV", value: "tv" },
   ];
 
   const [power, setPower] = useState(false);
   const [mute, setMute] = useState(false);
   const [night, setNight] = useState(false);
   const [volume, setVolume] = useState(50);
-  const [source, setSource] = useState("aux");
+  const [source, setSource] = useState("tuner");
+
+useEffect(() => {
+  leggiStatoZona(1); 
+}, [])
 
   return (
-    <SafeAreaView>
+    <AndroidSafeArea>
       <View className="px-5">
         <SecondaryHeader title={"Living Room"} />
         <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
@@ -30,8 +41,10 @@ export default function LivingRoom() {
             onPress={() => {
               if (power == false) {
                 setPower(true);
+                sendThreeBytes(4, 1, 1)
               } else {
                 setPower(false);
+                sendThreeBytes(4, 1, 0)
               }
             }}
             className={`flex flex-row items-center gap-2 `}
@@ -56,6 +69,7 @@ export default function LivingRoom() {
             onPress={() => {
               if (mute == false) {
                 setMute(true);
+                sendThreeBytes(21, 1, 0)
               } else {
                 setMute(false);
               }
@@ -114,12 +128,13 @@ export default function LivingRoom() {
           <Slider
             minimumTrackTintColor="#228BE6"
             maximumTrackTintColor="#FFFFFF"
-            step={1}
+            step={2}
             minimumValue={0}
-            maximumValue={100}
+            maximumValue={80}
             value={volume}
             onValueChange={(e) => {
               setVolume(e);
+              sendThreeBytes(15, 1, e)
             }}
           />
         </View>
@@ -136,6 +151,14 @@ export default function LivingRoom() {
             value={source}
             onChange={(item) => {
               setSource(item.value);
+              if(item.value == "tuner"){sendThreeBytes(19, 1, 0)}
+              else if(item.value == "cd"){sendThreeBytes(19, 1, 1)}
+              else if(item.value == "dvd"){sendThreeBytes(19, 1, 2)}
+              else if(item.value == "sat"){sendThreeBytes(19, 1, 3)}
+              else if(item.value == "pc"){sendThreeBytes(19, 1, 4)}
+              else if(item.value == "multiCd"){sendThreeBytes(19, 1, 5)}
+              else if(item.value == "multiDvd"){sendThreeBytes(19, 1, 6)}
+              else if(item.value == "tv"){sendThreeBytes(19, 1, 7)}
             }}
             style={{
               padding: 20,
@@ -146,6 +169,6 @@ export default function LivingRoom() {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </AndroidSafeArea>
   );
 }

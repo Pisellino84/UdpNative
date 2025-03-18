@@ -1,24 +1,18 @@
-import {
-  Image,
-  ImageSourcePropType,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { sendThreeBytes } from '../../../lib/udpProtocol';
+import {Image, ImageSourcePropType, Text, View} from 'react-native';
 import '../../../global.css';
-import { MainHeader } from '../../../components/Header';
-import AndroidSafeArea from '../../../components/AndroidSafeArea';
-import { router } from 'expo-router';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import icons from '../../../constants/icons';
 
 import Scenario from './scenario';
 import Zone from './zone';
 import LivingRoom from '../zone/livingRoom';
+import { useEffect } from 'react';
+import { leggiStatoZona } from '../../../lib/udpProtocol';
+
+
 
 const TabIcon = ({
   focused,
@@ -39,8 +33,7 @@ const TabIcon = ({
     <Text
       className={`${
         focused ? 'text-primary-300 font-extrabold' : 'text-black-200'
-      } text-base w-full text-center mt-1`}
-    >
+      } text-base w-full text-center mt-1`}>
       {title}
     </Text>
   </View>
@@ -61,15 +54,14 @@ function ZoneTabNavigator() {
           borderTopWidth: 1,
           minHeight: 70,
         },
-      }}
-    >
+      }}>
       <Tab.Screen
         name="Zone"
         component={Zone}
         options={{
           title: 'Zone',
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon focused={focused} icon={icons.zone} title="Zone" />
           ),
         }}
@@ -80,7 +72,7 @@ function ZoneTabNavigator() {
         options={{
           title: 'Scenario',
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon focused={focused} icon={icons.scenario} title="Scenario" />
           ),
         }}
@@ -93,8 +85,16 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="ZoneStack" component={ZoneTabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="LivingRoom" component={LivingRoom} options={{ headerShown: false }}/>
+        <Stack.Screen
+          name="ZoneStack"
+          component={ZoneTabNavigator}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="LivingRoom"
+          component={LivingRoom}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

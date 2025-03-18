@@ -9,6 +9,7 @@ import {NavigationContainer, useNavigation, NavigationProp} from '@react-navigat
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 
+
 type RootStackParamList = {
   LivingRoom: undefined;
   // add other routes here
