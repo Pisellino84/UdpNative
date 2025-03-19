@@ -69,9 +69,10 @@ useEffect(() => {
             onPress={() => {
               if (mute == false) {
                 setMute(true);
-                sendThreeBytes(21, 1, 0)
+                sendThreeBytes(22, 1, 1)
               } else {
                 setMute(false);
+                sendThreeBytes(22, 1, 0)
               }
             }}
             className={`flex flex-row items-center gap-2 `}
@@ -134,7 +135,7 @@ useEffect(() => {
             value={volume}
             onValueChange={(e) => {
               setVolume(e);
-              sendThreeBytes(15, 1, e)
+              /* sendThreeBytes(15, 1, e) */
             }}
           />
         </View>
