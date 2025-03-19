@@ -6,7 +6,7 @@ const remotePort = 53280;
 const remoteHost = '192.168.30.211'; // 192.168.30.211 (al momento non usare nel socket.bind())
 const socket = dgram.createSocket({type: 'udp4', debug: true}); // Crea il socket una sola volta
 
-socket.bind(remotePort, /* remoteHost, */(err: any) => {
+socket.bind(remotePort, remoteHost, (err: any) => {
   // Associa il socket all'avvio
   if (err) {
     console.error("Errore durante l'associazione del socket:", err);
@@ -34,7 +34,7 @@ socket.bind(remotePort, /* remoteHost, */(err: any) => {
 
 
 socket.on('message', function (msg, rinfo) {
-    console.log('Message received', msg);
+    console.log('Message received', msg.toString(), rinfo);
   });
   
 

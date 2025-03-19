@@ -152,6 +152,7 @@ useEffect(() => {
             value={source}
             onChange={(item) => {
               setSource(item.value);
+              setPower(true)
               if(item.value == "tuner"){sendThreeBytes(19, 1, 0)}
               else if(item.value == "cd"){sendThreeBytes(19, 1, 1)}
               else if(item.value == "dvd"){sendThreeBytes(19, 1, 2)}
