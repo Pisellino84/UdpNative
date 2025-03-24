@@ -6,7 +6,7 @@ const remotePort = 53280;
 const remoteHost = '192.168.30.211'; // 192.168.30.211 (al momento non usare nel socket.bind())
 const socket = dgram.createSocket({type: 'udp4', debug: true}); // Crea il socket una sola volta
 
-socket.bind(remotePort, remoteHost, (err: any) => {
+socket.bind(remotePort, (err: any) => {
   // Associa il socket all'avvio
   if (err) {
     console.error("Errore durante l'associazione del socket:", err);
@@ -17,24 +17,9 @@ socket.bind(remotePort, remoteHost, (err: any) => {
   }
 });
 
-/* socket.bind(remotePort, remoteHost, (err: any) => {
-  if (err) {
-    console.error("Errore durante l'associazione del socket:", err);
-    if (err.code === 'EADDRINUSE') {
-      console.error("La porta è già in uso.");
-    } else if (err.code === 'EACCES') {
-      console.error("Permesso negato per l'associazione alla porta.");
-    }
-  } else {
-    console.log(
-      `Socket UDP in ascolto - Port: ${remotePort} - IP: ${remoteHost}`,
-    );
-  }
-}); */
-
 
 socket.on('message', function (msg, rinfo) {
-    console.log('Message received', msg.toString(), rinfo);
+    console.log('Message received', msg.toString("hex"), rinfo);
   });
   
 
@@ -61,7 +46,7 @@ export async function sendThreeBytes(
 export async function leggiStatoZona(Zona: number) {
   try {
     const buffer = Buffer.from([50, Zona, 0]);
-    socket.send(buffer, 0, buffer.length, remotePort, undefined, err => {
+    socket.send(buffer, 0, buffer.length, remotePort, remoteHost, err => {
       if (err) {
         console.error("Errore durante l'invio della lettura zona:", err);
         Alert.alert('Errore');
