@@ -2,17 +2,17 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 
-const remotePort = 53280;
-const remoteHost = '192.168.30.211'; // 192.168.30.211 (al momento non usare nel socket.bind())
+const PORT = 53280;
+const HOST = '192.168.30.211'; // 192.168.30.211 (al momento non usare nel socket.bind())
 const socket = dgram.createSocket({type: 'udp4', debug: true}); // Crea il socket una sola volta
 
-socket.bind(remotePort, (err: any) => {
+socket.bind(PORT, (err: any) => {
   // Associa il socket all'avvio
   if (err) {
     console.error("Errore durante l'associazione del socket:", err);
   } else {
     console.log(
-      `Socket UDP in ascolto - Port: ${remotePort} - IP: ${remoteHost}`,
+      `Socket UDP in ascolto - Port: ${PORT} - IP: ${HOST}`,
     );
   }
 });
@@ -30,7 +30,7 @@ export async function sendThreeBytes(
 ) {
   try {
     const buffer = Buffer.from([byte1, byte2, byte3]);
-    socket.send(buffer, 0, buffer.length, remotePort, remoteHost, err => {
+    socket.send(buffer, 0, buffer.length, PORT, HOST, err => {
       if (err) {
         console.error("Errore durante l'invio dei byte:", err);
         Alert.alert('Errore');
@@ -46,7 +46,7 @@ export async function sendThreeBytes(
 export async function leggiStatoZona(Zona: number) {
   try {
     const buffer = Buffer.from([50, Zona, 0]);
-    socket.send(buffer, 0, buffer.length, remotePort, remoteHost, err => {
+    socket.send(buffer, 0, buffer.length, PORT, HOST, err => {
       if (err) {
         console.error("Errore durante l'invio della lettura zona:", err);
         Alert.alert('Errore');
