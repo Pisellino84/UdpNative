@@ -82,7 +82,7 @@ export async function sendThreeBytes(
 export async function leggiStatoZona(Zona: number) {
   try {
     const buffer = Buffer.from([50, Zona, 0]);
-    client.send(buffer, 0, buffer.length, PORT, "localhost", err => {
+    client.send(buffer, 0, buffer.length, PORT, HOST, err => {
       if (err) {
         console.error("Errore durante l'invio della lettura zona:", err);
         Alert.alert('Errore');
