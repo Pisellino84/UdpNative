@@ -2,8 +2,10 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 
-// POSSIBILI PROBLEMI PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI:
-//    1. Bug dell'emulatore (se possibile bisognerebbe provare su un dispositivo fisico);
+// POSSIBILI PROBLEMI PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI:              
+// |> 1. Bug dell'emulatore (se possibile bisognerebbe provare su un dispositivo fisico);          <|
+// |_ https://stackoverflow.com/questions/41975119/listen-for-udp-messages-on-android-react-native _|
+//
 //    2. Problemi di rete (router, firewall(ho provato a disattivare insieme all'antivirus), antivirus, etc.);
 //    3. Problemi di configurazione dell'UDP (porta, IP, etc.);
 
@@ -12,7 +14,7 @@ const HOST = '192.168.30.211';
 const client = dgram.createSocket({type: 'udp4'}); // Crea il client una sola volta
 
 
-client.bind(PORT, (err: any) => {
+client.bind(PORT, '0.0.0.0', (err: any) => {
   // Associa il client all'avvio
   if (err) {
     console.error("Errore durante l'associazione del client:", err);
