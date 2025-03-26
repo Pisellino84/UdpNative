@@ -2,8 +2,26 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 
-// PROBLEMI PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI:              
-//    1. Bug dell'emulatore, usare dispositivo fisico;          
+// PROBLEMa PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI            
+//    bug dell'emulatore,
+
+// SOLUZIONE 1
+//    usare dispotivo android fisico     
+
+// SOLUZIONE2
+//    avviare metro con npm start (se è la prima volta che usi l'emulatore avvia metro con npm run android, dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i passaggi)
+//    Aprire il cmd ed entrare nella directory degli umulatori di android ("C:\Users\resea\AppData\Local\Android\Sdk\emulator")
+//    digitare il comando "emulator.exe -avd <nome+emulatore> -feature -Wifi"
+//    aprire un nuovo terminale e connettersi al dispositivo con il comando "telnet localhost 5554"
+//    fare l'autenticazione come scritto nel terminale
+//    fare il redirect della porta digitando "redir add udp:53280:53280" (la porta 53280 è soggettiva, puoi scegliere la porta che vuoi)
+//    digitare "quit" per uscire dal telnet
+//    https://github.com/danidis91/Port-forward-UDP // Scarica ed estrai il repository
+//    dentro "bin/debug" avviare l'exe "PortForward.exe" 
+//    inserire i dati come da esempio:
+//    IP: 127.0.0.1
+//    Port: 53280
+//    e infine clieccare su "Redirect UDP"
 
 const PORT = 53280;
 const HOST = '192.168.30.211'; 
