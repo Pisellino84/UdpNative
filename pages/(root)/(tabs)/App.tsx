@@ -10,7 +10,7 @@ import Scenario from './scenario';
 import Zone from './zone';
 import LivingRoom from '../zone/livingRoom';
 import { useEffect } from 'react';
-import { leggiStatoZona } from '../../../lib/udpProtocol';
+import { leggiStatoZona } from '../../../lib/udpClient';
 
 
 

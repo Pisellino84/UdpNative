@@ -1,5 +1,5 @@
 import {Image, Text, TouchableOpacity, View} from 'react-native';
-import {sendThreeBytes} from '../../../lib/udpProtocol';
+import {sendThreeBytes} from '../../../lib/udpClient';
 import '../../../global.css';
 import {MainHeader} from '../../../components/Header';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';

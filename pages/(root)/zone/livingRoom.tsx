@@ -8,7 +8,7 @@ import { Dropdown } from "react-native-element-dropdown"; // https://github.com/
 import AndroidSafeArea from "../../../components/AndroidSafeArea";
 import icons from "../../../constants/icons";
 import { SecondaryHeader } from "../../../components/Header";
-import { leggiStatoZona, sendThreeBytes } from "../../../lib/udpProtocol";
+import { leggiStatoZona, sendThreeBytes } from "../../../lib/udpClient";
 
 export default function LivingRoom() {
   const Sources = [
