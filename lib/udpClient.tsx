@@ -1,12 +1,13 @@
 import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
+import EventEmitter from 'events';
 
-// PROBLEMA PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI            
+// PROBLEMA PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI
 //    bug dell'emulatore
 
 // SOLUZIONE 1
-//    usare dispotivo android fisico     
+//    usare dispotivo android fisico
 
 // SOLUZIONE2
 //    IMPORTATE: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi skippare i primi tre passaggi e avviare direttamente metro con npm run android.
@@ -19,42 +20,59 @@ import {Alert} from 'react-native';
 //    fare il redirect della porta digitando "redir add udp:53280:53280" (la porta 53280 è soggettiva, puoi scegliere la porta che vuoi)
 //    digitare "quit" per uscire dal telnet
 //    https://github.com/danidis91/Port-forward-UDP // Scarica ed estrai il repository
-//    dentro "bin/debug" avviare l'exe "PortForward.exe" 
+//    dentro "bin/debug" avviare l'exe "PortForward.exe"
 //    inserire i dati come da esempio:
 //    IP: 127.0.0.1
 //    Port: 53280
 //    e infine clieccare su "Redirect UDP"
 
-const PORT = 53280;
-const HOST = '192.168.30.211'; 
-const client = dgram.createSocket({type: 'udp4'}); // Crea il client una sola volta
+export const udpEvents = new EventEmitter();
 
+const PORT = 53280;
+const HOST = '192.168.30.211';
+const client = dgram.createSocket({type: 'udp4'}); // Crea il client una sola volta
 
 client.bind(PORT, (err: any) => {
   // Associa il client all'avvio
   if (err) {
     console.error("Errore durante l'associazione del client:", err);
   } else {
-    console.log(
-      `client UDP in ascolto - Port: ${PORT}`,
-    );
+    console.log(`client UDP in ascolto - Port: ${PORT}`);
   }
 });
 
-client.on('listening',  () => {
+client.on('listening', () => {
   console.log('client is listening');
 });
 
 client.on('error', (err: any) => {
-  console.error("Errore del client:", err);
+  console.error('Errore del client:', err);
   Alert.alert('Errore del client');
 });
 
+export let Power: number | null = null;
+export let Mute: number | null = null;
+export let Night: number | null = null;
+export let Volume: number | null = null;
+export let Source: number | null = null;
+
+// 33 power off, mute off
+// 35 power on, mute off
+// 37 power off, mute on
+// 39 power on, mute on
 
 client.on('message', function (msg, rinfo) {
-  console.log('Message received (hex)', msg.toString("hex"), rinfo);
+  console.log('Message received (hex)', msg.toString('hex'), rinfo);
   console.log('Message received (string)', msg.toString(), rinfo);
   console.log('Message received (buffer)', msg, rinfo);
+
+  if (msg.length > 0 && msg[0] === 50) {
+    Power = msg[4]; // Estrai il quinto valore (indice 4)
+    Mute = msg[4]; 
+    console.log('Quinto valore del buffer esportato:', Power);
+    udpEvents.emit('PowerChanged', Power);
+    udpEvents.emit('MuteChanged', Mute);
+  }
 });
 
 const timeoutDuration = 5000; // 5000 millisecondi = 5 secondi
@@ -65,17 +83,13 @@ function resetTimeout() {
     clearTimeout(timeout);
   }
   timeout = setTimeout(() => {
-    console.log("client timeout!");
+    console.log('client timeout!');
     // Handle timeout logic here
   }, timeoutDuration);
 }
 
 // Initialize timeout when the client is bound
 resetTimeout();
-
-
-
-  
 
 export async function sendThreeBytes(
   byte1: number,
