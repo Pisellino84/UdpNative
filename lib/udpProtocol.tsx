@@ -2,14 +2,16 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 
-// PROBLEMa PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI            
-//    bug dell'emulatore,
+// PROBLEMA PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI            
+//    bug dell'emulatore
 
 // SOLUZIONE 1
 //    usare dispotivo android fisico     
 
 // SOLUZIONE2
-//    avviare metro con npm start (se è la prima volta che usi l'emulatore avvia metro con npm run android, dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i passaggi)
+//    IMPORTATE: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi skippare i primi tre passaggi e avviare direttamente metro con npm run android.
+
+//    avviare metro con npm start (se è la prima volta che usi l'avd avvia metro con npm run android, dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i passaggi)
 //    Aprire il cmd ed entrare nella directory degli umulatori di android ("C:\Users\resea\AppData\Local\Android\Sdk\emulator")
 //    digitare il comando "emulator.exe -avd <nome+emulatore> -feature -Wifi" (per vedere i nomi degli emulatore digitare "emulator.exe -list-avds")
 //    aprire un nuovo terminale e connettersi al dispositivo con il comando "telnet localhost 5554"
