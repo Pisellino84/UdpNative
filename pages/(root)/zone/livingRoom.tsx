@@ -132,11 +132,20 @@ export default function LivingRoom() {
 
           <TouchableOpacity
             onPress={() => {
+              if(power){
+
               if (night == false) {
                 setNight(true);
+                sendThreeBytes(24, 1, 1);
               } else {
                 setNight(false);
-              }
+                sendThreeBytes(24, 1, 0);
+              } }
+              else
+                Alert.alert(
+                  'La zona è spenta',
+                  'Accendi la zona per attivare la funzione Night',
+                );
             }}
             className={`flex flex-row items-center gap-2 `}>
             <Image
