@@ -2,12 +2,6 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 
-/*
-
-
-
-*/
-
 // PROBLEMI PER CUI RIESCO A INVIARE I DATI MA NON RIESCO A RICEVERLI:              
 //    1. Bug dell'emulatore, usare dispositivo fisico;          
 
