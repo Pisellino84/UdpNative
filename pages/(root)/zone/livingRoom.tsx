@@ -8,7 +8,11 @@ import {Dropdown} from 'react-native-element-dropdown'; // https://github.com/ho
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import icons from '../../../constants/icons';
 import {SecondaryHeader} from '../../../components/Header';
-import {leggiStatoZona, sendThreeBytes, udpEvents} from '../../../lib/udpClient';
+import {
+  leggiStatoZona,
+  sendThreeBytes,
+  udpEvents,
+} from '../../../lib/udpClient';
 
 export default function LivingRoom() {
   const Sources = [
@@ -25,7 +29,7 @@ export default function LivingRoom() {
   const [power, setPower] = useState(false);
   const [mute, setMute] = useState(false);
   const [night, setNight] = useState(false);
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(0);
   const [source, setSource] = useState('tuner');
 
   useEffect(() => {
@@ -44,22 +48,26 @@ export default function LivingRoom() {
     const handleMuteChange = (newMute: number) => {
       if (newMute === 37 || newMute === 39) {
         setMute(true);
-      }
-      else if (newMute === 35 || newMute === 33) {
+      } else if (newMute === 35 || newMute === 33) {
         setMute(false);
       }
-    }
+    };
+
+    const handleVolumeChange = (newVolume: number) => {
+      setVolume(newVolume);
+    };
 
     udpEvents.on('PowerChanged', handlePowerChange);
     udpEvents.on('MuteChanged', handleMuteChange);
+    udpEvents.on('VolumeChanged', handleVolumeChange);
 
     // Cleanup: rimuovi il listener quando il componente viene smontato
     return () => {
       udpEvents.off('PowerChanged', handlePowerChange);
       udpEvents.off('MuteChanged', handleMuteChange);
+      udpEvents.off('VolumeChanged', handleVolumeChange);
     };
   }, []);
-
 
   return (
     <AndroidSafeArea>
@@ -102,10 +110,11 @@ export default function LivingRoom() {
                   setMute(false);
                   sendThreeBytes(22, 1, 0);
                 }
-              }
-              else(
-                Alert.alert('La zona è spenta', "Accendi la zona per attivare la funzione Mute")
-              )
+              } else
+                Alert.alert(
+                  'La zona è spenta',
+                  'Accendi la zona per attivare la funzione Mute',
+                );
             }}
             className={`flex flex-row items-center gap-2 `}>
             <Image
@@ -157,9 +166,13 @@ export default function LivingRoom() {
             minimumValue={0}
             maximumValue={80}
             value={volume}
+            disabled={mute}
             onValueChange={e => {
-              setVolume(e);
-              /* sendThreeBytes(15, 1, e) */
+              if (!mute) {
+                // Cambia il volume solo se mute non è attivo
+                setVolume(e);
+                sendThreeBytes(15, 1, e);
+              }
             }}
           />
         </View>
@@ -210,4 +223,3 @@ export default function LivingRoom() {
 function handlePowerChange(...args: any[]): void {
   throw new Error('Function not implemented.');
 }
-

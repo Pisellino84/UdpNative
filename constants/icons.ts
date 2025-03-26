@@ -25,6 +25,8 @@ import skip from "../assets/icons/skip.png"
 import pause from "../assets/icons/pause.png"
 import play from "../assets/icons/play.png"
 import whiteDot from "../assets/icons/w-dot.png"
+import minus from "../assets/icons/minus.png"
+import plus from "../assets/icons/plus.png"
 
 export default {
     backArrow,
@@ -43,4 +45,6 @@ export default {
     pause,
     play,
     whiteDot,
+    plus,
+    minus,
 }

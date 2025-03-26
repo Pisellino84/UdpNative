@@ -69,9 +69,10 @@ client.on('message', function (msg, rinfo) {
   if (msg.length > 0 && msg[0] === 50) {
     Power = msg[4]; // Estrai il quinto valore (indice 4)
     Mute = msg[4]; 
-    console.log('Quinto valore del buffer esportato:', Power);
+    Volume = msg[5];
     udpEvents.emit('PowerChanged', Power);
     udpEvents.emit('MuteChanged', Mute);
+    udpEvents.emit('VolumeChanged', Volume);
   }
 });
 
