@@ -30,6 +30,8 @@ export default function LivingRoom() {
     {label: 'TV', value: 'tv'},
   ];
 
+  // rivedere il power/mute/night perchè gli viene passato un numero e non un booleano
+
   const [power, setPower] = useState(Power);
   const [mute, setMute] = useState(Mute);
   const [night, setNight] = useState(Night);
