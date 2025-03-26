@@ -12,6 +12,10 @@ import {
   leggiStatoZona,
   sendThreeBytes,
   udpEvents,
+  Power,
+  Mute,
+  Night,
+  Volume,
 } from '../../../lib/udpClient';
 
 export default function LivingRoom() {
@@ -26,10 +30,10 @@ export default function LivingRoom() {
     {label: 'TV', value: 'tv'},
   ];
 
-  const [power, setPower] = useState(false);
-  const [mute, setMute] = useState(false);
-  const [night, setNight] = useState(false);
-  const [volume, setVolume] = useState(0);
+  const [power, setPower] = useState(Power);
+  const [mute, setMute] = useState(Mute);
+  const [night, setNight] = useState(Night);
+  const [volume, setVolume] = useState(Volume);
   const [source, setSource] = useState('tuner');
 
   useEffect(() => {
