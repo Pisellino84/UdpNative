@@ -13,7 +13,7 @@ import {Alert} from 'react-native';
 //    Aprire il cmd ed entrare nella directory degli umulatori di android ("C:\Users\resea\AppData\Local\Android\Sdk\emulator")
 //    digitare il comando "emulator.exe -avd <nome+emulatore> -feature -Wifi"
 //    aprire un nuovo terminale e connettersi al dispositivo con il comando "telnet localhost 5554"
-//    fare l'autenticazione come scritto nel terminale
+//    fare l'autenticazione come scritto nel istruzione segnate nel terminale
 //    fare il redirect della porta digitando "redir add udp:53280:53280" (la porta 53280 è soggettiva, puoi scegliere la porta che vuoi)
 //    digitare "quit" per uscire dal telnet
 //    https://github.com/danidis91/Port-forward-UDP // Scarica ed estrai il repository
