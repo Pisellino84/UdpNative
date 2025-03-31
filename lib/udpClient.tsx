@@ -61,23 +61,26 @@ export let Source: number | null = null;
 // 37 power off, mute on
 // 39 power on, mute on
 
-client.on('message', function (msg, rinfo) {
+client.on('message', (msg, rinfo) => {
   console.log('Message received (buffer)', msg, rinfo);
   console.log('Message received (string)', msg.toString(), rinfo);
 
   if (msg.length > 0 && msg[0] === 50) {
-    Power = msg[4]; 
-    Mute = msg[4]; 
-    Volume = msg[5];
+    const [power, mute, volume, source] = [msg[4], msg[4], msg[5], msg[6]];
 
-    Source = msg[6];
-    udpEvents.emit('PowerChanged', Power);
-    udpEvents.emit('MuteChanged', Mute);
-    udpEvents.emit('VolumeChanged', Volume);
+    Power = power;
+    Mute = mute;
+    Volume = volume;
+    Source = source;
 
-    udpEvents.emit('SourceChanged', Source);
+    const events = {
+      PowerChanged: power,
+      MuteChanged: mute,
+      VolumeChanged: volume,
+      SourceChanged: source,
+    };
 
-
+    Object.entries(events).forEach(([event, value]) => udpEvents.emit(event, value));
   }
 });
 
