@@ -56,7 +56,10 @@ const Zone = () => {
           <Text className="text-xl font-medium">Kitchen</Text>
           <Image source={icons.rightArrow} className="size-6" />
         </TouchableOpacity>
-        <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center">
+        <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center"
+        onPress={() => {
+          navigation.navigate('LivingRoom', { zoneId: 3 }); // Passa l'ID della zona
+        }}>
           <Text className="text-xl font-medium">Bathroom</Text>
           <Image source={icons.rightArrow} className="size-6" />
         </TouchableOpacity>
