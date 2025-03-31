@@ -2,7 +2,6 @@ import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
 import {Dropdown} from 'react-native-element-dropdown'; // https://github.com/hoaphantn7604/react-native-element-dropdown
 
@@ -17,40 +16,40 @@ import {
   Mute,
   Night,
   Volume,
+  Source,
 } from '../../../lib/udpClient';
-import { retrieveData, saveData } from '../../../lib/db';
+import {retrieveData, saveData} from '../../../lib/db';
 
 export default function LivingRoom() {
   const Sources = [
-    {label: 'Tuner', value: 'tuner'},
-    {label: 'CD', value: 'cd'},
-    {label: 'DVD', value: 'dvd'},
-    {label: 'SAT', value: 'sat'},
-    {label: 'PC', value: 'pc'},
-    {label: 'Multi CD', value: 'multiCd'},
-    {label: 'Multi DVD', value: 'multiDvd'},
-    {label: 'TV', value: 'tv'},
+    {label: 'Tuner', value: 16},
+    {label: 'CD', value: 17},
+    {label: 'DVD', value: 18},
+    {label: 'SAT', value: 19},
+    {label: 'PC', value: 20},
+    {label: 'Multi CD', value: 21},
+    {label: 'Multi DVD', value: 22},
+    {label: 'TV', value: 23},
   ];
-
 
   const [power, setPower] = useState(Power);
   const [mute, setMute] = useState(Mute);
   const [night, setNight] = useState(Night);
   const [volume, setVolume] = useState(Volume);
-  const [source, setSource] = useState('tuner');
+  const [source, setSource] = useState(Source);
 
   useEffect(() => {
     // Funzione da eseguire ogni secondo
     /* const interval = setInterval(() => {
       leggiStatoZona(1); // Esegui la funzione desiderata
     }, 500); // Intervallo di 1 secondo (500 ms) */
-  
+
     // Leggi lo stato della zona all'inizio
     leggiStatoZona(1);
 
     // Ascolta i cambiamenti di Power
     const handlePowerChange = (newPower: number) => {
-      if(Power == 35 || Power == 39) {
+      if (Power == 35 || Power == 39) {
         setPower(1);
       } else {
         setPower(0);
@@ -63,7 +62,7 @@ export default function LivingRoom() {
     };
 
     const handleMuteChange = (newMute: number) => {
-      if(Mute == 35 || Mute == 39) {
+      if (Mute == 35 || Mute == 39) {
         setMute(1);
       } else {
         setMute(0);
@@ -76,7 +75,7 @@ export default function LivingRoom() {
     };
 
     const handleVolumeChange = (newVolume: number) => {
-      retrieveData('volume').then((savedVolume) => {
+      retrieveData('volume').then(savedVolume => {
         if (savedVolume !== null) {
           setVolume(Number(savedVolume));
         }
@@ -84,15 +83,23 @@ export default function LivingRoom() {
       setVolume(newVolume);
     };
 
+    const handleSourceChange = (newSource: number) => {
+      setSource(newSource);
+    };
+
     udpEvents.on('PowerChanged', handlePowerChange);
     udpEvents.on('MuteChanged', handleMuteChange);
     udpEvents.on('VolumeChanged', handleVolumeChange);
+
+    udpEvents.on('SourceChanged', handleSourceChange);
 
     // Cleanup: rimuovi il listener quando il componente viene smontato
     return () => {
       udpEvents.off('PowerChanged', handlePowerChange);
       udpEvents.off('MuteChanged', handleMuteChange);
       udpEvents.off('VolumeChanged', handleVolumeChange);
+
+      udpEvents.off('SourceChanged', handleSourceChange);
       /* clearInterval(interval); */
     };
   }, []);
@@ -161,16 +168,15 @@ export default function LivingRoom() {
 
           <TouchableOpacity
             onPress={() => {
-              if(power){
-
-              if (night == 0) {
-                setNight(1);
-                sendThreeBytes(24, 1, 1);
-              } else {
-                setNight(0);
-                sendThreeBytes(24, 1, 0);
-              } }
-              else
+              if (power) {
+                if (night == 0) {
+                  setNight(1);
+                  sendThreeBytes(24, 1, 1);
+                } else {
+                  setNight(0);
+                  sendThreeBytes(24, 1, 0);
+                }
+              } else
                 Alert.alert(
                   'La zona è spenta',
                   'Accendi la zona per attivare la funzione Night',
@@ -209,53 +215,48 @@ export default function LivingRoom() {
               if (!mute) {
                 // Cambia il volume solo se mute non è attivo
                 setVolume(e);
-                if(volume !== null && volume > 0) {
-                saveData('volume', e.toString());}
-                sendThreeBytes(15, 1, e);
-              }
-              else if(volume == 0 && mute == 1) {
-                  retrieveData('volume').then((savedVolume) => {
-                    if (savedVolume !== null) {
-                      setVolume(Number(savedVolume));
-                    }
-                  });
+                if (volume !== null && volume > 0) {
+                  saveData('volume', e.toString());
                 }
-                
+                sendThreeBytes(15, 1, e);
+              } else if (volume == 0 && mute == 1) {
+                retrieveData('volume').then(savedVolume => {
+                  if (savedVolume !== null) {
+                    setVolume(Number(savedVolume));
+                  }
+                });
               }
-            }
+            }}
           />
         </View>
         <View className="my-2.5">
-          <Text className="text-black-300 text-lg font-medium mb-1">
-            Source:
-          </Text>
+          <Text className="text-black-300 text-lg font-medium">Source:</Text>
+          {power === 0 && (
+            <Text className="text-red-500 text-md font-medium">
+              Per modificare la sorgente accendi la zona
+            </Text>
+          )}
           <Dropdown
             data={Sources}
             maxHeight={300}
             labelField="label"
             valueField="value"
             placeholder="Select source"
+            disable={!power}
             value={source}
             onChange={item => {
-              setSource(item.value);
-              setPower(1);
-              if (item.value == 'tuner') {
-                sendThreeBytes(19, 1, 0);
-              } else if (item.value == 'cd') {
-                sendThreeBytes(19, 1, 1);
-              } else if (item.value == 'dvd') {
-                sendThreeBytes(19, 1, 2);
-              } else if (item.value == 'sat') {
-                sendThreeBytes(19, 1, 3);
-              } else if (item.value == 'pc') {
-                sendThreeBytes(19, 1, 4);
-              } else if (item.value == 'multiCd') {
-                sendThreeBytes(19, 1, 5);
-              } else if (item.value == 'multiDvd') {
-                sendThreeBytes(19, 1, 6);
-              } else if (item.value == 'tv') {
-                sendThreeBytes(19, 1, 7);
-              }
+              if (power) {
+                setSource(item.value);
+                // Calcola il parametro da inviare basandoti sul valore
+                const param = item.value - 16; // I valori vanno da 16 a 23, quindi sottrai 16
+                if (param >= 0 && param <= 7) {
+                  sendThreeBytes(19, 1, param);
+                }
+              } else
+                Alert.alert(
+                  'La zona è spenta',
+                  'Accendi la zona per cambiare sorgente',
+                );
             }}
             style={{
               padding: 20,

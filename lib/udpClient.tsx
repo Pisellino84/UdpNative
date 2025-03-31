@@ -65,12 +65,17 @@ client.on('message', function (msg, rinfo) {
   console.log('Message received (buffer)', msg, rinfo);
 
   if (msg.length > 0 && msg[0] === 50) {
-    Power = msg[4]; // Estrai il quinto valore (indice 4)
+    Power = msg[4]; 
     Mute = msg[4]; 
     Volume = msg[5];
+
+    Source = msg[6];
     udpEvents.emit('PowerChanged', Power);
     udpEvents.emit('MuteChanged', Mute);
     udpEvents.emit('VolumeChanged', Volume);
+
+    udpEvents.emit('SourceChanged', Source);
+
   }
 });
 
@@ -125,3 +130,10 @@ export async function leggiStatoZona(Zona: number) {
     console.error('Errore:', error);
   }
 }
+
+// {0: 50, 1: 1, 2: 0, 3: 35, 4: 35, 5: 44,|| 6: 16,||  7: 0, 8: 14, 9: 8}
+
+// {0: 50, 1: 1, 2: 0, 3: 35, 4: 35, 5: 44, 6: 19, 7: 0, 8: 14, 9: 8}
+
+// {0: 50, 1: 1, 2: 0, 3: 35, 4: 35, 5: 44, 6: 17, 7: 0, 8: 14, 9: 8}
+
