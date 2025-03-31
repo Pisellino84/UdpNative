@@ -232,7 +232,7 @@ export default function LivingRoom() {
         <View className="my-2.5">
           <Text className="text-black-300 text-lg font-medium">Source:</Text>
           {power === 0 && (
-            <Text className="text-red-500 text-md font-medium">
+            <Text className="text-red-500 text-md font-medium -mt-1">
               Per modificare la sorgente accendi la zona
             </Text>
           )}
@@ -245,18 +245,12 @@ export default function LivingRoom() {
             disable={!power}
             value={source}
             onChange={item => {
-              if (power) {
-                setSource(item.value);
-                // Calcola il parametro da inviare basandoti sul valore
-                const param = item.value - 16; // I valori vanno da 16 a 23, quindi sottrai 16
-                if (param >= 0 && param <= 7) {
-                  sendThreeBytes(19, 1, param);
-                }
-              } else
-                Alert.alert(
-                  'La zona è spenta',
-                  'Accendi la zona per cambiare sorgente',
-                );
+              setSource(item.value);
+              // Calcola il parametro da inviare basandoti sul valore
+              const param = item.value - 16; // I valori vanno da 16 a 23, quindi sottrai 16
+              if (param >= 0 && param <= 7) {
+                sendThreeBytes(19, 1, param);
+              }
             }}
             style={{
               padding: 20,

@@ -61,6 +61,10 @@ const Zone = ()  => {
             </Text>
             <Image source={icons.rightArrow} className="size-6" />
           </TouchableOpacity>
+          <TouchableOpacity className="flex p-5 bg-green-500 rounded-xl justify-between items-center">
+            <Text className="text-xl text-white font-extrabold">TEST</Text>
+          </TouchableOpacity>
+            
         </View>
       </AndroidSafeArea>
   );
