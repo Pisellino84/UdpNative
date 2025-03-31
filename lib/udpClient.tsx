@@ -62,8 +62,6 @@ export let Source: number | null = null;
 // 39 power on, mute on
 
 client.on('message', function (msg, rinfo) {
-  console.log('Message received (hex)', msg.toString('hex'), rinfo);
-  console.log('Message received (string)', msg.toString(), rinfo);
   console.log('Message received (buffer)', msg, rinfo);
 
   if (msg.length > 0 && msg[0] === 50) {

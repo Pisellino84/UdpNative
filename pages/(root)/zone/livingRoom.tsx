@@ -2,6 +2,7 @@ import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
 import {Dropdown} from 'react-native-element-dropdown'; // https://github.com/hoaphantn7604/react-native-element-dropdown
 
@@ -17,6 +18,7 @@ import {
   Night,
   Volume,
 } from '../../../lib/udpClient';
+import { retrieveData, saveData } from '../../../lib/db';
 
 export default function LivingRoom() {
   const Sources = [
@@ -30,7 +32,6 @@ export default function LivingRoom() {
     {label: 'TV', value: 'tv'},
   ];
 
-  // rivedere il power/mute/night perchè gli viene passato un numero e non un booleano
 
   const [power, setPower] = useState(Power);
   const [mute, setMute] = useState(Mute);
@@ -39,6 +40,11 @@ export default function LivingRoom() {
   const [source, setSource] = useState('tuner');
 
   useEffect(() => {
+    // Funzione da eseguire ogni secondo
+    /* const interval = setInterval(() => {
+      leggiStatoZona(1); // Esegui la funzione desiderata
+    }, 500); // Intervallo di 1 secondo (500 ms) */
+  
     // Leggi lo stato della zona all'inizio
     leggiStatoZona(1);
 
@@ -70,6 +76,11 @@ export default function LivingRoom() {
     };
 
     const handleVolumeChange = (newVolume: number) => {
+      retrieveData('volume').then((savedVolume) => {
+        if (savedVolume !== null) {
+          setVolume(Number(savedVolume));
+        }
+      });
       setVolume(newVolume);
     };
 
@@ -82,6 +93,7 @@ export default function LivingRoom() {
       udpEvents.off('PowerChanged', handlePowerChange);
       udpEvents.off('MuteChanged', handleMuteChange);
       udpEvents.off('VolumeChanged', handleVolumeChange);
+      /* clearInterval(interval); */
     };
   }, []);
 
@@ -124,6 +136,7 @@ export default function LivingRoom() {
                   sendThreeBytes(22, 1, 1);
                 } else {
                   setMute(0);
+                  sendThreeBytes(15, 1, Number(volume));
                   sendThreeBytes(22, 1, 0);
                 }
               } else
@@ -196,9 +209,20 @@ export default function LivingRoom() {
               if (!mute) {
                 // Cambia il volume solo se mute non è attivo
                 setVolume(e);
+                if(volume !== null && volume > 0) {
+                saveData('volume', e.toString());}
                 sendThreeBytes(15, 1, e);
               }
-            }}
+              else if(volume == 0 && mute == 1) {
+                  retrieveData('volume').then((savedVolume) => {
+                    if (savedVolume !== null) {
+                      setVolume(Number(savedVolume));
+                    }
+                  });
+                }
+                
+              }
+            }
           />
         </View>
         <View className="my-2.5">
@@ -244,7 +268,4 @@ export default function LivingRoom() {
       </View>
     </AndroidSafeArea>
   );
-}
-function handlePowerChange(...args: any[]): void {
-  throw new Error('Function not implemented.');
 }
