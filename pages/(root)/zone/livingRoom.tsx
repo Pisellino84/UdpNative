@@ -63,7 +63,7 @@ export default function LivingRoom() {
 
     // Ascolta i cambiamenti di Power
     const handlePowerChange = (newPower: number) => {
-      if(Power == 35 || Power == 39) {
+      if(Power == 35 || Power == 39 || Power == 3 || Power == 7) {
         setPower(1);
       } else {
         setPower(0);
@@ -76,7 +76,7 @@ export default function LivingRoom() {
     };
 
     const handleMuteChange = (newMute: number) => {
-      if(Mute == 35 || Mute == 39) {
+      if(Mute == 35 || Mute == 39 || Mute == 7 || Mute == 5) {
         setMute(1);
       } else {
         setMute(0);
