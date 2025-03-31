@@ -44,18 +44,28 @@ export default function LivingRoom() {
 
     // Ascolta i cambiamenti di Power
     const handlePowerChange = (newPower: number) => {
+      if(Power == 35 || Power == 39) {
+        setPower(1);
+      } else {
+        setPower(0);
+      }
       if (newPower === 35 || newPower === 39) {
-        setPower(true);
+        setPower(1);
       } else if (newPower === 33 || newPower === 37) {
-        setPower(false);
+        setPower(0);
       }
     };
 
     const handleMuteChange = (newMute: number) => {
+      if(Mute == 35 || Mute == 39) {
+        setMute(1);
+      } else {
+        setMute(0);
+      }
       if (newMute === 37 || newMute === 39) {
-        setMute(true);
+        setMute(1);
       } else if (newMute === 35 || newMute === 33) {
-        setMute(false);
+        setMute(0);
       }
     };
 
@@ -82,11 +92,11 @@ export default function LivingRoom() {
         <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
           <TouchableOpacity
             onPress={() => {
-              if (power == false) {
-                setPower(true);
+              if (power == 0) {
+                setPower(1);
                 sendThreeBytes(4, 1, 1);
               } else {
-                setPower(false);
+                setPower(0);
                 sendThreeBytes(4, 1, 0);
               }
             }}
@@ -109,11 +119,11 @@ export default function LivingRoom() {
           <TouchableOpacity
             onPress={() => {
               if (power) {
-                if (mute === false) {
-                  setMute(true);
+                if (mute === 0) {
+                  setMute(1);
                   sendThreeBytes(22, 1, 1);
                 } else {
-                  setMute(false);
+                  setMute(0);
                   sendThreeBytes(22, 1, 0);
                 }
               } else
@@ -140,11 +150,11 @@ export default function LivingRoom() {
             onPress={() => {
               if(power){
 
-              if (night == false) {
-                setNight(true);
+              if (night == 0) {
+                setNight(1);
                 sendThreeBytes(24, 1, 1);
               } else {
-                setNight(false);
+                setNight(0);
                 sendThreeBytes(24, 1, 0);
               } }
               else
@@ -180,8 +190,8 @@ export default function LivingRoom() {
             step={2}
             minimumValue={0}
             maximumValue={80}
-            value={volume}
-            disabled={mute}
+            value={volume ?? 0}
+            disabled={!!mute}
             onValueChange={e => {
               if (!mute) {
                 // Cambia il volume solo se mute non è attivo
@@ -204,7 +214,7 @@ export default function LivingRoom() {
             value={source}
             onChange={item => {
               setSource(item.value);
-              setPower(true);
+              setPower(1);
               if (item.value == 'tuner') {
                 sendThreeBytes(19, 1, 0);
               } else if (item.value == 'cd') {
