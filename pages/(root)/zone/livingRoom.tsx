@@ -19,31 +19,32 @@ import {
   Source,
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import {useRoute, RouteProp} from '@react-navigation/native';
+import {ZoomInEasyDown} from 'react-native-reanimated';
 
 export default function LivingRoom() {
   // Define RootStackParamList if not already defined elsewhere
   type RootStackParamList = {
-    LivingRoom: { zoneId: number };
+    LivingRoom: {zoneId: number};
   };
-  
+
   const route = useRoute<RouteProp<RootStackParamList, 'LivingRoom'>>();
-  const { zoneId } = route.params; // Recupera il parametro zoneId
+  const {zoneId} = route.params; // Recupera il parametro zoneId
 
   React.useEffect(() => {
     // Usa il parametro zoneId per chiamare leggiStatoZona
     leggiStatoZona(zoneId);
   }, [zoneId]);
-  
+
   const Sources = [
-    {label: 'Tuner', value: 16},
-    {label: 'CD', value: 17},
-    {label: 'DVD', value: 18},
-    {label: 'SAT', value: 19},
-    {label: 'PC', value: 20},
-    {label: 'Multi CD', value: 21},
-    {label: 'Multi DVD', value: 22},
-    {label: 'TV', value: 23},
+    {label: 'Tuner', value: 0},
+    {label: 'CD', value: 1},
+    {label: 'DVD', value: 2},
+    {label: 'SAT', value: 3},
+    {label: 'PC', value: 4},
+    {label: 'Multi CD', value: 5},
+    {label: 'Multi DVD', value: 6},
+    {label: 'TV', value: 7},
   ];
 
   const [power, setPower] = useState(Power);
@@ -63,7 +64,7 @@ export default function LivingRoom() {
 
     // Ascolta i cambiamenti di Power
     const handlePowerChange = (newPower: number) => {
-      if(Power == 35 || Power == 39 || Power == 3 || Power == 7) {
+      if (Power == 35 || Power == 39 || Power == 47) {
         setPower(1);
       } else {
         setPower(0);
@@ -76,7 +77,7 @@ export default function LivingRoom() {
     };
 
     const handleMuteChange = (newMute: number) => {
-      if(Mute == 35 || Mute == 39 || Mute == 7 || Mute == 5) {
+      if (Mute == 35 || Mute == 39 || Power == 47) {
         setMute(1);
       } else {
         setMute(0);
@@ -104,7 +105,6 @@ export default function LivingRoom() {
     udpEvents.on('PowerChanged', handlePowerChange);
     udpEvents.on('MuteChanged', handleMuteChange);
     udpEvents.on('VolumeChanged', handleVolumeChange);
-
     udpEvents.on('SourceChanged', handleSourceChange);
 
     // Cleanup: rimuovi il listener quando il componente viene smontato
@@ -112,7 +112,6 @@ export default function LivingRoom() {
       udpEvents.off('PowerChanged', handlePowerChange);
       udpEvents.off('MuteChanged', handleMuteChange);
       udpEvents.off('VolumeChanged', handleVolumeChange);
-
       udpEvents.off('SourceChanged', handleSourceChange);
       /* clearInterval(interval); */
     };
@@ -183,7 +182,7 @@ export default function LivingRoom() {
           <TouchableOpacity
             onPress={() => {
               if (power) {
-                if (night == 0) {
+                if (night === 0) {
                   setNight(1);
                   sendThreeBytes(24, zoneId, 1);
                 } else {
@@ -261,7 +260,7 @@ export default function LivingRoom() {
             onChange={item => {
               setSource(item.value);
               // Calcola il parametro da inviare basandoti sul valore
-              const param = item.value - 16; // I valori vanno da 16 a 23, quindi sottrai 16
+              const param = item.value - 0; // I valori vanno da 0 a 8, quindi sottrai 0
               if (param >= 0 && param <= 7) {
                 sendThreeBytes(19, zoneId, param);
               }
@@ -274,6 +273,9 @@ export default function LivingRoom() {
             containerStyle={{borderRadius: '4%'}}
           />
         </View>
+        <TouchableOpacity onPress={() => sendThreeBytes(50, zoneId, 1)}>
+          <Text>TEST</Text>
+        </TouchableOpacity>
       </View>
     </AndroidSafeArea>
   );
