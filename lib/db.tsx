@@ -24,3 +24,12 @@ export async function retrieveData(key: string) {
     return null;
   }
 }
+
+export async function clearAllData() {
+  try {
+    await AsyncStorage.clear();
+    console.log('Tutti i dati rimossi con successo!');
+  } catch (error) {
+    console.error('Errore durante la rimozione di tutti i dati:', error);
+  }
+}
