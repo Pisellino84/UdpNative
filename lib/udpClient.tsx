@@ -30,7 +30,7 @@ export const udpEvents = new EventEmitter();
 
 const PORT = 53280;
 const HOST = '192.168.30.211';
-const client = dgram.createSocket({type: 'udp4'}); // Crea il client una sola volta
+export const client = dgram.createSocket({type: 'udp4'}); // Crea il client una sola volta
 
 client.bind(PORT, (err: any) => {
   // Associa il client all'avvio
@@ -63,6 +63,7 @@ export let Source: number | null = null;
 
 client.on('message', function (msg, rinfo) {
   console.log('Message received (buffer)', msg, rinfo);
+  console.log('Message received (string)', msg.toString(), rinfo);
 
   if (msg.length > 0 && msg[0] === 50) {
     Power = msg[4]; 
@@ -75,6 +76,7 @@ client.on('message', function (msg, rinfo) {
     udpEvents.emit('VolumeChanged', Volume);
 
     udpEvents.emit('SourceChanged', Source);
+
 
   }
 });

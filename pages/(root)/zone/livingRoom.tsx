@@ -19,8 +19,22 @@ import {
   Source,
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
+import { useRoute, RouteProp } from '@react-navigation/native';
 
 export default function LivingRoom() {
+  // Define RootStackParamList if not already defined elsewhere
+  type RootStackParamList = {
+    LivingRoom: { zoneId: number };
+  };
+  
+  const route = useRoute<RouteProp<RootStackParamList, 'LivingRoom'>>();
+  const { zoneId } = route.params; // Recupera il parametro zoneId
+
+  React.useEffect(() => {
+    // Usa il parametro zoneId per chiamare leggiStatoZona
+    leggiStatoZona(zoneId);
+  }, [zoneId]);
+  
   const Sources = [
     {label: 'Tuner', value: 16},
     {label: 'CD', value: 17},
@@ -45,18 +59,18 @@ export default function LivingRoom() {
     }, 500); // Intervallo di 1 secondo (500 ms) */
 
     // Leggi lo stato della zona all'inizio
-    leggiStatoZona(1);
+    leggiStatoZona(zoneId);
 
     // Ascolta i cambiamenti di Power
-    const handlePowerChange = (newPower: number) => {
+    const handlePowerChange = () => {
       if (Power == 35 || Power == 39) {
         setPower(1);
       } else {
         setPower(0);
       }
-      if (newPower === 35 || newPower === 39) {
+      if (Power === 35 || Power === 39) {
         setPower(1);
-      } else if (newPower === 33 || newPower === 37) {
+      } else if (Power === 33 || Power === 37) {
         setPower(0);
       }
     };
@@ -75,7 +89,7 @@ export default function LivingRoom() {
     };
 
     const handleVolumeChange = (newVolume: number) => {
-      retrieveData('volume').then(savedVolume => {
+      retrieveData(`volume ${zoneId}`).then(savedVolume => {
         if (savedVolume !== null) {
           setVolume(Number(savedVolume));
         }
@@ -113,10 +127,10 @@ export default function LivingRoom() {
             onPress={() => {
               if (power == 0) {
                 setPower(1);
-                sendThreeBytes(4, 1, 1);
+                sendThreeBytes(4, zoneId, 1);
               } else {
                 setPower(0);
-                sendThreeBytes(4, 1, 0);
+                sendThreeBytes(4, zoneId, 0);
               }
             }}
             className={`flex flex-row items-center gap-2 `}>
@@ -140,11 +154,11 @@ export default function LivingRoom() {
               if (power) {
                 if (mute === 0) {
                   setMute(1);
-                  sendThreeBytes(22, 1, 1);
+                  sendThreeBytes(22, zoneId, 1);
                 } else {
                   setMute(0);
-                  sendThreeBytes(15, 1, Number(volume));
-                  sendThreeBytes(22, 1, 0);
+                  sendThreeBytes(15, zoneId, Number(volume));
+                  sendThreeBytes(22, zoneId, 0);
                 }
               } else
                 Alert.alert(
@@ -171,10 +185,10 @@ export default function LivingRoom() {
               if (power) {
                 if (night == 0) {
                   setNight(1);
-                  sendThreeBytes(24, 1, 1);
+                  sendThreeBytes(24, zoneId, 1);
                 } else {
                   setNight(0);
-                  sendThreeBytes(24, 1, 0);
+                  sendThreeBytes(24, zoneId, 0);
                 }
               } else
                 Alert.alert(
@@ -216,11 +230,11 @@ export default function LivingRoom() {
                 // Cambia il volume solo se mute non è attivo
                 setVolume(e);
                 if (volume !== null && volume > 0) {
-                  saveData('volume', e.toString());
+                  saveData(`volume ${zoneId}`, e.toString());
                 }
-                sendThreeBytes(15, 1, e);
+                sendThreeBytes(15, zoneId, e);
               } else if (volume == 0 && mute == 1) {
-                retrieveData('volume').then(savedVolume => {
+                retrieveData(`volume ${zoneId}`).then(savedVolume => {
                   if (savedVolume !== null) {
                     setVolume(Number(savedVolume));
                   }
@@ -249,7 +263,7 @@ export default function LivingRoom() {
               // Calcola il parametro da inviare basandoti sul valore
               const param = item.value - 16; // I valori vanno da 16 a 23, quindi sottrai 16
               if (param >= 0 && param <= 7) {
-                sendThreeBytes(19, 1, param);
+                sendThreeBytes(19, zoneId, param);
               }
             }}
             style={{
