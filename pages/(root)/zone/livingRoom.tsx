@@ -62,21 +62,21 @@ export default function LivingRoom() {
     leggiStatoZona(zoneId);
 
     // Ascolta i cambiamenti di Power
-    const handlePowerChange = () => {
-      if (Power == 35 || Power == 39) {
+    const handlePowerChange = (newPower: number) => {
+      if(Power == 35 || Power == 39) {
         setPower(1);
       } else {
         setPower(0);
       }
-      if (Power === 35 || Power === 39) {
+      if (newPower === 35 || newPower === 39) {
         setPower(1);
-      } else if (Power === 33 || Power === 37) {
+      } else if (newPower === 33 || newPower === 37) {
         setPower(0);
       }
     };
 
     const handleMuteChange = (newMute: number) => {
-      if (Mute == 35 || Mute == 39) {
+      if(Mute == 35 || Mute == 39) {
         setMute(1);
       } else {
         setMute(0);
