@@ -8,7 +8,7 @@ import icons from '../../../constants/icons';
 
 import Scenario from './scenario';
 import Zone from './zone';
-import LivingRoom from '../zone/livingRoom';
+import PaginaZona from '../zone/paginaZona';
 import { useEffect } from 'react';
 import { leggiStatoZona } from '../../../lib/udpClient';
 
@@ -91,8 +91,8 @@ const App = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="LivingRoom"
-          component={LivingRoom}
+          name="PaginaZona"
+          component={PaginaZona}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

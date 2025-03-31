@@ -21,15 +21,14 @@ import {
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
-import {ZoomInEasyDown} from 'react-native-reanimated';
 
-export default function LivingRoom() {
+export default function PaginaZona() {
   // Define RootStackParamList if not already defined elsewhere
   type RootStackParamList = {
-    LivingRoom: {zoneId: number};
+    PaginaZona: {zoneId: number};
   };
 
-  const route = useRoute<RouteProp<RootStackParamList, 'LivingRoom'>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'PaginaZona'>>();
   const {zoneId} = route.params; // Recupera il parametro zoneId
 
   React.useEffect(() => {

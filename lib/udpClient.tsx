@@ -66,12 +66,12 @@ client.on('message', (msg, rinfo) => {
   console.log('Message received (buffer)', msg, rinfo);
   console.log('Message received (string)', msg.toString(), rinfo);
   if(msg.length > 0 && msg[0] == 61) {
-    console.log("NOME")
     const nome = msg.toString('utf-8', 4)
     Nome = nome;
     const names = {
       NomeChanged: nome,
     }
+    console.log("NOME: ", nome)
     Object.entries(names).forEach(([event, value]) => udpEvents.emit(event, value))
   }
 

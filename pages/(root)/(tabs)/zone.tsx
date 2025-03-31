@@ -11,7 +11,7 @@ import {
 } from '@react-navigation/native';
 
 type RootStackParamList = {
-  LivingRoom: { zoneId: number }; // Aggiunto parametro zoneId
+  PaginaZona: { zoneId: number }; // Aggiunto parametro zoneId
   // add other routes here
 };
 
@@ -44,21 +44,21 @@ const Zone = () => {
         <TouchableOpacity
           className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
           onPress={() => {
-            navigation.navigate('LivingRoom', { zoneId: 1 }); // Passa l'ID della zona
+            navigation.navigate('PaginaZona', { zoneId: 1 }); // Passa l'ID della zona
           }}>
           <Text className="text-xl font-medium">Living Room</Text>
           <Image source={icons.rightArrow} className="size-6" />
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center"
         onPress={() => {
-          navigation.navigate('LivingRoom', { zoneId: 2 }); // Passa l'ID della zona
+          navigation.navigate('PaginaZona', { zoneId: 2 }); // Passa l'ID della zona
         }}>
           <Text className="text-xl font-medium">Kitchen</Text>
           <Image source={icons.rightArrow} className="size-6" />
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row  border-b p-5 border-black-50 justify-between items-center"
         onPress={() => {
-          navigation.navigate('LivingRoom', { zoneId: 3 }); // Passa l'ID della zona
+          navigation.navigate('PaginaZona', { zoneId: 3 }); // Passa l'ID della zona
         }}>
           <Text className="text-xl font-medium">Bathroom</Text>
           <Image source={icons.rightArrow} className="size-6" />
