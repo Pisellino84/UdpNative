@@ -17,6 +17,7 @@ import {
   Night,
   Volume,
   Source,
+  Nome,
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
@@ -33,7 +34,7 @@ export default function LivingRoom() {
 
   React.useEffect(() => {
     // Usa il parametro zoneId per chiamare leggiStatoZona
-    leggiStatoZona(zoneId);
+    sendThreeBytes(61, zoneId, 0)
   }, [zoneId]);
 
   const Sources = [
@@ -52,6 +53,7 @@ export default function LivingRoom() {
   const [night, setNight] = useState(Night);
   const [volume, setVolume] = useState(Volume);
   const [source, setSource] = useState(Source);
+  const [nome, setNome] = useState(Nome)
 
   useEffect(() => {
     // Funzione da eseguire ogni secondo
@@ -102,10 +104,15 @@ export default function LivingRoom() {
       setSource(newSource);
     };
 
+    const handleNomeChange = (newNome: string) => {
+      setNome(newNome);
+    };
+
     udpEvents.on('PowerChanged', handlePowerChange);
     udpEvents.on('MuteChanged', handleMuteChange);
     udpEvents.on('VolumeChanged', handleVolumeChange);
     udpEvents.on('SourceChanged', handleSourceChange);
+    udpEvents.on('NomeChanged', handleNomeChange)
 
     // Cleanup: rimuovi il listener quando il componente viene smontato
     return () => {
@@ -113,6 +120,7 @@ export default function LivingRoom() {
       udpEvents.off('MuteChanged', handleMuteChange);
       udpEvents.off('VolumeChanged', handleVolumeChange);
       udpEvents.off('SourceChanged', handleSourceChange);
+      udpEvents.off('NomeChanged', handleNomeChange)
       /* clearInterval(interval); */
     };
   }, []);
@@ -120,7 +128,7 @@ export default function LivingRoom() {
   return (
     <AndroidSafeArea>
       <View className="px-5">
-        <SecondaryHeader title={'Living Room'} />
+        <SecondaryHeader title={nome ?? 'Default Title'} />
         <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
           <TouchableOpacity
             onPress={() => {
@@ -273,7 +281,7 @@ export default function LivingRoom() {
             containerStyle={{borderRadius: '4%'}}
           />
         </View>
-        <TouchableOpacity onPress={() => sendThreeBytes(50, zoneId, 1)}>
+        <TouchableOpacity onPress={() => sendThreeBytes(61, zoneId, 0)}>
           <Text>TEST</Text>
         </TouchableOpacity>
       </View>

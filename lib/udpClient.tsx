@@ -55,6 +55,7 @@ export let Mute: number | null = null;
 export let Night: number | null = null;
 export let Volume: number | null = null;
 export let Source: number | null = null;
+export let Nome: string | null = null;
 
 // 33 power off, mute off
 // 35 power on, mute off
@@ -64,6 +65,15 @@ export let Source: number | null = null;
 client.on('message', (msg, rinfo) => {
   console.log('Message received (buffer)', msg, rinfo);
   console.log('Message received (string)', msg.toString(), rinfo);
+  if(msg.length > 0 && msg[0] == 61) {
+    console.log("NOME")
+    const nome = msg.toString('utf-8', 4)
+    Nome = nome;
+    const names = {
+      NomeChanged: nome,
+    }
+    Object.entries(names).forEach(([event, value]) => udpEvents.emit(event, value))
+  }
 
   if (msg.length > 0 && msg[0] === 50) {
     const [power, mute, volume, source] = [msg[4], msg[4], msg[5], msg[6]];
@@ -79,9 +89,9 @@ client.on('message', (msg, rinfo) => {
       VolumeChanged: volume,
       SourceChanged: source,
     };
-
     Object.entries(events).forEach(([event, value]) => udpEvents.emit(event, value));
   }
+  
 });
 
 const timeoutDuration = 5000; // 5000 millisecondi = 5 secondi
