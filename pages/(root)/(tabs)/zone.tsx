@@ -1,4 +1,4 @@
-import {ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {sendThreeBytes, Nome} from '../../../lib/udpClient'; // Importa Nome
 import '../../../global.css';
 import {MainHeader} from '../../../components/Header';
@@ -9,7 +9,7 @@ import {useNavigation, NavigationProp} from '@react-navigation/native';
 import React, {useState} from 'react';
 
 type RootStackParamList = {
-  PaginaZona: {zoneId: number}; // Aggiunto parametro zoneId
+  PaginaZona: {zoneId: number}; 
 };
 
 const Zone = () => {
@@ -20,18 +20,30 @@ const Zone = () => {
 
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(49).fill(''));
-  const [isLoading, setIsLoading] = useState(true); // Stato per la schermata di caricamento
+  const [isLoading, setIsLoading] = useState(true); 
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneNames = async () => {
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
-    for (const zoneId of zones) {
-      sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
-      await new Promise(resolve => setTimeout(resolve, 30)); // Ritardo per evitare di saltare zone
-      names[zoneId - 1] = Nome ?? `Zona ${zoneId}`; // Usa un valore predefinito se Nome è null
-      setZoneNames([...names]); // Aggiorna lo stato
+
+    while (isLoading) {
+      for (const zoneId of zones) {
+        sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
+        await new Promise(resolve => setTimeout(resolve, 30)); // Ritardo per evitare di saltare zone
+
+        if (Nome) {
+          names[zoneId - 1] = Nome; // Usa il nome caricato
+          setZoneNames([...names]); // Aggiorna lo stato
+        }
+      }
+
+      // Controlla se tutti i nomi sono stati caricati
+      const allNamesLoaded = names.every(name => name !== '');
+      if (allNamesLoaded) {
+        setIsLoading(false); // Disattiva la schermata di caricamento
+        break; // Esce dal ciclo
+      }
     }
-    setIsLoading(false); // Disattiva la schermata di caricamento
   };
 
   // Carica i nomi all'avvio
@@ -86,7 +98,7 @@ const Zone = () => {
                 navigation.navigate('PaginaZona', {zoneId}); // Passa l'ID della zona
               }}>
               <Text className="text-xl font-medium">
-                {zoneNames[zoneId - 1] || `Zona ${zoneId}`} {/* Mostra il nome o un placeholder */}
+                {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
               </Text>
               <Image source={icons.rightArrow} className="size-6" />
             </TouchableOpacity>
