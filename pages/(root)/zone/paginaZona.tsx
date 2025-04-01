@@ -53,11 +53,6 @@ export default function PaginaZona() {
   const [nome, setNome] = useState(Nome);
 
   useEffect(() => {
-    // Funzione da eseguire ogni secondo
-    /* const interval = setInterval(() => {
-      leggiStatoZona(1); // Esegui la funzione desiderata
-    }, 500); // Intervallo di 1 secondo (500 ms) */
-
     // Leggi lo stato della zona all'inizio
     leggiStatoZona(zoneId);
 
@@ -131,7 +126,6 @@ export default function PaginaZona() {
       udpEvents.off('Byte6Changed', handleByte6Change);
       udpEvents.off('VolumeChanged', handleVolumeChange);
       udpEvents.off('NomeChanged', handleNomeChange);
-      /* clearInterval(interval); */
     };
   }, []);
 
