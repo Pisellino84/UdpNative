@@ -7,7 +7,7 @@ Usare dispotivo android fisico
 - **SOLUZIONE2**
 > **IMPORTATE**: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi saltare i passaggi e cominciare da telnet localhost e avviare direttamente metro con npm run android.
 
-Avviare metro con:
+Avvia metro
 
 ```sh
 # Using npm
@@ -16,7 +16,7 @@ npm start
 # OR using Yarn
 yarn start
 ```
-Se è la prima volta che usi l'avd avvia metro con: 
+Se è la prima volta che usi l'avd avvia metro con 
 
 ```sh
 # Using npm
@@ -30,16 +30,21 @@ Dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i
 
 Aprire il cmd ed entrare nella directory degli umulatori di android (".....\Android\Sdk\emulator")
 
-Digitare il comando (per vedere i nomi degli emulatore digitare "emulator.exe -list-avds")
+Avvia l'emulatore con la feauture Wifi 
 
 ```sh
-# Using npm
 emulator.exe -avd <nome+emulatore> -feature -Wifi
 ```
-Aprire un nuovo terminale e connettersi al dispositivo con il comando
+
+Per vedere i nomi degli emulatori
 
 ```sh
-# Using npm
+emulator.exe -list-avds
+```
+
+Aprire un nuovo terminale e connettersi al dispositivo 
+
+```sh
 telnet localhost 5554
 ```
 Fare l'autenticazione come scritto nel istruzione segnate nel terminale
@@ -47,14 +52,12 @@ Fare l'autenticazione come scritto nel istruzione segnate nel terminale
 Fare il redirect della porta sostituendo <port>:<port> con le porte da usare
 
 ```sh
-# Using npm
 redir add udp:<port>:<port>
 ```
 
-Per uscire dal telnet
+Esci dal telnet
 
 ```sh
-# Using npm
 quit
 ```
 
