@@ -232,7 +232,7 @@ export default function PaginaZona() {
             disabled={!!mute}
             onValueChange={e => {
               if (!mute) {
-                // Cambia il volume solo se mute non è attivo
+                // Cambia il volume solo se mute non è attivo.
                 setVolume(e);
                 if (volume !== null && volume > 0) {
                   saveData(`volume ${zoneId}`, e.toString());
