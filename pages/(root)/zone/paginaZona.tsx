@@ -79,6 +79,15 @@ export default function PaginaZona() {
     };
 
     const handleByte6Change = () => {
+      if (Byte6 !== null) {
+        const sourceValue = Byte6 % 16; // Calcola il valore della sorgente
+        if (sourceValue >= 0 && sourceValue <= 7) {
+          setSource(sourceValue);
+        }
+      }
+    };
+
+    /* const handleByte6Change = () => {
       if (Byte6 == 0 || Byte6 == 16 || Byte6 == 32 || Byte6 == 48 || Byte6 == 64 || Byte6 == 80 || Byte6 == 96 || Byte6 == 112 || Byte6 == 160 || Byte6 == 224) {
         setSource(0);
       } else if (Byte6 == 1 || Byte6 == 17 || Byte6 == 33 || Byte6 == 49 || Byte6 == 65 || Byte6 == 81 || Byte6 == 97 || Byte6 == 113 || Byte6 == 161 || Byte6 == 225) {
@@ -96,7 +105,7 @@ export default function PaginaZona() {
       } else if (Byte6 == 7  || Byte6 == 23 || Byte6 == 39 || Byte6 == 55 || Byte6 == 71 || Byte6 == 87 || Byte6 == 103 || Byte6 == 119 || Byte6 == 167 || Byte6 == 231) {
         setSource(7);
       }
-    };
+    }; */
 
     const handleVolumeChange = (newVolume: number) => {
       retrieveData(`volume ${zoneId}`).then(savedVolume => {
