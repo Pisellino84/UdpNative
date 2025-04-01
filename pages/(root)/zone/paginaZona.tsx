@@ -1,6 +1,5 @@
 import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
 import {Dropdown} from 'react-native-element-dropdown'; // https://github.com/hoaphantn7604/react-native-element-dropdown
