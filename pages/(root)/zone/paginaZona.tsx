@@ -62,7 +62,7 @@ export default function PaginaZona() {
     leggiStatoZona(zoneId);
 
     // Ascolta i cambiamenti di Power
-    const handleByte5Change = (newByte5: number) => {
+    const handleByte5Change = () => {
       if (Byte5 == 33) {
         setPower(0);
         setMute(0);
@@ -78,7 +78,7 @@ export default function PaginaZona() {
       }
     };
 
-    const handleByte6Change = (newSource: number) => {
+    const handleByte6Change = () => {
       if (Byte6 == 0 || Byte6 == 16 || Byte6 == 32 || Byte6 == 48 || Byte6 == 64 || Byte6 == 80 || Byte6 == 96 || Byte6 == 112 || Byte6 == 160 || Byte6 == 224) {
         setSource(0);
       } else if (Byte6 == 1 || Byte6 == 17 || Byte6 == 33 || Byte6 == 49 || Byte6 == 65 || Byte6 == 81 || Byte6 == 97 || Byte6 == 113 || Byte6 == 161 || Byte6 == 225) {
@@ -97,19 +97,6 @@ export default function PaginaZona() {
         setSource(7);
       }
     };
-
-    /* const handleMuteChange = (newMute: number) => {
-      if (Byte5 == 35 || Byte5 == 39 || Byte5 == 47) {
-        setMute(1);
-      } else {
-        setMute(0);
-      }
-      if (newMute === 37 || newMute === 39) {
-        setMute(1);
-      } else if (newMute === 35 || newMute === 33) {
-        setMute(0);
-      }
-    }; */
 
     const handleVolumeChange = (newVolume: number) => {
       retrieveData(`volume ${zoneId}`).then(savedVolume => {
