@@ -12,11 +12,9 @@ import {
   leggiStatoZona,
   sendThreeBytes,
   udpEvents,
-  Power,
-  Mute,
-  Night,
+  Byte5,
+  Byte6,
   Volume,
-  Source,
   Nome,
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
@@ -33,7 +31,7 @@ export default function PaginaZona() {
 
   React.useEffect(() => {
     // Usa il parametro zoneId per chiamare leggiStatoZona
-    sendThreeBytes(61, zoneId, 0)
+    sendThreeBytes(61, zoneId, 0);
   }, [zoneId]);
 
   const Sources = [
@@ -47,12 +45,12 @@ export default function PaginaZona() {
     {label: 'TV', value: 7},
   ];
 
-  const [power, setPower] = useState(Power);
-  const [mute, setMute] = useState(Mute);
-  const [night, setNight] = useState(Night);
+  const [power, setPower] = useState(0);
+  const [mute, setMute] = useState(0);
+  const [night, setNight] = useState(0);
+  const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
-  const [source, setSource] = useState(Source);
-  const [nome, setNome] = useState(Nome)
+  const [nome, setNome] = useState(Nome);
 
   useEffect(() => {
     // Funzione da eseguire ogni secondo
@@ -64,21 +62,44 @@ export default function PaginaZona() {
     leggiStatoZona(zoneId);
 
     // Ascolta i cambiamenti di Power
-    const handlePowerChange = (newPower: number) => {
-      if (Power == 35 || Power == 39 || Power == 47) {
-        setPower(1);
-      } else {
+    const handleByte5Change = (newByte5: number) => {
+      if (Byte5 == 33) {
         setPower(0);
-      }
-      if (newPower === 35 || newPower === 39) {
+        setMute(0);
+      } else if (Byte5 == 35) {
         setPower(1);
-      } else if (newPower === 33 || newPower === 37) {
+        setMute(0);
+      } else if (Byte5 == 37) {
         setPower(0);
+        setMute(1);
+      } else if (Byte5 == 39) {
+        setPower(1);
+        setMute(1);
       }
     };
 
-    const handleMuteChange = (newMute: number) => {
-      if (Mute == 35 || Mute == 39 || Power == 47) {
+    const handleByte6Change = (newSource: number) => {
+      if (Byte6 == 0 || Byte6 == 16 || Byte6 == 32 || Byte6 == 48 || Byte6 == 64 || Byte6 == 80 || Byte6 == 96 || Byte6 == 112 || Byte6 == 160 || Byte6 == 224) {
+        setSource(0);
+      } else if (Byte6 == 1 || Byte6 == 17 || Byte6 == 33 || Byte6 == 49 || Byte6 == 65 || Byte6 == 81 || Byte6 == 97 || Byte6 == 113 || Byte6 == 161 || Byte6 == 225) {
+        setSource(1);
+      } else if (Byte6 == 2 || Byte6 == 18  || Byte6 == 34 || Byte6 == 50 || Byte6 == 66 || Byte6 == 82 || Byte6 == 98 || Byte6 == 114 || Byte6 == 162 || Byte6 == 226) {
+        setSource(2);
+      } else if (Byte6 == 3 || Byte6 == 19  || Byte6 == 35 || Byte6 == 51 || Byte6 == 67 || Byte6 == 83 || Byte6 == 99 || Byte6 == 115 || Byte6 == 163 || Byte6 == 227) {
+        setSource(3);
+      } else if (Byte6 == 4 || Byte6 == 20  || Byte6 == 36 || Byte6 == 52 || Byte6 == 68 || Byte6 == 84 || Byte6 == 100 || Byte6 == 116 || Byte6 == 164 || Byte6 == 228) {
+        setSource(4);
+      } else if (Byte6 == 5 || Byte6 == 21  || Byte6 == 37 || Byte6 == 53 || Byte6 == 69 || Byte6 == 85 || Byte6 == 101 || Byte6 == 117 || Byte6 == 165 || Byte6 == 229) {
+        setSource(5);
+      } else if (Byte6 == 6  || Byte6 == 22  || Byte6 == 38 || Byte6 == 54 || Byte6 == 70 || Byte6 == 86 || Byte6 == 102 || Byte6 == 118 || Byte6 == 166 || Byte6 == 230) {
+        setSource(6);
+      } else if (Byte6 == 7  || Byte6 == 23 || Byte6 == 39 || Byte6 == 55 || Byte6 == 71 || Byte6 == 87 || Byte6 == 103 || Byte6 == 119 || Byte6 == 167 || Byte6 == 231) {
+        setSource(7);
+      }
+    };
+
+    /* const handleMuteChange = (newMute: number) => {
+      if (Byte5 == 35 || Byte5 == 39 || Byte5 == 47) {
         setMute(1);
       } else {
         setMute(0);
@@ -88,7 +109,7 @@ export default function PaginaZona() {
       } else if (newMute === 35 || newMute === 33) {
         setMute(0);
       }
-    };
+    }; */
 
     const handleVolumeChange = (newVolume: number) => {
       retrieveData(`volume ${zoneId}`).then(savedVolume => {
@@ -99,27 +120,21 @@ export default function PaginaZona() {
       setVolume(newVolume);
     };
 
-    const handleSourceChange = (newSource: number) => {
-      setSource(newSource);
-    };
-
     const handleNomeChange = (newNome: string) => {
       setNome(newNome);
     };
 
-    udpEvents.on('PowerChanged', handlePowerChange);
-    udpEvents.on('MuteChanged', handleMuteChange);
+    udpEvents.on('Byte5Changed', handleByte5Change);
+    udpEvents.on('Byte6Changed', handleByte6Change);
     udpEvents.on('VolumeChanged', handleVolumeChange);
-    udpEvents.on('SourceChanged', handleSourceChange);
-    udpEvents.on('NomeChanged', handleNomeChange)
+    udpEvents.on('NomeChanged', handleNomeChange);
 
     // Cleanup: rimuovi il listener quando il componente viene smontato
     return () => {
-      udpEvents.off('PowerChanged', handlePowerChange);
-      udpEvents.off('MuteChanged', handleMuteChange);
+      udpEvents.off('Byte5Changed', handleByte5Change);
+      udpEvents.off('Byte6Changed', handleByte6Change);
       udpEvents.off('VolumeChanged', handleVolumeChange);
-      udpEvents.off('SourceChanged', handleSourceChange);
-      udpEvents.off('NomeChanged', handleNomeChange)
+      udpEvents.off('NomeChanged', handleNomeChange);
       /* clearInterval(interval); */
     };
   }, []);
@@ -266,11 +281,14 @@ export default function PaginaZona() {
             value={source}
             onChange={item => {
               setSource(item.value);
-              // Calcola il parametro da inviare basandoti sul valore
-              const param = item.value - 0; // I valori vanno da 0 a 8, quindi sottrai 0
-              if (param >= 0 && param <= 7) {
-                sendThreeBytes(19, zoneId, param);
-              }
+              sendThreeBytes(19, zoneId, item.value)
+              /* if (Byte6 != null && Byte6 <= 7 ) {
+                sendThreeBytes(19, zoneId, item.value)
+              } else if (Byte6 != null && Byte6 >= 16 && Byte6 <= 23) {
+                sendThreeBytes(19, zoneId, item.value)
+              } else if (Byte6 != null && Byte6 >= 32 && Byte6 <= 39) {
+                sendThreeBytes(19, zoneId, item.value) 
+              } */
             }}
             style={{
               padding: 20,
@@ -280,7 +298,7 @@ export default function PaginaZona() {
             containerStyle={{borderRadius: '4%'}}
           />
         </View>
-        <TouchableOpacity onPress={() => sendThreeBytes(61, zoneId, 0)}>
+        <TouchableOpacity onPress={() => leggiStatoZona(zoneId)}>
           <Text>TEST</Text>
         </TouchableOpacity>
       </View>

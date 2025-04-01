@@ -50,11 +50,9 @@ client.on('error', (err: any) => {
   Alert.alert('Errore del client');
 });
 
-export let Power: number | null = null;
-export let Mute: number | null = null;
-export let Night: number | null = null;
+export let Byte5: number | null = null; // power / mute / night
+export let Byte6: number | null = null; // audio / video
 export let Volume: number | null = null;
-export let Source: number | null = null;
 export let Nome: string | null = null;
 
 // 33 power off, mute off
@@ -63,8 +61,6 @@ export let Nome: string | null = null;
 // 39 power on, mute on
 
 client.on('message', (msg, rinfo) => {
-  console.log('Message received (buffer)', msg, rinfo);
-  console.log('Message received (string)', msg.toString(), rinfo);
   if(msg.length > 0 && msg[0] == 61) {
     const nome = msg.toString('utf-8', 4)
     Nome = nome;
@@ -76,18 +72,17 @@ client.on('message', (msg, rinfo) => {
   }
 
   if (msg.length > 0 && msg[0] === 50) {
-    const [power, mute, volume, source] = [msg[4], msg[4], msg[5], msg[6]];
+    console.log('Message received (buffer)', msg, rinfo);
+    const [byte5, byte6, volume ] = [msg[4], msg[6], msg[5]];
 
-    Power = power;
-    Mute = mute;
+    Byte5 = byte5;
+    Byte6 = byte6;
     Volume = volume;
-    Source = source;
 
     const events = {
-      PowerChanged: power,
-      MuteChanged: mute,
+      Byte5Changed: byte5,
+      Byte6Changed: byte6,
       VolumeChanged: volume,
-      SourceChanged: source,
     };
     Object.entries(events).forEach(([event, value]) => udpEvents.emit(event, value));
   }
