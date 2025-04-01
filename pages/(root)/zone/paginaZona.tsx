@@ -28,7 +28,6 @@ export default function PaginaZona() {
 
   const route = useRoute<RouteProp<RootStackParamList, 'PaginaZona'>>();
   const {zoneId} = route.params; // Recupera il parametro zoneId
-  useZonaMonitor(zoneId, 1000)
 
   React.useEffect(() => {
     // Usa il parametro zoneId per chiamare leggiStatoZona
@@ -124,7 +123,7 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
     };
   }, []);
-
+  useZonaMonitor(zoneId, 200, volume)
   return (
     <AndroidSafeArea>
       <View className="px-5">

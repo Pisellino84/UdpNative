@@ -1,17 +1,36 @@
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import {leggiStatoZona} from './udpClient';
 
-export function useZonaMonitor(zoneId: number, interval: number = 5000) {
+export function useZonaMonitor(zoneId: number, interval: number = 5000, pauseTrigger?: any) {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    // Funzione per leggere lo stato della zona
     const fetchZonaState = () => {
       leggiStatoZona(zoneId);
     };
 
-    // Avvia il monitoraggio con un intervallo specificato
-    const intervalId = setInterval(fetchZonaState, interval);
+    let intervalId: NodeJS.Timeout | null = setInterval(fetchZonaState, interval);
 
-    // Cleanup: interrompi il monitoraggio quando il componente viene smontato
-    return () => clearInterval(intervalId);
-  }, [zoneId, interval]);
+    // Funzione per riavviare il monitoraggio
+    const restartMonitor = () => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(fetchZonaState, interval);
+    };
+
+    // Se `pauseTrigger` cambia, ferma il monitoraggio e riavvialo dopo un timeout
+    if (pauseTrigger !== undefined) {
+      if (intervalId) clearInterval(intervalId);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(() => {
+        restartMonitor();
+      }, 500); // Riavvia dopo 500 ms di inattività
+    }
+
+    // Cleanup
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [zoneId, interval, pauseTrigger]);
 }
