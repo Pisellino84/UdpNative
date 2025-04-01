@@ -235,17 +235,8 @@ export default function PaginaZona() {
               if (!mute) {
                 // Cambia il volume solo se mute non è attivo.
                 setVolume(e);
-                if (volume !== null && volume > 0) {
-                  saveData(`volume ${zoneId}`, e.toString());
-                }
                 sendThreeBytes(15, zoneId, e);
-              } else if (volume == 0 && mute == 1) {
-                retrieveData(`volume ${zoneId}`).then(savedVolume => {
-                  if (savedVolume !== null) {
-                    setVolume(Number(savedVolume));
-                  }
-                });
-              }
+              } 
             }}
           />
         </View>
