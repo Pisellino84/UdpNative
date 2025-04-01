@@ -133,7 +133,7 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
       /* clearInterval(interval); */
     };
-  }, [zoneId]);
+  }, []);
 
   return (
     <AndroidSafeArea>
