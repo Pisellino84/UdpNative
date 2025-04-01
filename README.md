@@ -49,7 +49,7 @@ telnet localhost 5554
 ```
 Fare l'autenticazione come scritto nel istruzione segnate nel terminale
 
-Fare il redirect della porta sostituendo <port>:<port> con le porte da usare
+Fare il redirect della porta sostituendo port:port con le porte da usare
 
 ```sh
 redir add udp:<port>:<port>
