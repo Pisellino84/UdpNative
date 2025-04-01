@@ -102,12 +102,27 @@ export default function PaginaZona() {
     }; */
 
     const handleVolumeChange = (newVolume: number) => {
-      retrieveData(`volume ${zoneId}`).then(savedVolume => {
-        if (savedVolume !== null) {
-          setVolume(Number(savedVolume));
+      if (Volume != 0) {
+        // Usa il nuovo valore di volume se è maggiore di 0
+        setVolume(Volume);
+        if (Volume !== null) {
+          saveData(`volume ${zoneId}`, Volume.toString());
         }
-      });
-      setVolume(newVolume);
+      } else if (Volume === 0) {
+        // Se Volume è 0, pesca il valore da retrieveData
+        retrieveData(`volume ${zoneId}`).then(savedVolume => {
+          if (savedVolume !== null) {
+            setVolume(Number(savedVolume));
+          }
+        });
+      } else {
+        // Altrimenti, pesca il valore da retrieveData
+        retrieveData(`volume ${zoneId}`).then(savedVolume => {
+          if (savedVolume !== null) {
+            setVolume(Number(savedVolume));
+          }
+        });
+      }
     };
 
     const handleNomeChange = (newNome: string) => {
@@ -230,7 +245,7 @@ export default function PaginaZona() {
           <Slider
             minimumTrackTintColor="#228BE6"
             maximumTrackTintColor="#FFFFFF"
-            step={2}
+            step={1}
             minimumValue={0}
             maximumValue={80}
             value={volume ?? 0}
