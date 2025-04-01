@@ -102,27 +102,7 @@ export default function PaginaZona() {
     }; */
 
     const handleVolumeChange = (newVolume: number) => {
-      if (Volume != 0) {
-        // Usa il nuovo valore di volume se è maggiore di 0
-        setVolume(Volume);
-        if (Volume !== null) {
-          saveData(`volume ${zoneId}`, Volume.toString());
-        }
-      } else if (Volume === 0) {
-        // Se Volume è 0, pesca il valore da retrieveData
-        retrieveData(`volume ${zoneId}`).then(savedVolume => {
-          if (savedVolume !== null) {
-            setVolume(Number(savedVolume));
-          }
-        });
-      } else {
-        // Altrimenti, pesca il valore da retrieveData
-        retrieveData(`volume ${zoneId}`).then(savedVolume => {
-          if (savedVolume !== null) {
-            setVolume(Number(savedVolume));
-          }
-        });
-      }
+      setVolume(newVolume)
     };
 
     const handleNomeChange = (newNome: string) => {
@@ -248,7 +228,7 @@ export default function PaginaZona() {
             step={1}
             minimumValue={0}
             maximumValue={80}
-            value={volume ?? 0}
+            value={Volume ?? 0}
             disabled={!!mute}
             onValueChange={e => {
               if (!mute) {
