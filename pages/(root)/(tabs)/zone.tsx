@@ -7,6 +7,7 @@ import icons from '../../../constants/icons';
 
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import React, {useState} from 'react';
+import Slider from '@react-native-community/slider';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number}; 
@@ -105,7 +106,18 @@ const Zone = () => {
                 <Image source={icons.power} className='size-4'/>
                 <Image source={icons.mute} className='size-4'/>
               </View>
-              
+              <View className='flex flex-row'>
+                <Slider 
+                maximumTrackTintColor="#228BE6"
+                step={2}
+                minimumValue={0}
+                maximumValue={80}
+                value={50}
+                style={{width: 150}}
+                disabled
+                />
+                <Text className='font-bold'>12</Text>
+              </View>
               </View>
               
               <Image source={icons.rightArrow} className="size-6" />
