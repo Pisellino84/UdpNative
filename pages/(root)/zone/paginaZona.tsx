@@ -49,7 +49,7 @@ export default function PaginaZona() {
   const [mute, setMute] = useState(0);
   const [night, setNight] = useState(0);
   const [source, setSource] = useState(0);
-  const [volume, setVolume] = useState(Volume);
+  const [volume, setVolume] = useState(0);
   const [nome, setNome] = useState(Nome);
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
       /* clearInterval(interval); */
     };
-  }, []);
+  }, [zoneId]);
 
   return (
     <AndroidSafeArea>
