@@ -5,7 +5,7 @@ Bug dell'emulatore
 Usare dispotivo android fisico
 
 - **SOLUZIONE2**
-> **IMPORTATE**: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi skippare i primi tre passaggi e avviare direttamente metro con npm run android.
+> **IMPORTATE**: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi saltare i passaggi e cominciare da telnet localhost e avviare direttamente metro con npm run android.
 
 Avviare metro con:
 
