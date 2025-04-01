@@ -57,16 +57,16 @@ export default function PaginaZona() {
 
     // Ascolta i cambiamenti di Power
     const handleByte5Change = () => {
-      if (Byte5 == 33) {
+      if (Byte5 == 33 || Byte5 == 1 ) {
         setPower(0);
         setMute(0);
-      } else if (Byte5 == 35) {
+      } else if (Byte5 == 35 || Byte5 == 3) {
         setPower(1);
         setMute(0);
-      } else if (Byte5 == 37) {
+      } else if (Byte5 == 37 || Byte5 == 5) {
         setPower(0);
         setMute(1);
-      } else if (Byte5 == 39) {
+      } else if (Byte5 == 39 || Byte5 == 7) {
         setPower(1);
         setMute(1);
       }

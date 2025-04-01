@@ -29,7 +29,7 @@ const Zone = () => {
     while (isLoading) {
       for (const zoneId of zones) {
         sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
-        await new Promise(resolve => setTimeout(resolve, 30)); // Ritardo per evitare di saltare zone
+        await new Promise(resolve => setTimeout(resolve, 100)); // Ritardo per evitare di saltare zone
 
         if (Nome) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
@@ -97,9 +97,17 @@ const Zone = () => {
               onPress={() => {
                 navigation.navigate('PaginaZona', {zoneId}); // Passa l'ID della zona
               }}>
-              <Text className="text-xl font-medium">
+              <View className='flex flex-row items-center gap-2'>
+                <Text className="text-xl font-medium">
                 {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
               </Text>
+              <View className='flex flex-col gap-1'>
+                <Image source={icons.power} className='size-4'/>
+                <Image source={icons.mute} className='size-4'/>
+              </View>
+              
+              </View>
+              
               <Image source={icons.rightArrow} className="size-6" />
             </TouchableOpacity>
           ))}
