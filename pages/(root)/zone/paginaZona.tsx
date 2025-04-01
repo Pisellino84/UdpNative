@@ -18,6 +18,7 @@ import {
 } from '../../../lib/udpClient';
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
+import { useZonaMonitor } from '../../../lib/useZonaMonitor';
 
 export default function PaginaZona() {
   // Define RootStackParamList if not already defined elsewhere
@@ -27,6 +28,7 @@ export default function PaginaZona() {
 
   const route = useRoute<RouteProp<RootStackParamList, 'PaginaZona'>>();
   const {zoneId} = route.params; // Recupera il parametro zoneId
+  useZonaMonitor(zoneId, 1000)
 
   React.useEffect(() => {
     // Usa il parametro zoneId per chiamare leggiStatoZona
