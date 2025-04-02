@@ -27,6 +27,7 @@ import {useNavigation, NavigationProp} from '@react-navigation/native';
 import {useEffect, useState, useRef} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData} from '../../../lib/db';
+import { useZonaMonitor } from 'lib/useZonaMonitor';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number};
@@ -60,9 +61,10 @@ const Zone = () => {
       let volumeChanged = false;
       let Byte5Changed = false;
       while (!nomeChanged && !volumeChanged && zoneId !== 49) {
-        sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
+         // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 20)); // Ritardo per evitare di saltare zone in ms
+        await new Promise(resolve => setTimeout(resolve, 5)); // Ritardo per evitare di saltare zone in ms
+        sendThreeBytes(61, zoneId, 0);
         console.log(Volume);
 
         if (Nome && Nome !== lastNome.current) {
@@ -101,6 +103,7 @@ const Zone = () => {
   useEffect(() => {
     loadZoneData();
   }, []);
+
 
   if (isLoading) {
     // Mostra la schermata di caricamento

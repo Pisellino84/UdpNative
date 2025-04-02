@@ -52,7 +52,7 @@ function ZoneTabNavigator() {
           position: 'absolute',
           borderTopColor: '#0061FF1A',
           borderTopWidth: 1,
-          minHeight: 70,
+          minHeight: 100,
         },
       }}>
       <Tab.Screen

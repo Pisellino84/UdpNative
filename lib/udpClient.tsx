@@ -14,7 +14,7 @@ import EventEmitter from 'events';
 
 //    avviare metro con npm start (se è la prima volta che usi l'avd avvia metro con npm run android, dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i passaggi)
 //    Aprire il cmd ed entrare nella directory degli umulatori di android ("C:\Users\resea\AppData\Local\Android\Sdk\emulator")
-//    digitare il comando "emulator.exe -avd <nome+emulatore> -feature -Wifi" (per vedere i nomi degli emulatore digitare "emulator.exe -list-avds")
+//    digitare il comando ".\emulator.exe -avd <nome+emulatore> -feature -Wifi" (per vedere i nomi degli emulatore digitare ".\emulator.exe -list-avds")
 //    aprire un nuovo terminale e connettersi al dispositivo con il comando "telnet localhost 5554"
 //    fare l'autenticazione come scritto nel istruzione segnate nel terminale
 //    fare il redirect della porta digitando "redir add udp:53280:53280" (la porta 53280 è soggettiva, puoi scegliere la porta che vuoi)
