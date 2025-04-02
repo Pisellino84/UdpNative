@@ -220,7 +220,7 @@ export default function PaginaZona() {
           <Text className="text-black-300 text-lg font-medium mb-1">
             Volume:{' '}
             <Text className="text-2xl font-extrabold text-primary-300">
-              {volume}
+              {Volume}
             </Text>
           </Text>
           <Slider
