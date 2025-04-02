@@ -257,13 +257,6 @@ export default function PaginaZona() {
             onChange={item => {
               setSource(item.value);
               sendThreeBytes(19, zoneId, item.value)
-              /* if (Byte6 != null && Byte6 <= 7 ) {
-                sendThreeBytes(19, zoneId, item.value)
-              } else if (Byte6 != null && Byte6 >= 16 && Byte6 <= 23) {
-                sendThreeBytes(19, zoneId, item.value)
-              } else if (Byte6 != null && Byte6 >= 32 && Byte6 <= 39) {
-                sendThreeBytes(19, zoneId, item.value) 
-              } */
             }}
             style={{
               padding: 20,
