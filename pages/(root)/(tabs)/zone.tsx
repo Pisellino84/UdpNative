@@ -6,7 +6,7 @@ import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import icons from '../../../constants/icons';
 
 import {useNavigation, NavigationProp} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react'; // Aggiunto useRef
 import Slider from '@react-native-community/slider';
 
 type RootStackParamList = {
@@ -20,29 +20,34 @@ const Zone = () => {
   const zones = Array.from({length: 49}, (_, i) => i + 1);
 
   // Stato per memorizzare i nomi delle zone
-  const [zoneNames, setZoneNames] = useState<string[]>(Array(49).fill(''));
+  const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [isLoading, setIsLoading] = useState(true); 
+
+  // useRef per memorizzare l'ultimo valore di Nome
+  const lastNome = useRef<string | null>(null);
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneNames = async () => {
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
 
-    while (isLoading) {
-      for (const zoneId of zones) {
-        sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
-        await new Promise(resolve => setTimeout(resolve, 100)); // Ritardo per evitare di saltare zone
+    for (const zoneId of zones) {
+      let nomeChanged = false; // Flag per controllare se Nome è cambiato
 
-        if (Nome) {
+      while (!nomeChanged && zoneId !== 49) {
+        sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
+        await new Promise(resolve => setTimeout(resolve, 200)); // Ritardo per evitare di saltare zone
+
+        if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
           setZoneNames([...names]); // Aggiorna lo stato
+          lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
+          nomeChanged = true; // Imposta il flag a true
         }
       }
 
-      // Controlla se tutti i nomi sono stati caricati
-      const allNamesLoaded = names.every(name => name !== '');
-      if (allNamesLoaded) {
-        setIsLoading(false); // Disattiva la schermata di caricamento
-        break; // Esce dal ciclo
+      // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
+      if (zoneId === 48) {
+        setIsLoading(false); 
       }
     }
   };
