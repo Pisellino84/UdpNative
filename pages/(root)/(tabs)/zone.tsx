@@ -7,7 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {sendThreeBytes, Nome, leggiStatoZona} from '../../../lib/udpClient'; // Importa Nome
+import {
+  sendThreeBytes,
+  Nome,
+  leggiStatoZona,
+  Volume,
+} from '../../../lib/udpClient'; // Importa Nome
 
 import '../../../global.css';
 
@@ -20,7 +25,7 @@ import icons from '../../../constants/icons';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import {useEffect, useState, useRef} from 'react';
 import Slider from '@react-native-community/slider';
-import {retrieveData} from 'lib/db';
+import {retrieveData} from '../../../lib/db';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number};
@@ -34,31 +39,42 @@ const Zone = () => {
 
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
+  const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(''));
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
 
   // useRef per memorizzare l'ultimo valore di Nome
   const lastNome = useRef<string | null>(null);
+  const lastVolume = useRef<number | null>(null);
 
   // Funzione per caricare i nomi uno alla volta
-  const loadZoneNames = async () => {
+  const loadZoneData = async () => {
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
+    const volumes: number[] = [...zoneVolumes];
 
     for (const zoneId of zones) {
       let nomeChanged = false; // Flag per controllare se Nome è cambiato
-
-      while (!nomeChanged && zoneId !== 49) {
+      let volumeChanged = false;
+      while (!nomeChanged && !volumeChanged && zoneId !== 49) {
         sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
-        await new Promise(resolve => setTimeout(resolve, 30)); // Ritardo per evitare di saltare zone in ms
+        leggiStatoZona(zoneId);
+        await new Promise(resolve => setTimeout(resolve, 100)); // Ritardo per evitare di saltare zone in ms
 
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
+          if (Volume) {
+            volumes[zoneId - 1] = Volume;
+          } else {
+            volumes[zoneId - 1] = 0;
+          }
           setZoneNames([...names]); // Aggiorna lo stato
+          setZoneVolumes([...volumes]);
           setPerc(prevPerc => prevPerc + 1);
           lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
+          lastVolume.current = Volume;
           nomeChanged = true; // Imposta il flag a true
+          volumeChanged = true;
         }
-        retrieveData(`volume_`)
       }
 
       // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
@@ -70,7 +86,7 @@ const Zone = () => {
 
   // Carica i nomi all'avvio
   useEffect(() => {
-    loadZoneNames();
+    loadZoneData();
   }, []);
 
   if (isLoading) {
@@ -134,11 +150,13 @@ const Zone = () => {
                     step={2}
                     minimumValue={0}
                     maximumValue={80}
-                    value={50}
+                    value={zoneVolumes[zoneId - 1]}
                     style={{width: 150}}
                     disabled
                   />
-                  <Text className="font-bold">12</Text>
+                  <Text className="font-bold">
+                    {zoneVolumes[zoneId - 1] ?? 0}
+                  </Text>
                 </View>
               </View>
 
