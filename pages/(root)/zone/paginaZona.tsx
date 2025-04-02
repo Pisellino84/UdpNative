@@ -53,6 +53,26 @@ export default function PaginaZona() {
   const [nome, setNome] = useState(Nome);
   const [slider, setSlider] = useState(volume)
 
+  function volumeController() {
+
+  }
+
+  function retrieveVolume() {
+    retrieveData(`${zoneId}`).then(volumeString => {
+      if (volumeString !== null) {
+        const volumeNumber = parseInt(volumeString, 10);
+        if (!isNaN(volumeNumber)) {
+          setVolume(volumeNumber);
+          console.log("dato caricato", volumeNumber)
+        } else {
+          console.error('Il volume recuperato non è un numero valido.');
+        }
+      } else {
+        console.error('Volume non trovato.');
+      }
+    })
+  }
+
  
   
 
@@ -77,35 +97,11 @@ export default function PaginaZona() {
       } else if (Byte5 == 37 || Byte5 == 5) {
         setPower(0);
         setMute(1);
-        retrieveData(`${zoneId}`).then(volumeString => {
-          if (volumeString !== null) {
-            const volumeNumber = parseInt(volumeString, 10);
-            if (!isNaN(volumeNumber)) {
-              setVolume(volumeNumber);
-              console.log("dato caricato", volumeNumber)
-            } else {
-              console.error('Il volume recuperato non è un numero valido.');
-            }
-          } else {
-            console.error('Volume non trovato.');
-          }
-        })
+        retrieveVolume()
       } else if (Byte5 == 39 || Byte5 == 7) {
         setPower(1);
         setMute(1);
-        retrieveData(`${zoneId}`).then(volumeString => {
-          if (volumeString !== null) {
-            const volumeNumber = parseInt(volumeString, 10);
-            if (!isNaN(volumeNumber)) {
-              setVolume(volumeNumber);
-              console.log("dato caricato", volumeNumber)
-            } else {
-              console.error('Il volume recuperato non è un numero valido.');
-            }
-          } else {
-            console.error('Volume non trovato.');
-          }
-        })
+        retrieveVolume()
       }
     };
 
