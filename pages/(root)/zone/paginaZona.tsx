@@ -240,7 +240,7 @@ export default function PaginaZona() {
             step={1}
             minimumValue={0}
             maximumValue={80}
-            value={/* Volume */ volume}
+            value={volume ?? 0}
             disabled={!!mute}
             onValueChange={e => {           
                 setSlider(e)
