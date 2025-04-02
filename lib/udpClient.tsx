@@ -61,19 +61,21 @@ export let Nome: string | null = null;
 // 39 power on, mute on
 
 client.on('message', (msg, rinfo) => {
-  if(msg.length > 0 && msg[0] === 61) {
-    const nome = msg.toString('utf-8', 4)
+  if (msg.length > 0 && msg[0] === 61) {
+    const nome = msg.toString('utf-8', 4);
     Nome = nome;
     const names = {
       NomeChanged: nome,
-    }
-    console.log("NOME: ", nome)
-    Object.entries(names).forEach(([event, value]) => udpEvents.emit(event, value))
+    };
+    console.log('NOME: ', nome);
+    Object.entries(names).forEach(([event, value]) =>
+      udpEvents.emit(event, value),
+    );
   }
 
   if (msg.length > 0 && msg[0] === 50) {
-    /* console.log('Message received (buffer)', msg, rinfo);  */
-    const [byte5, byte6, volume ] = [msg[4], msg[6], msg[5]];
+    console.log('Message received (buffer)', msg, rinfo); 
+    const [byte5, byte6, volume] = [msg[4], msg[6], msg[5]];
 
     Byte5 = byte5;
     Byte6 = byte6;
@@ -83,9 +85,10 @@ client.on('message', (msg, rinfo) => {
       Byte5Changed: byte5,
       Byte6Changed: byte6,
     };
-    Object.entries(events).forEach(([event, value]) => udpEvents.emit(event, value));
+    Object.entries(events).forEach(([event, value]) =>
+      udpEvents.emit(event, value),
+    );
   }
-  
 });
 
 const timeoutDuration = 5000; // 5000 millisecondi = 5 secondi
@@ -145,4 +148,3 @@ export async function leggiStatoZona(Zona: number) {
 // {0: 50, 1: 1, 2: 0, 3: 35, 4: 35, 5: 44, 6: 19, 7: 0, 8: 14, 9: 8}
 
 // {0: 50, 1: 1, 2: 0, 3: 35, 4: 35, 5: 44, 6: 17, 7: 0, 8: 14, 9: 8}
-

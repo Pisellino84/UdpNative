@@ -12,6 +12,7 @@ import {
   Nome,
   leggiStatoZona,
   Volume,
+  Byte5,
 } from '../../../lib/udpClient'; // Importa Nome
 
 import '../../../global.css';
@@ -40,43 +41,55 @@ const Zone = () => {
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(''));
+  const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(''));
+
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
 
   // useRef per memorizzare l'ultimo valore di Nome
   const lastNome = useRef<string | null>(null);
-  const lastVolume = useRef<number | null>(null);
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
     const volumes: number[] = [...zoneVolumes];
+    const bytes5: number[] = [...zoneBytes5];
 
     for (const zoneId of zones) {
       let nomeChanged = false; // Flag per controllare se Nome è cambiato
       let volumeChanged = false;
+      let Byte5Changed = false;
       while (!nomeChanged && !volumeChanged && zoneId !== 49) {
         sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Ritardo per evitare di saltare zone in ms
+        await new Promise(resolve => setTimeout(resolve, 20)); // Ritardo per evitare di saltare zone in ms
+        console.log(Volume);
 
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
+          if (Byte5) {
+            bytes5[zoneId - 1] = Byte5;
+            console.log('byte5', Byte5);
+          } else {
+            bytes5[zoneId - 1] = 0;
+          }
+
           if (Volume) {
             volumes[zoneId - 1] = Volume;
           } else {
             volumes[zoneId - 1] = 0;
           }
+
           setZoneNames([...names]); // Aggiorna lo stato
           setZoneVolumes([...volumes]);
+          setZoneBytes5([...bytes5]);
           setPerc(prevPerc => prevPerc + 1);
           lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
-          lastVolume.current = Volume;
           nomeChanged = true; // Imposta il flag a true
           volumeChanged = true;
+          Byte5Changed = true;
         }
       }
-
       // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
       if (zoneId === 48) {
         setIsLoading(false);
@@ -140,9 +153,31 @@ const Zone = () => {
                 <Text className="text-xl font-medium">
                   {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
                 </Text>
-                <View className="flex flex-col gap-1">
-                  <Image source={icons.power} className="size-4" />
-                  <Image source={icons.mute} className="size-4" />
+                <View className="flex flex-col gap-2">
+                  <Image
+                    source={icons.power}
+                    className="size-6"
+                    tintColor={
+                      zoneBytes5[zoneId - 1] == 35 ||
+                      zoneBytes5[zoneId - 1] == 3 ||
+                      zoneBytes5[zoneId - 1] == 39 ||
+                      zoneBytes5[zoneId - 1] == 7
+                        ? '#228BE6'
+                        : '#D4D4D8'
+                    }
+                  />
+                  <Image
+                    source={icons.mute}
+                    className="size-6 ml-1"
+                    tintColor={
+                      zoneBytes5[zoneId - 1] == 37 ||
+                      zoneBytes5[zoneId - 1] == 5 ||
+                      zoneBytes5[zoneId - 1] == 39 ||
+                      zoneBytes5[zoneId - 1] == 7
+                        ? '#228BE6'
+                        : '#D4D4D8'
+                    }
+                  />
                 </View>
                 <View className="flex flex-row">
                   <Slider
