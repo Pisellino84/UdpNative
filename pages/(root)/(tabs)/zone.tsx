@@ -1,8 +1,12 @@
 import {ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {sendThreeBytes, Nome} from '../../../lib/udpClient'; // Importa Nome
+
 import '../../../global.css';
+
 import {MainHeader} from '../../../components/Header';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
+import ProgressBar from '../../../components/ProgressBar';
+
 import icons from '../../../constants/icons';
 
 import {useNavigation, NavigationProp} from '@react-navigation/native';
@@ -22,6 +26,7 @@ const Zone = () => {
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [isLoading, setIsLoading] = useState(true); 
+  const [perc, setPerc] = useState(0)
 
   // useRef per memorizzare l'ultimo valore di Nome
   const lastNome = useRef<string | null>(null);
@@ -40,6 +45,7 @@ const Zone = () => {
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
           setZoneNames([...names]); // Aggiorna lo stato
+          setPerc((prevPerc) => prevPerc + 1)
           lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
           nomeChanged = true; // Imposta il flag a true
         }
@@ -64,6 +70,7 @@ const Zone = () => {
         <View className="flex h-screen justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
           <Text className="text-lg mt-4">Caricamento in corso...</Text>
+          <ProgressBar progress={perc} />
         </View>
       </AndroidSafeArea>
     );

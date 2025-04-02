@@ -11,12 +11,12 @@ export default function ProgressBar({ progress }: { progress: number }) {
   const percentage = Math.min(Math.round((clampedProgress / maxValue) * 100), 100);
 
   return (
-    <View className="bg-red-200 w-[200px]">
+    <View className="w-[200px] rounded-xl">
       <View
-        className={`bg-green-200 h-5 flex items-center justify-center`}
+        className={`bg-primary-300 h-5 flex items-center justify-center  rounded-xl`}
         style={{ width: width }}
       ></View>
-      <Text className="absolute justify-center right-0 left-0 items-center text-center">
+      <Text className="absolute justify-center right-0 left-0 items-center text-center font-extrabold">
         {percentage}%
       </Text>
     </View>
