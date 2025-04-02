@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Image, Alert, ViewComponent} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
@@ -13,7 +13,7 @@ import {
   udpEvents,
   Byte5,
   Byte6,
-  /* Volume, */
+  Volume,
   Nome,
 } from '../../../lib/udpClient';
 import {clearAllData, retrieveData, saveData} from '../../../lib/db';
@@ -49,7 +49,7 @@ export default function PaginaZona() {
   const [mute, setMute] = useState(0);
   const [night, setNight] = useState(0);
   const [source, setSource] = useState(0);
-  const [volume, setVolume] = useState(0);
+  const [volume, setVolume] = useState(Volume);
   const [nome, setNome] = useState(Nome);
   const [slider, setSlider] = useState(volume)
 
@@ -58,19 +58,7 @@ export default function PaginaZona() {
 
   useEffect(() => {
     // Leggi lo stato della zona all'inizio
-    retrieveData(`${zoneId}`).then(volumeString => {
-      if (volumeString !== null) {
-        const volumeNumber = parseInt(volumeString, 10);
-        if (!isNaN(volumeNumber)) {
-          setVolume(volumeNumber);
-          console.log("dato caricato", volumeNumber)
-        } else {
-          console.error('Il volume recuperato non è un numero valido.');
-        }
-      } else {
-        console.error('Volume non trovato.');
-      }
-    })
+    
     leggiStatoZona(zoneId);
     
 
@@ -79,15 +67,45 @@ export default function PaginaZona() {
       if (Byte5 == 33 || Byte5 == 1) {
         setPower(0);
         setMute(0);
+        setVolume(Volume)
+        saveData(`${zoneId}`, Volume?.toString())
       } else if (Byte5 == 35 || Byte5 == 3) {
         setPower(1);
         setMute(0);
+        setVolume(Volume)
+        saveData(`${zoneId}`, Volume?.toString())
       } else if (Byte5 == 37 || Byte5 == 5) {
         setPower(0);
         setMute(1);
+        retrieveData(`${zoneId}`).then(volumeString => {
+          if (volumeString !== null) {
+            const volumeNumber = parseInt(volumeString, 10);
+            if (!isNaN(volumeNumber)) {
+              setVolume(volumeNumber);
+              console.log("dato caricato", volumeNumber)
+            } else {
+              console.error('Il volume recuperato non è un numero valido.');
+            }
+          } else {
+            console.error('Volume non trovato.');
+          }
+        })
       } else if (Byte5 == 39 || Byte5 == 7) {
         setPower(1);
         setMute(1);
+        retrieveData(`${zoneId}`).then(volumeString => {
+          if (volumeString !== null) {
+            const volumeNumber = parseInt(volumeString, 10);
+            if (!isNaN(volumeNumber)) {
+              setVolume(volumeNumber);
+              console.log("dato caricato", volumeNumber)
+            } else {
+              console.error('Il volume recuperato non è un numero valido.');
+            }
+          } else {
+            console.error('Volume non trovato.');
+          }
+        })
       }
     };
 
@@ -101,7 +119,7 @@ export default function PaginaZona() {
     };
 
     const handleVolumeChange = (newVolume: number) => {
-      
+      setVolume(newVolume)
     };
 
     const handleNomeChange = (newNome: string) => {
