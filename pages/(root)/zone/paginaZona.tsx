@@ -61,7 +61,7 @@ export default function PaginaZona() {
       if (Byte5 == 33 || Byte5 == 1 ) {
         setPower(0);
         setMute(0);
-      } else if (Byte5 == 35 || Byte5 == 3) {
+      } else if (Byte5 == 35 || Byte5 == 3) {        
         setPower(1);
         setMute(0);
       } else if (Byte5 == 37 || Byte5 == 5) {
@@ -163,7 +163,6 @@ export default function PaginaZona() {
                   sendThreeBytes(22, zoneId, 1);
                 } else {
                   setMute(0);
-                  sendThreeBytes(15, zoneId, Number(volume));
                   sendThreeBytes(22, zoneId, 0);
                 }
               } else
@@ -220,7 +219,7 @@ export default function PaginaZona() {
           <Text className="text-black-300 text-lg font-medium mb-1">
             Volume:{' '}
             <Text className="text-2xl font-extrabold text-primary-300">
-              {Volume}
+              {volume}
             </Text>
           </Text>
           <Slider
