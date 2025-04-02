@@ -61,7 +61,7 @@ export let Nome: string | null = null;
 // 39 power on, mute on
 
 client.on('message', (msg, rinfo) => {
-  if(msg.length > 0 && msg[0] == 61) {
+  if(msg.length > 0 && msg[0] === 61) {
     const nome = msg.toString('utf-8', 4)
     Nome = nome;
     const names = {
@@ -72,7 +72,7 @@ client.on('message', (msg, rinfo) => {
   }
 
   if (msg.length > 0 && msg[0] === 50) {
-    console.log('Message received (buffer)', msg, rinfo);
+    /* console.log('Message received (buffer)', msg, rinfo); */
     const [byte5, byte6, volume ] = [msg[4], msg[6], msg[5]];
 
     Byte5 = byte5;
@@ -82,7 +82,6 @@ client.on('message', (msg, rinfo) => {
     const events = {
       Byte5Changed: byte5,
       Byte6Changed: byte6,
-      VolumeChanged: volume,
     };
     Object.entries(events).forEach(([event, value]) => udpEvents.emit(event, value));
   }
@@ -133,7 +132,7 @@ export async function leggiStatoZona(Zona: number) {
         console.error("Errore durante l'invio della lettura zona:", err);
         Alert.alert('Errore');
       } else {
-        console.log('lettura zona avvenuta successo!');
+        /* console.log('lettura zona avvenuta successo!'); */
       }
     });
   } catch (error) {

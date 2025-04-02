@@ -13,12 +13,12 @@ import {
   udpEvents,
   Byte5,
   Byte6,
-  Volume,
+  /* Volume, */
   Nome,
 } from '../../../lib/udpClient';
-import {retrieveData, saveData} from '../../../lib/db';
+import {clearAllData, retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
-import { useZonaMonitor } from '../../../lib/useZonaMonitor';
+import {useZonaMonitor} from '../../../lib/useZonaMonitor';
 
 export default function PaginaZona() {
   // Define RootStackParamList if not already defined elsewhere
@@ -49,19 +49,37 @@ export default function PaginaZona() {
   const [mute, setMute] = useState(0);
   const [night, setNight] = useState(0);
   const [source, setSource] = useState(0);
-  const [volume, setVolume] = useState(Volume);
+  const [volume, setVolume] = useState(0);
   const [nome, setNome] = useState(Nome);
+  const [slider, setSlider] = useState(volume)
+
+ 
+  
 
   useEffect(() => {
     // Leggi lo stato della zona all'inizio
+    retrieveData(`${zoneId}`).then(volumeString => {
+      if (volumeString !== null) {
+        const volumeNumber = parseInt(volumeString, 10);
+        if (!isNaN(volumeNumber)) {
+          setVolume(volumeNumber);
+          console.log("dato caricato", volumeNumber)
+        } else {
+          console.error('Il volume recuperato non è un numero valido.');
+        }
+      } else {
+        console.error('Volume non trovato.');
+      }
+    })
     leggiStatoZona(zoneId);
+    
 
     // Ascolta i cambiamenti di Power
     const handleByte5Change = () => {
-      if (Byte5 == 33 || Byte5 == 1 ) {
+      if (Byte5 == 33 || Byte5 == 1) {
         setPower(0);
         setMute(0);
-      } else if (Byte5 == 35 || Byte5 == 3) {        
+      } else if (Byte5 == 35 || Byte5 == 3) {
         setPower(1);
         setMute(0);
       } else if (Byte5 == 37 || Byte5 == 5) {
@@ -82,28 +100,8 @@ export default function PaginaZona() {
       }
     };
 
-    /* const handleByte6Change = () => {
-      if (Byte6 == 0 || Byte6 == 16 || Byte6 == 32 || Byte6 == 48 || Byte6 == 64 || Byte6 == 80 || Byte6 == 96 || Byte6 == 112 || Byte6 == 160 || Byte6 == 224) {
-        setSource(0);
-      } else if (Byte6 == 1 || Byte6 == 17 || Byte6 == 33 || Byte6 == 49 || Byte6 == 65 || Byte6 == 81 || Byte6 == 97 || Byte6 == 113 || Byte6 == 161 || Byte6 == 225) {
-        setSource(1);
-      } else if (Byte6 == 2 || Byte6 == 18  || Byte6 == 34 || Byte6 == 50 || Byte6 == 66 || Byte6 == 82 || Byte6 == 98 || Byte6 == 114 || Byte6 == 162 || Byte6 == 226) {
-        setSource(2);
-      } else if (Byte6 == 3 || Byte6 == 19  || Byte6 == 35 || Byte6 == 51 || Byte6 == 67 || Byte6 == 83 || Byte6 == 99 || Byte6 == 115 || Byte6 == 163 || Byte6 == 227) {
-        setSource(3);
-      } else if (Byte6 == 4 || Byte6 == 20  || Byte6 == 36 || Byte6 == 52 || Byte6 == 68 || Byte6 == 84 || Byte6 == 100 || Byte6 == 116 || Byte6 == 164 || Byte6 == 228) {
-        setSource(4);
-      } else if (Byte6 == 5 || Byte6 == 21  || Byte6 == 37 || Byte6 == 53 || Byte6 == 69 || Byte6 == 85 || Byte6 == 101 || Byte6 == 117 || Byte6 == 165 || Byte6 == 229) {
-        setSource(5);
-      } else if (Byte6 == 6  || Byte6 == 22  || Byte6 == 38 || Byte6 == 54 || Byte6 == 70 || Byte6 == 86 || Byte6 == 102 || Byte6 == 118 || Byte6 == 166 || Byte6 == 230) {
-        setSource(6);
-      } else if (Byte6 == 7  || Byte6 == 23 || Byte6 == 39 || Byte6 == 55 || Byte6 == 71 || Byte6 == 87 || Byte6 == 103 || Byte6 == 119 || Byte6 == 167 || Byte6 == 231) {
-        setSource(7);
-      }
-    }; */
-
     const handleVolumeChange = (newVolume: number) => {
-      setVolume(newVolume)
+      
     };
 
     const handleNomeChange = (newNome: string) => {
@@ -123,7 +121,7 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
     };
   }, []);
-  useZonaMonitor(zoneId, 200, volume)
+  useZonaMonitor(zoneId, 200, volume);
   return (
     <AndroidSafeArea>
       <View className="px-5">
@@ -219,7 +217,7 @@ export default function PaginaZona() {
           <Text className="text-black-300 text-lg font-medium mb-1">
             Volume:{' '}
             <Text className="text-2xl font-extrabold text-primary-300">
-              {volume}
+              {slider}
             </Text>
           </Text>
           <Slider
@@ -228,14 +226,15 @@ export default function PaginaZona() {
             step={1}
             minimumValue={0}
             maximumValue={80}
-            value={Volume ?? 0}
+            value={/* Volume */ volume}
             disabled={!!mute}
-            onValueChange={e => {
-              if (!mute) {
-                // Cambia il volume solo se mute non è attivo.
-                setVolume(e);
-                sendThreeBytes(15, zoneId, e);
-              } 
+            onValueChange={e => {           
+                setSlider(e)
+            }}
+            onSlidingComplete={(e) =>{
+              saveData(`${zoneId}`, e.toString());
+              sendThreeBytes(15, zoneId, e)
+              setVolume(e)
             }}
           />
         </View>
@@ -256,7 +255,7 @@ export default function PaginaZona() {
             value={source}
             onChange={item => {
               setSource(item.value);
-              sendThreeBytes(19, zoneId, item.value)
+              sendThreeBytes(19, zoneId, item.value);
             }}
             style={{
               padding: 20,
