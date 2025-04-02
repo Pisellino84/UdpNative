@@ -35,7 +35,7 @@ const Zone = () => {
 
       while (!nomeChanged && zoneId !== 49) {
         sendThreeBytes(61, zoneId, 0); // Invia i tre byte richiesti
-        await new Promise(resolve => setTimeout(resolve, 200)); // Ritardo per evitare di saltare zone
+        await new Promise(resolve => setTimeout(resolve, 30)); // Ritardo per evitare di saltare zone in ms
 
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
