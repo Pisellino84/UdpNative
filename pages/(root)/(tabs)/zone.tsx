@@ -1,5 +1,13 @@
-import {ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
-import {sendThreeBytes, Nome} from '../../../lib/udpClient'; // Importa Nome
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {sendThreeBytes, Nome, leggiStatoZona} from '../../../lib/udpClient'; // Importa Nome
 
 import '../../../global.css';
 
@@ -10,11 +18,12 @@ import ProgressBar from '../../../components/ProgressBar';
 import icons from '../../../constants/icons';
 
 import {useNavigation, NavigationProp} from '@react-navigation/native';
-import React, {useState, useRef} from 'react'; // Aggiunto useRef
+import {useEffect, useState, useRef} from 'react';
 import Slider from '@react-native-community/slider';
+import {retrieveData} from 'lib/db';
 
 type RootStackParamList = {
-  PaginaZona: {zoneId: number}; 
+  PaginaZona: {zoneId: number};
 };
 
 const Zone = () => {
@@ -25,8 +34,8 @@ const Zone = () => {
 
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
-  const [isLoading, setIsLoading] = useState(true); 
-  const [perc, setPerc] = useState(0)
+  const [isLoading, setIsLoading] = useState(true);
+  const [perc, setPerc] = useState(0);
 
   // useRef per memorizzare l'ultimo valore di Nome
   const lastNome = useRef<string | null>(null);
@@ -45,21 +54,22 @@ const Zone = () => {
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
           setZoneNames([...names]); // Aggiorna lo stato
-          setPerc((prevPerc) => prevPerc + 1)
+          setPerc(prevPerc => prevPerc + 1);
           lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
           nomeChanged = true; // Imposta il flag a true
         }
+        retrieveData(`volume_`)
       }
 
       // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
       if (zoneId === 48) {
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     }
   };
 
   // Carica i nomi all'avvio
-  React.useEffect(() => {
+  useEffect(() => {
     loadZoneNames();
   }, []);
 
@@ -110,28 +120,28 @@ const Zone = () => {
               onPress={() => {
                 navigation.navigate('PaginaZona', {zoneId}); // Passa l'ID della zona
               }}>
-              <View className='flex flex-row items-center gap-2'>
+              <View className="flex flex-row items-center gap-2">
                 <Text className="text-xl font-medium">
-                {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
-              </Text>
-              <View className='flex flex-col gap-1'>
-                <Image source={icons.power} className='size-4'/>
-                <Image source={icons.mute} className='size-4'/>
+                  {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
+                </Text>
+                <View className="flex flex-col gap-1">
+                  <Image source={icons.power} className="size-4" />
+                  <Image source={icons.mute} className="size-4" />
+                </View>
+                <View className="flex flex-row">
+                  <Slider
+                    maximumTrackTintColor="#228BE6"
+                    step={2}
+                    minimumValue={0}
+                    maximumValue={80}
+                    value={50}
+                    style={{width: 150}}
+                    disabled
+                  />
+                  <Text className="font-bold">12</Text>
+                </View>
               </View>
-              <View className='flex flex-row'>
-                <Slider 
-                maximumTrackTintColor="#228BE6"
-                step={2}
-                minimumValue={0}
-                maximumValue={80}
-                value={50}
-                style={{width: 150}}
-                disabled
-                />
-                <Text className='font-bold'>12</Text>
-              </View>
-              </View>
-              
+
               <Image source={icons.rightArrow} className="size-6" />
             </TouchableOpacity>
           ))}

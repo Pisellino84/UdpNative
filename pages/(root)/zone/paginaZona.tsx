@@ -1,4 +1,11 @@
-import {View, Text, TouchableOpacity, Image, Alert, ViewComponent} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ViewComponent,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
@@ -51,57 +58,54 @@ export default function PaginaZona() {
   const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
   const [nome, setNome] = useState(Nome);
-  const [slider, setSlider] = useState(volume)
-
-  function volumeController() {
-
-  }
+  const [slider, setSlider] = useState(volume);
 
   function retrieveVolume() {
-    retrieveData(`${zoneId}`).then(volumeString => {
+    retrieveData(`volume_${zoneId}`).then(volumeString => {
       if (volumeString !== null) {
         const volumeNumber = parseInt(volumeString, 10);
         if (!isNaN(volumeNumber)) {
           setVolume(volumeNumber);
-          console.log("dato caricato", volumeNumber)
+          console.log('dato caricato', volumeNumber);
         } else {
           console.error('Il volume recuperato non è un numero valido.');
         }
       } else {
         console.error('Volume non trovato.');
       }
-    })
+    });
   }
 
- 
-  
+  function saveSetting() {
+    saveData(`byte5_${zoneId}`, Byte5?.toString());
+    saveData(`volume_${zoneId}`, Volume?.toString());
+  }
 
   useEffect(() => {
     // Leggi lo stato della zona all'inizio
-    
+
     leggiStatoZona(zoneId);
-    
 
     // Ascolta i cambiamenti di Power
     const handleByte5Change = () => {
       if (Byte5 == 33 || Byte5 == 1) {
         setPower(0);
         setMute(0);
-        setVolume(Volume)
-        saveData(`${zoneId}`, Volume?.toString())
+        setVolume(Volume);
+        saveSetting()
       } else if (Byte5 == 35 || Byte5 == 3) {
         setPower(1);
         setMute(0);
-        setVolume(Volume)
-        saveData(`${zoneId}`, Volume?.toString())
+        setVolume(Volume);
+        saveSetting()
       } else if (Byte5 == 37 || Byte5 == 5) {
         setPower(0);
         setMute(1);
-        retrieveVolume()
+        retrieveVolume();
       } else if (Byte5 == 39 || Byte5 == 7) {
         setPower(1);
         setMute(1);
-        retrieveVolume()
+        retrieveVolume();
       }
     };
 
@@ -115,7 +119,7 @@ export default function PaginaZona() {
     };
 
     const handleVolumeChange = (newVolume: number) => {
-      setVolume(newVolume)
+      setVolume(newVolume);
     };
 
     const handleNomeChange = (newNome: string) => {
@@ -242,13 +246,13 @@ export default function PaginaZona() {
             maximumValue={80}
             value={volume ?? 0}
             disabled={!!mute}
-            onValueChange={e => {           
-                setSlider(e)
+            onValueChange={e => {
+              setSlider(e);
             }}
-            onSlidingComplete={(e) =>{
-              saveData(`${zoneId}`, e.toString());
-              sendThreeBytes(15, zoneId, e)
-              setVolume(e)
+            onSlidingComplete={e => {
+              saveData(`volume_${zoneId}`, e.toString());
+              sendThreeBytes(15, zoneId, e);
+              setVolume(e);
             }}
           />
         </View>

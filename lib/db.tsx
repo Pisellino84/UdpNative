@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export async function saveData(key: string, value: any) {
   try {
     await AsyncStorage.setItem(key, value);
-    console.log('Dati salvati con successo!', value);
+    console.log('Dati salvati con successo!', key, value);
   } catch (error) {
     console.error('Errore durante il salvataggio dei dati:', error);
   }
