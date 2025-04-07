@@ -24,10 +24,11 @@ import ProgressBar from '../../../components/ProgressBar';
 import icons from '../../../constants/icons';
 
 import {useNavigation, NavigationProp} from '@react-navigation/native';
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData} from '../../../lib/db';
-import { useZonaMonitor } from 'lib/useZonaMonitor';
+import {useZonaMonitor} from 'lib/useZonaMonitor';
+import {useFocusEffect} from '@react-navigation/native';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number};
@@ -41,8 +42,8 @@ const Zone = () => {
 
   // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
-  const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(''));
-  const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(''));
+  const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
+  const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
 
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
@@ -61,7 +62,7 @@ const Zone = () => {
       let volumeChanged = false;
       let Byte5Changed = false;
       while (!nomeChanged && !volumeChanged && zoneId !== 49) {
-         // Invia i tre byte richiesti
+        // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
         await new Promise(resolve => setTimeout(resolve, 5)); // Ritardo per evitare di saltare zone in ms
         sendThreeBytes(61, zoneId, 0);
@@ -103,7 +104,6 @@ const Zone = () => {
   useEffect(() => {
     loadZoneData();
   }, []);
-
 
   if (isLoading) {
     // Mostra la schermata di caricamento
