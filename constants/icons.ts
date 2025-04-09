@@ -27,6 +27,7 @@ import play from "../assets/icons/play.png"
 import whiteDot from "../assets/icons/w-dot.png"
 import minus from "../assets/icons/minus.png"
 import plus from "../assets/icons/plus.png"
+import settings from "../assets/icons/settings.png"
 
 export default {
     backArrow,
@@ -47,4 +48,5 @@ export default {
     whiteDot,
     plus,
     minus,
+    settings
 }

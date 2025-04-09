@@ -9,8 +9,11 @@ import icons from '../../../constants/icons';
 import Scenario from './scenario';
 import Zone from './zone';
 import PaginaZona from '../zone/paginaZona';
-import { useEffect } from 'react';
-import { leggiStatoZona } from '../../../lib/udpClient';
+import {useEffect} from 'react';
+import Impostazioni from '../impostazioni/impostazioni';
+import {useNavigation} from '@react-navigation/native';
+import {NavigationProp} from 'node_modules/@react-navigation/native/lib/typescript/commonjs/src';
+import FirstView from '../../../pages/firstView';
 
 
 
@@ -77,6 +80,21 @@ function ZoneTabNavigator() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Impostazioni"
+        component={Impostazioni}
+        options={{
+          title: 'Impostazioni',
+          headerShown: false,
+          tabBarIcon: ({focused}) => (
+            <TabIcon
+              focused={focused}
+              icon={icons.settings}
+              title="Impostazioni"
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -93,6 +111,11 @@ const App = () => {
         <Stack.Screen
           name="PaginaZona"
           component={PaginaZona}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="FirstView"
+          component={FirstView}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

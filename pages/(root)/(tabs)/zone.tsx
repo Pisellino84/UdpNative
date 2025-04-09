@@ -34,12 +34,15 @@ import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 
-type RootStackParamList = {
-  PaginaZona: {zoneId: number};
-};
-
 const Zone = () => {
+  type RootStackParamList = {
+    PaginaZona: {zoneId: number};
+    FirstView: undefined;
+  };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  useEffect(() => {navigation.navigate("FirstView")}, [])
+    
 
   // Array di 48 zone
   const zones = Array.from({length: 49}, (_, i) => i + 1);
@@ -58,11 +61,14 @@ const Zone = () => {
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
-    setIsLoading(true);
+    setIsLoading(true); // Resetta i nomi delle zone
     setPerc(0);
+
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
+
+    names.fill(''); // Resetta i nomi delle zone
 
     for (const zoneId of zones) {
       let nomeChanged = false; // Flag per controllare se Nome è cambiato
@@ -71,9 +77,9 @@ const Zone = () => {
       while (!nomeChanged && !volumeChanged && zoneId !== 49) {
         // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 5)); // Ritardo per evitare di saltare zone in ms
+        await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
         sendThreeBytes(61, zoneId, 0);
-        console.log(Volume);
+        console.log(Nome, zoneId, 'Nome'); // Log del nome
 
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome; // Usa il nome caricato
@@ -141,27 +147,70 @@ const Zone = () => {
         console.log('Zone screen unfocused - interval cleared'); // Add this log
       };
     }, [isLoading, zoneVolumes]),
-  ); */
+  );  */
+
   function retrieveNumZone() {
     retrieveData(`numZone`).then(numString => {
-          if (numString !== null) {
-            const numZone = parseInt(numString, 10);
-            if (!isNaN(numZone)) {
-              setNumZone(numZone);
-              console.log('dato caricato', numString);
-            } else {
-              console.error('Il numZone recuperato non è un numero valido.');
-            }
-          } else {
-            console.error('numZone non trovato.');
-          }
-        });
+      if (numString !== null) {
+        const numZone = parseInt(numString, 10);
+        if (!isNaN(numZone)) {
+          if (numZone <= 9) setNumZone(numZone);
+          else setNumZone(numZone + 1); 
+          console.log('dato caricato', numString);
+        } else {
+          console.error('Il numZone recuperato non è un numero valido.');
+        }
+      }
+    });
   }
 
+  function modificaNumZone() {
+    Alert.alert(
+      'Modifica numero zone',
+      'Modifica il numero di zone da 1 a 48',
+      [
+        {
+          text: 'Annulla',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            prompt(
+              'Modifica numero zone',
+              'Inserisci il numero di zone (1-48)',
+              [
+                {
+                  text: 'Annulla',
+                  style: 'cancel',
+                },
+                {
+                  text: 'OK',
+                  onPress: e => {
+                    const num = parseInt(e ?? '', 10); // Converte la stringa in un numero
+                    if (!isNaN(num) && num >= 1 && num <= 48) {
+                      if (num <= 9) setNumZone(num);
+                      else setNumZone(num + 1); // Imposta il numero di zone
+                      saveData('numZone', num.toString()); // Salva il numero di zone nel database
+                    } else {
+                      Alert.alert(
+                        'Numero non valido',
+                        'Inserisci un numero tra 1 e 48.',
+                      );
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
+  }
   // Carica i nomi all'avvio
   useEffect(() => {
     loadZoneData();
-    retrieveNumZone()
+    retrieveNumZone();
   }, []);
 
   if (isLoading) {
@@ -182,6 +231,26 @@ const Zone = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <MainHeader title="Zone" icon={icons.zone} />
         <View className="my-5 flex flex-col gap-3">
+          <View className="w-full flex flex-row justify-between items-center mb-5">
+            <TouchableOpacity
+              className="bg-primary-300 p-3 rounded-xl"
+              onPress={() => {
+                modificaNumZone();
+              }}>
+              <Text className="text-white font-bold text-md text-center uppercase">
+                Visualizza Zone
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-primary-300 p-3 rounded-xl justify-end"
+              onPress={() => {
+                loadZoneData();
+              }}>
+              <Text className="text-white font-bold text-md text-center uppercase">
+                Aggiorna Stato
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View className="flex flex-row justify-between items-center">
             <TouchableOpacity>
               <Text
@@ -190,62 +259,6 @@ const Zone = () => {
                   zones.forEach(zoneId => sendThreeBytes(4, zoneId, 1));
                 }}>
                 Turn all Zones ON
-              </Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity className="flex-col items-center justify-center" onPress={() => {loadZoneData();}}>
-              <Image
-                source={icons.repeat}
-                tintColor={'#228BE6'}
-                className="size-10"
-              />
-            </TouchableOpacity> */}
-            <TouchableOpacity
-              className="bg-primary-300 p-3 rounded-xl"
-              onPress={() => {
-                Alert.alert(
-                  'Modifica numero zone',
-                  'Modifica il numero di zone da 1 a 48',
-                  [
-                    {
-                      text: 'Annulla',
-                      style: 'cancel',
-                    },
-                    {
-                      text: 'OK',
-                      onPress: () => {
-                        prompt(
-                          'Modifica numero zone',
-                          'Inserisci il numero di zone (1-48)',
-                          [
-                            {
-                              text: 'Annulla',
-                              style: 'cancel',
-                            },
-                            {
-                              text: 'OK',
-                              onPress: e => {
-                                const num = parseInt(e ?? '', 10); // Converte la stringa in un numero
-                                if (!isNaN(num) && num >= 1 && num <= 48) {
-                                  if (num <= 9) setNumZone(num);
-                                  else setNumZone(num + 1); // Imposta il numero di zone
-                                  saveData('numZone', num.toString()); // Salva il numero di zone nel database
-                                } else {
-                                  Alert.alert(
-                                    'Numero non valido',
-                                    'Inserisci un numero tra 1 e 48.',
-                                  );
-                                }
-                              },
-                            },
-                          ],
-                        );
-                      },
-                    },
-                  ],
-                );
-              }}>
-              <Text className="text-white font-bold text-md w-20 text-center uppercase">
-                Modifica Numero Zone
               </Text>
             </TouchableOpacity>
             <TouchableOpacity>
@@ -258,8 +271,6 @@ const Zone = () => {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <View className="w-full flex items-center justify-center"></View>
           {/* Genera dinamicamente i pulsanti per le zone */}
           {zones.slice(0, numZone).map(zoneId => (
             <TouchableOpacity
@@ -272,7 +283,7 @@ const Zone = () => {
                 <Text className="text-xl font-medium">
                   {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
                 </Text>
-                {/*  <View className="flex flex-col gap-2">
+                <View className="flex flex-col gap-2">
                   <Image
                     source={icons.power}
                     className="size-6"
@@ -297,8 +308,8 @@ const Zone = () => {
                         : '#D4D4D8'
                     }
                   />
-                </View> */}
-                {/* <View className="flex flex-row">
+                </View>
+                <View className="flex flex-row">
                   <Slider
                     maximumTrackTintColor="#228BE6"
                     step={2}
@@ -311,7 +322,7 @@ const Zone = () => {
                   <Text className="font-bold">
                     {zoneVolumes[zoneId - 1] ?? 0}
                   </Text>
-                </View> */}
+                </View>
               </View>
 
               <Image source={icons.rightArrow} className="size-6" />
