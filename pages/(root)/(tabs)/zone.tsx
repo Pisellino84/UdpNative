@@ -23,12 +23,9 @@ import ProgressBar from '../../../components/ProgressBar';
 
 import icons from '../../../constants/icons';
 
-import {useNavigation, NavigationProp} from '@react-navigation/native';
+import {useNavigation, NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
-import {retrieveData} from '../../../lib/db';
-import {useZonaMonitor} from 'lib/useZonaMonitor';
-import {useFocusEffect} from '@react-navigation/native';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number};
@@ -99,7 +96,40 @@ const Zone = () => {
       }
     }
   };
-
+  /* useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      let intervalId: NodeJS.Timeout;
+  
+      const loadZoneStates = async () => {
+        
+        const volumes: number[] = [...zoneVolumes];
+        volumes.fill(0)
+        if (isLoading || !isActive) return;
+        
+        for(let i = 1; i <= 48; i++) {
+            
+            await leggiStatoZona(i);
+            volumes[i - 1] = Volume ?? 99; 
+            // assumendo che leggiStatoZona sia una funzione asincrona
+             setZoneVolumes([volumes[i - 1]]); // Aggiorna lo stato 
+            
+            console.log(`Volume: ${i}`, volumes[i - 1]);
+       
+        }
+      };
+  
+      // Esegui immediatamente e poi ogni secondo
+      loadZoneStates();
+      intervalId = setInterval(loadZoneStates, 1000);
+  
+      return () => {
+        isActive = false; // Pulizia quando l'effetto viene smontato
+        clearInterval(intervalId); // Pulisci l'intervallo
+      };
+    }, [isLoading, zoneVolumes]) // Aggiungi zoneVolumes alle dipendenze se necessario
+  ); */
+  
   // Carica i nomi all'avvio
   useEffect(() => {
     loadZoneData();
