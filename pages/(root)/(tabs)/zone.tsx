@@ -17,6 +17,7 @@ import {
 } from '../../../lib/udpClient'; // Importa Nome
 
 import '../../../global.css';
+import prompt from 'react-native-prompt-android';
 
 import {MainHeader} from '../../../components/Header';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
@@ -31,6 +32,7 @@ import {
 } from '@react-navigation/native';
 import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
+import {retrieveData, saveData} from '../../../lib/db';
 
 type RootStackParamList = {
   PaginaZona: {zoneId: number};
@@ -46,6 +48,7 @@ const Zone = () => {
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
+  const [numZone, setNumZone] = useState(6); // Stato per il numero di zone
 
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
@@ -55,7 +58,7 @@ const Zone = () => {
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
-    setIsLoading(false);
+    setIsLoading(true);
     setPerc(0);
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
     const volumes: number[] = [...zoneVolumes];
@@ -139,10 +142,26 @@ const Zone = () => {
       };
     }, [isLoading, zoneVolumes]),
   ); */
+  function retrieveNumZone() {
+    retrieveData(`numZone`).then(numString => {
+          if (numString !== null) {
+            const numZone = parseInt(numString, 10);
+            if (!isNaN(numZone)) {
+              setNumZone(numZone);
+              console.log('dato caricato', numString);
+            } else {
+              console.error('Il numZone recuperato non è un numero valido.');
+            }
+          } else {
+            console.error('numZone non trovato.');
+          }
+        });
+  }
 
   // Carica i nomi all'avvio
   useEffect(() => {
     loadZoneData();
+    retrieveNumZone()
   }, []);
 
   if (isLoading) {
@@ -194,7 +213,7 @@ const Zone = () => {
                     {
                       text: 'OK',
                       onPress: () => {
-                        Alert.prompt(
+                        prompt(
                           'Modifica numero zone',
                           'Inserisci il numero di zone (1-48)',
                           [
@@ -205,9 +224,11 @@ const Zone = () => {
                             {
                               text: 'OK',
                               onPress: e => {
-                                const num = parseInt(e ?? "", 10); // Converte la stringa in un numero
+                                const num = parseInt(e ?? '', 10); // Converte la stringa in un numero
                                 if (!isNaN(num) && num >= 1 && num <= 48) {
-                                  sendThreeBytes(4, num, 0); // Invia il numero di zone
+                                  if (num <= 9) setNumZone(num);
+                                  else setNumZone(num + 1); // Imposta il numero di zone
+                                  saveData('numZone', num.toString()); // Salva il numero di zone nel database
                                 } else {
                                   Alert.alert(
                                     'Numero non valido',
@@ -240,7 +261,7 @@ const Zone = () => {
 
           <View className="w-full flex items-center justify-center"></View>
           {/* Genera dinamicamente i pulsanti per le zone */}
-          {zones.slice(0, 6).map(zoneId => (
+          {zones.slice(0, numZone).map(zoneId => (
             <TouchableOpacity
               key={zoneId}
               className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
