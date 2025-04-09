@@ -74,7 +74,7 @@ client.on('message', (msg, rinfo) => {
   }
 
   if (msg.length > 0 && msg[0] === 50) {
-    console.log('Message received (buffer)', msg, rinfo); 
+    /* console.log('Message received (buffer)', msg, rinfo); */
     const [byte5, byte6, volume] = [msg[4], msg[6], msg[5]];
 
     Byte5 = byte5;

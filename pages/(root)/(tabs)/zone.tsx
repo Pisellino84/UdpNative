@@ -4,6 +4,7 @@ import {
   Image,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,7 +24,11 @@ import ProgressBar from '../../../components/ProgressBar';
 
 import icons from '../../../constants/icons';
 
-import {useNavigation, NavigationProp, useFocusEffect} from '@react-navigation/native';
+import {
+  useNavigation,
+  NavigationProp,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 
@@ -50,6 +55,8 @@ const Zone = () => {
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
+    setIsLoading(false);
+    setPerc(0);
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
@@ -96,40 +103,43 @@ const Zone = () => {
       }
     }
   };
+
   /* useFocusEffect(
     useCallback(() => {
       let isActive = true;
       let intervalId: NodeJS.Timeout;
-  
+
       const loadZoneStates = async () => {
-        
-        const volumes: number[] = [...zoneVolumes];
-        volumes.fill(0)
+        const volumes: number[] = Array(48).fill(0); // Initialize a new array
         if (isLoading || !isActive) return;
-        
-        for(let i = 1; i <= 48; i++) {
-            
-            await leggiStatoZona(i);
-            volumes[i - 1] = Volume ?? 99; 
-            // assumendo che leggiStatoZona sia una funzione asincrona
-             setZoneVolumes([volumes[i - 1]]); // Aggiorna lo stato 
-            
-            console.log(`Volume: ${i}`, volumes[i - 1]);
-       
+        for (let i = 1; i <= 48; i++) {
+          await leggiStatoZona(i);
+          await new Promise(resolve => setTimeout(resolve, 100));
+      
+          if (Volume !== undefined) { // Check if Volume has a value
+            console.log(`Volume Zona ${i}`, Volume);
+            console.log(`Nome Zona ${i}`, zoneNames[i - 1]);
+            volumes[i - 1] = Volume ?? 999;
+            console.log('OK');
+          } else {
+            console.log('NO OK');
+            volumes[i - 1] = 999;
+          }
         }
+        setZoneVolumes(volumes); // Update state only once after the loop
       };
-  
-      // Esegui immediatamente e poi ogni secondo
+
       loadZoneStates();
-      intervalId = setInterval(loadZoneStates, 1000);
+      intervalId = setInterval(loadZoneStates, 5000);
   
       return () => {
-        isActive = false; // Pulizia quando l'effetto viene smontato
-        clearInterval(intervalId); // Pulisci l'intervallo
+        isActive = false;
+        clearInterval(intervalId);
+        console.log('Zone screen unfocused - interval cleared'); // Add this log
       };
-    }, [isLoading, zoneVolumes]) // Aggiungi zoneVolumes alle dipendenze se necessario
+    }, [isLoading, zoneVolumes]),
   ); */
-  
+
   // Carica i nomi all'avvio
   useEffect(() => {
     loadZoneData();
@@ -163,6 +173,60 @@ const Zone = () => {
                 Turn all Zones ON
               </Text>
             </TouchableOpacity>
+            {/* <TouchableOpacity className="flex-col items-center justify-center" onPress={() => {loadZoneData();}}>
+              <Image
+                source={icons.repeat}
+                tintColor={'#228BE6'}
+                className="size-10"
+              />
+            </TouchableOpacity> */}
+            <TouchableOpacity
+              className="bg-primary-300 p-3 rounded-xl"
+              onPress={() => {
+                Alert.alert(
+                  'Modifica numero zone',
+                  'Modifica il numero di zone da 1 a 48',
+                  [
+                    {
+                      text: 'Annulla',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'OK',
+                      onPress: () => {
+                        Alert.prompt(
+                          'Modifica numero zone',
+                          'Inserisci il numero di zone (1-48)',
+                          [
+                            {
+                              text: 'Annulla',
+                              style: 'cancel',
+                            },
+                            {
+                              text: 'OK',
+                              onPress: e => {
+                                const num = parseInt(e ?? "", 10); // Converte la stringa in un numero
+                                if (!isNaN(num) && num >= 1 && num <= 48) {
+                                  sendThreeBytes(4, num, 0); // Invia il numero di zone
+                                } else {
+                                  Alert.alert(
+                                    'Numero non valido',
+                                    'Inserisci un numero tra 1 e 48.',
+                                  );
+                                }
+                              },
+                            },
+                          ],
+                        );
+                      },
+                    },
+                  ],
+                );
+              }}>
+              <Text className="text-white font-bold text-md w-20 text-center uppercase">
+                Modifica Numero Zone
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity>
               <Text
                 className="text-primary-300 font-light"
@@ -174,8 +238,9 @@ const Zone = () => {
             </TouchableOpacity>
           </View>
 
+          <View className="w-full flex items-center justify-center"></View>
           {/* Genera dinamicamente i pulsanti per le zone */}
-          {zones.map(zoneId => (
+          {zones.slice(0, 6).map(zoneId => (
             <TouchableOpacity
               key={zoneId}
               className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
@@ -186,7 +251,7 @@ const Zone = () => {
                 <Text className="text-xl font-medium">
                   {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
                 </Text>
-                <View className="flex flex-col gap-2">
+                {/*  <View className="flex flex-col gap-2">
                   <Image
                     source={icons.power}
                     className="size-6"
@@ -211,8 +276,8 @@ const Zone = () => {
                         : '#D4D4D8'
                     }
                   />
-                </View>
-                <View className="flex flex-row">
+                </View> */}
+                {/* <View className="flex flex-row">
                   <Slider
                     maximumTrackTintColor="#228BE6"
                     step={2}
@@ -225,7 +290,7 @@ const Zone = () => {
                   <Text className="font-bold">
                     {zoneVolumes[zoneId - 1] ?? 0}
                   </Text>
-                </View>
+                </View> */}
               </View>
 
               <Image source={icons.rightArrow} className="size-6" />
