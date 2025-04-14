@@ -14,6 +14,8 @@ import Impostazioni from '../impostazioni/impostazioni';
 import {useNavigation} from '@react-navigation/native';
 import {NavigationProp} from 'node_modules/@react-navigation/native/lib/typescript/commonjs/src';
 import FirstView from '../../../pages/firstView';
+import { getIp } from '../../../pages/firstView';
+const ip = getIp()
 
 const TabIcon = ({
   focused,
@@ -96,6 +98,7 @@ function ZoneTabNavigator() {
     </Tab.Navigator>
   );
 }
+
 
 const App = () => {
   return (

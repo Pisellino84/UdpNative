@@ -118,3 +118,8 @@ export async function leggiStatoZona(Zona: number) {
     // console.error('Errore:', error);
   }
 }
+
+export function clearUdp() {
+  sendThreeBytes(61, 1 , 0)
+  leggiStatoZona(1)
+}

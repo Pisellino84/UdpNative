@@ -3,7 +3,7 @@ import React from "react";
 import icons from "../constants/icons";
 import { router } from "expo-router";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { leggiStatoZona, sendThreeBytes } from "../lib/udpClient";
+import { leggiStatoZona, sendThreeBytes, clearUdp } from "../lib/udpClient";
 
 interface Props {
   icon?: any;
@@ -33,10 +33,6 @@ export function MainHeader({ icon = icons.standard, title }: Props) {
   );
 }
 
-function clearUdp() {
-  sendThreeBytes(61, 1 , 0)
-  leggiStatoZona(1)
-}
 
 export function SecondaryHeader({ title }: Props) {
   type RootStackParamList = {

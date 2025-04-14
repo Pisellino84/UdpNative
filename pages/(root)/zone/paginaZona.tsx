@@ -200,36 +200,6 @@ export default function PaginaZona() {
               Mute
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              if (power) {
-                if (night === 0) {
-                  setNight(1);
-                  sendThreeBytes(24, zoneId, 1);
-                } else {
-                  setNight(0);
-                  sendThreeBytes(24, zoneId, 0);
-                }
-              } else
-                Alert.alert(
-                  'La zona è spenta',
-                  'Accendi la zona per attivare la funzione Night',
-                );
-            }}
-            className={`flex flex-row items-center gap-2 `}>
-            <Image
-              source={icons.night}
-              className="size-11"
-              tintColor={night ? '#228BE6' : '#D4D4D8'}
-            />
-            <Text
-              className={
-                night ? 'text-primary-300 font' : 'text-black-50 font-light'
-              }>
-              Night
-            </Text>
-          </TouchableOpacity>
         </View>
         <View className="my-2.5">
           <Text className="text-black-300 text-lg font-medium mb-1">

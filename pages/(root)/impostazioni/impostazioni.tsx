@@ -3,6 +3,7 @@ import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import {View, Text, TouchableOpacity} from 'react-native';
 import {settingsHeader as SettingsHeader} from '../../../components/Header';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
+import { saveData } from '../../../lib/db';
 
 export default function Impostazioni() {
   type RootStackParamList = {
@@ -11,6 +12,7 @@ export default function Impostazioni() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   function handleIpChange() {
     console.log('adasd');
+    saveData("FW", "no")
     navigation.navigate('FirstView');
   }
   return (

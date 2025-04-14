@@ -14,6 +14,7 @@ import {
   leggiStatoZona,
   Volume,
   Byte5,
+  clearUdp,
 } from '../../../lib/udpClient'; // Importa Nome
 
 import '../../../global.css';
@@ -42,13 +43,7 @@ const Zone = () => {
     FirstView: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  let ip = getIp()
-  useEffect(() => {
-    
-    if (ip === '') {
-      navigation.navigate('FirstView');
-    }
-  }, []);
+  let ip = getIp();
 
   // Array di 48 zone
   const zones = Array.from({length: 49}, (_, i) => i + 1);
@@ -67,51 +62,54 @@ const Zone = () => {
 
   // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
+
     setIsLoading(true); // Resetta i nomi delle zone
     setPerc(0);
 
     const names: string[] = [...zoneNames]; // Copia dello stato attuale
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
-
-    names.fill(''); // Resetta i nomi delle zone
-
+    names.fill("")
     for (const zoneId of zones) {
-      
       let nomeChanged = false; // Flag per controllare se Nome è cambiato
       let volumeChanged = false;
       let Byte5Changed = false;
-      while (!nomeChanged && !volumeChanged && zoneId !== 49 && ip.length > 3) {
-        ip = getIp()
-          // Invia i tre byte richiesti
-          leggiStatoZona(zoneId);
-          await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
-          sendThreeBytes(61, zoneId, 0);
-          console.log(Nome, zoneId, 'Nome'); // Log del nome
+      while (
+        !nomeChanged &&
+        !volumeChanged &&
+        zoneId !== 49 &&
+        ip.length >= 7
+      ) {
+        ip = getIp();
+        // Invia i tre byte richiesti
+        leggiStatoZona(zoneId);
+        await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
+        sendThreeBytes(61, zoneId, 0);
+        console.log("NOME DELLA ZONA: ", Nome, zoneId); // Log del nome
 
-          if (Nome && Nome !== lastNome.current) {
-            names[zoneId - 1] = Nome; // Usa il nome caricato
-            if (Byte5) {
-              bytes5[zoneId - 1] = Byte5;
-              console.log('byte5', Byte5);
-            } else {
-              bytes5[zoneId - 1] = 0;
-            }
+        if (Nome && Nome !== lastNome.current) {
+          names[zoneId - 1] = Nome; // Usa il nome caricato
+          if (Byte5) {
+            bytes5[zoneId - 1] = Byte5;
+            console.log('byte5', Byte5);
+          } else {
+            bytes5[zoneId - 1] = 0;
+          }
 
-            if (Volume) {
-              volumes[zoneId - 1] = Volume;
-            } else {
-              volumes[zoneId - 1] = 0;
-            }
+          if (Volume) {
+            volumes[zoneId - 1] = Volume;
+          } else {
+            volumes[zoneId - 1] = 0;
+          }
 
-            setZoneNames([...names]); // Aggiorna lo stato
-            setZoneVolumes([...volumes]);
-            setZoneBytes5([...bytes5]);
-            setPerc(prevPerc => prevPerc + 1);
-            lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
-            nomeChanged = true; // Imposta il flag a true
-            volumeChanged = true;
-            Byte5Changed = true;
+          setZoneNames([...names]); // Aggiorna lo stato
+          setZoneVolumes([...volumes]);
+          setZoneBytes5([...bytes5]);
+          setPerc(prevPerc => prevPerc + 1);
+          lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
+          nomeChanged = true; // Imposta il flag a true
+          volumeChanged = true;
+          Byte5Changed = true;
           
         }
       }
@@ -128,6 +126,7 @@ const Zone = () => {
         const numZone = parseInt(numString, 10);
         if (!isNaN(numZone)) {
           if (numZone <= 9) setNumZone(numZone);
+          else if(numZone == 48) setNumZone(numZone)
           else setNumZone(numZone + 1);
           console.log('dato caricato', numString);
         } else {
@@ -163,6 +162,7 @@ const Zone = () => {
                     const num = parseInt(e ?? '', 10);
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
+                      else if(num == 48) setNumZone(num - 1)
                       else setNumZone(num + 1);
                       saveData('numZone', num.toString());
                     } else {
@@ -182,6 +182,7 @@ const Zone = () => {
   }
   // Carica i nomi all'avvio
   useEffect(() => {
+    new Promise(resolve => setTimeout(resolve, 10))
     loadZoneData();
     retrieveNumZone();
   }, []);
