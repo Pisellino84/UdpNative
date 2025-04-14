@@ -1,5 +1,5 @@
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
-import {MainHeader, SecondaryHeader} from '../../../components/Header';
+import { MainHeader, SecondaryHeader } from '../../../components/Header';
 import icons from '../../../constants/icons';
 import {
   Text,
@@ -16,24 +16,51 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {useState} from 'react';
-import {sendThreeBytes} from '../../../lib/udpClient';
-import {Dropdown} from 'react-native-element-dropdown';
+import { useEffect, useState } from 'react';
+import { sendThreeBytes } from '../../../lib/udpClient';
+import { Dropdown } from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
+import { retrieveData, saveData } from '../../../lib/db';
 
 export default function Scenario() {
   type RootStackParamList = {
     CreateScenario:
-      | {updateScenari: (newScenario: {nome: string}) => void}
+      | { updateScenari: (newScenario: { nome: string; settings: any[] }) => void }
       | undefined;
-    EditScenario: {nome: number; index: number};
+    EditScenario: {
+      nome: string;
+      index: number;
+      updateScenarioSettings: (index: number, newSetting: any) => void; // Modificato per ricevere una singola impostazione
+    };
   };
+  useEffect(() => {
+    retrieveScenari();
+  }, []);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [scenari, setScenari] = useState<any[]>([]);
 
-  const handleCreateScenario = (newScenario: {nome: string}) => {
-    setScenari([...scenari, newScenario]);
+  const handleCreateScenario = (newScenario: { nome: string }) => {
+    setScenari([...scenari, { ...newScenario, settings: [] }]); // Inizializziamo settings come array vuoto
+    saveData("scenari", JSON.stringify(scenari));
   };
+
+  const handleUpdateScenarioSettings = (index: number, newSetting: any) => {
+    const updatedScenari = scenari.map((scenario, i) =>
+      i === index
+        ? { ...scenario, settings: [...scenario.settings, newSetting] }
+        : scenario
+    );
+    setScenari(updatedScenari);
+    saveData("scenari", JSON.stringify(updatedScenari)); // Aggiorna i dati salvati
+  };
+
+  function retrieveScenari() {
+    retrieveData("scenari").then(array => {
+      if (array !== null) {
+        setScenari(JSON.parse(array));
+      }
+    });
+  }
 
   return (
     <AndroidSafeArea>
@@ -87,6 +114,7 @@ export default function Scenario() {
                   navigation.navigate('EditScenario', {
                     nome: scenario.nome,
                     index,
+                    updateScenarioSettings: handleUpdateScenarioSettings, // Passiamo la funzione modificata
                   })
                 }>
                 <Image source={icons.edit} className="size-6" />
@@ -105,9 +133,9 @@ export default function Scenario() {
   );
 }
 
-export function CreateScenario({route}: {route: any}) {
+export function CreateScenario({ route }: { route: any }) {
   const [nome, setNome] = useState('');
-  const {updateScenari} = route.params;
+  const { updateScenari } = route.params;
   const navigation = useNavigation();
 
   return (
@@ -123,7 +151,7 @@ export function CreateScenario({route}: {route: any}) {
         <TouchableOpacity
           className="flex rounded-xl mt-2 p-5 bg-green-500 justify-center items-center"
           onPress={() => {
-            updateScenari({nome});
+            updateScenari({ nome });
             navigation.goBack();
           }}>
           <Text className="font-bold text-white text-xl">OK</Text>
@@ -132,35 +160,75 @@ export function CreateScenario({route}: {route: any}) {
     </AndroidSafeArea>
   );
 }
+interface Setting {
+  id: number | null;
+  power: number;
+  mute: number;
+  volume: number;
+  source: number;
+}
 
-let settings: any[] = [];
+interface Scenario {
+  nome: string;
+  settings: any[]; // O specifica un tipo più preciso se lo conosci
+  // Altre proprietà dello scenario, se presenti
+}
 
-export function EditScenario() {
-  type RootStackParamList = {
-    EditScenario: {nome: number; index: number};
-  };
-  const route = useRoute<RouteProp<RootStackParamList, 'EditScenario'>>();
-  const {nome, index} = route.params;
-  const [id, setId] = useState(0);
+export function EditScenario({ route }: { route: any }) {
+  const { nome, index, updateScenarioSettings } = route.params;
+  const [id, setId] = useState<number | null>(null);
   const [power, setPower] = useState(0);
   const [mute, setMute] = useState(0);
   const [volume, setVolume] = useState(0);
   const [source, setSource] = useState(0);
+  const [currentScenarioSettings, setCurrentScenarioSettings] = useState<any[]>([]);
+  const [allScenari, setAllScenari] = useState<Scenario[]>([]); // Tipizzato come array di Scenario
 
   const Sources = [
-    {label: 'Tuner', value: 0},
-    {label: 'CD', value: 1},
-    {label: 'DVD', value: 2},
-    {label: 'SAT', value: 3},
-    {label: 'PC', value: 4},
-    {label: 'Multi CD', value: 5},
-    {label: 'Multi DVD', value: 6},
-    {label: 'TV', value: 7},
+    { label: 'Tuner', value: 0 },
+    { label: 'CD', value: 1 },
+    { label: 'DVD', value: 2 },
+    { label: 'SAT', value: 3 },
+    { label: 'PC', value: 4 },
+    { label: 'Multi CD', value: 5 },
+    { label: 'Multi DVD', value: 6 },
+    { label: 'TV', value: 7 },
   ];
 
+  useEffect(() => {
+    retrieveScenariForEdit();
+  }, []);
+
+  function retrieveScenariForEdit() {
+    retrieveData("scenari").then(array => {
+      if (array !== null) {
+        const parsedScenari: Scenario[] = JSON.parse(array); // Tipizzato come array di Scenario
+        setAllScenari(parsedScenari);
+        // Trova lo scenario corrente e imposta le sue impostazioni per la visualizzazione
+        const currentScenario = parsedScenari.find((scenario: Scenario, i) => i === index);
+        if (currentScenario && currentScenario.settings) {
+          setCurrentScenarioSettings(currentScenario.settings);
+        }
+      }
+    });
+  }
+
   function handleSave() {
-    settings.push({id, power, mute, volume, source});
-    console.log(settings);
+    if (id !== null) {
+      const newSetting: Setting = { id, power, mute, volume, source }; // Tipizzato come Setting
+      updateScenarioSettings(index, newSetting);
+      // Ottimisticamente aggiorna la visualizzazione locale
+      setCurrentScenarioSettings(prevSettings => [...prevSettings, newSetting]);
+      console.log('Impostazioni salvate per lo scenario con indice:', index, newSetting);
+      // Resetta gli stati del form
+      setId(null);
+      setPower(0);
+      setMute(0);
+      setVolume(0);
+      setSource(0);
+    } else {
+      console.warn("L'ID non è valido.");
+    }
   }
 
   return (
@@ -173,12 +241,10 @@ export function EditScenario() {
             placeholder="es: 6"
             className="bg-white w-full rounded-xl p-5"
             onChangeText={e => {
-              const numeroId = parseInt(e, 10); // Il secondo argomento 10 indica che vogliamo interpretare la stringa come un numero in base 10 (decimale)
+              const numeroId = parseInt(e, 10);
               if (!isNaN(numeroId)) {
-                // Verifica se la conversione ha avuto successo (se la stringa non è "Not a Number")
                 setId(numeroId);
               } else {
-                // Gestisci il caso in cui l'input non è un numero valido, ad esempio reimpostando l'id a null o mostrando un messaggio di errore.
                 console.warn("Input non valido per l'ID");
               }
             }}
@@ -190,11 +256,7 @@ export function EditScenario() {
           <TouchableOpacity
             className={`flex flex-row items-center gap-2 `}
             onPress={() => {
-              if (power == 0) {
-                setPower(1);
-              } else {
-                setPower(0);
-              }
+              setPower(prev => prev === 0 ? 1 : 0);
             }}>
             <Image
               source={icons.power}
@@ -213,12 +275,11 @@ export function EditScenario() {
 
           <TouchableOpacity
             onPress={() => {
-              if (mute === 0) {
-                setMute(1);
-                sendThreeBytes(22, id, 1);
+              setMute(prev => prev === 0 ? 1 : 0);
+              if (id !== null) {
+                sendThreeBytes(22, id, mute === 0 ? 1 : 0);
               } else {
-                setMute(0);
-                sendThreeBytes(22, id, 0);
+                console.warn("ID non impostato, impossibile inviare comando Mute.");
               }
             }}
             className={`flex flex-row items-center gap-2 `}>
@@ -271,7 +332,7 @@ export function EditScenario() {
               backgroundColor: 'white',
               borderRadius: '4%',
             }}
-            containerStyle={{borderRadius: '4%'}}
+            containerStyle={{ borderRadius: '4%' }}
           />
         </View>
         <TouchableOpacity
@@ -279,8 +340,24 @@ export function EditScenario() {
             handleSave();
           }}
           className="bg-green-500 p-5 flex items-center justify-center rounded-xl mt-5">
-          <Text className="text-white font-extrabold text-xl">SALVA</Text>
+          <Text className="text-white font-extrabold text-xl">Aggiungi Impostazione</Text>
         </TouchableOpacity>
+
+        <View className="mt-5">
+          <Text className="text-lg font-bold mb-2">Impostazioni Salvate:</Text>
+          {currentScenarioSettings.map((setting, settingIndex) => (
+            <View key={settingIndex} className="bg-gray-100 p-3 rounded-md mb-2">
+              <Text>Zona ID: {setting.id}</Text>
+              <Text>Power: {setting.power ? 'On' : 'Off'}</Text>
+              <Text>Mute: {setting.mute ? 'Muted' : 'Unmuted'}</Text>
+              <Text>Volume: {setting.volume}</Text>
+              <Text>Source: {Sources.find(s => s.value === setting.source)?.label || 'Sconosciuta'}</Text>
+            </View>
+          ))}
+          {currentScenarioSettings.length === 0 && (
+            <Text className="text-gray-500">Nessuna impostazione salvata per questo scenario.</Text>
+          )}
+        </View>
       </View>
     </AndroidSafeArea>
   );
