@@ -6,13 +6,13 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import icons from '../../../constants/icons';
 
-import Scenario from './scenario';
+import Scenario, { EditScenario } from './scenario';
 import Zone from './zone';
 import PaginaZona from '../zone/paginaZona';
 import {useEffect} from 'react';
 import Impostazioni from '../impostazioni/impostazioni';
 import {useNavigation} from '@react-navigation/native';
-import {NavigationProp} from 'node_modules/@react-navigation/native/lib/typescript/commonjs/src';
+import {NavigationProp} from '@react-navigation/native';
 import FirstView from '../../../pages/firstView';
 import { getIp } from '../../../pages/firstView';
 import { CreateScenario } from './scenario';
@@ -123,6 +123,11 @@ const App = () => {
         <Stack.Screen
           name="CreateScenario"
           component={CreateScenario}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="EditScenario"
+          component={EditScenario}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

@@ -253,9 +253,6 @@ export default function PaginaZona() {
             containerStyle={{borderRadius: '4%'}}
           />
         </View>
-        <TouchableOpacity onPress={() => leggiStatoZona(zoneId)}>
-          <Text>TEST</Text>
-        </TouchableOpacity>
       </View>
     </AndroidSafeArea>
   );
