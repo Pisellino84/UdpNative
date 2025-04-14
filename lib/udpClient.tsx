@@ -13,7 +13,7 @@ export const client = dgram.createSocket({type: 'udp4'});
 
 client.bind(PORT, (err: any) => {
   if (err) {
-    console.error("Errore durante l'associazione del client:", err);
+    // console.error("Errore durante l'associazione del client:", err);
     return;
   } else {
     console.log(`client UDP in ascolto - Port: ${PORT}`);
@@ -25,7 +25,7 @@ client.on('listening', () => {
 });
 
 client.on('error', (err: any) => {
-  console.error('Errore del client:', err);
+  // console.error('Errore del client:', err);
 });
 
 export let Byte5: number | null = null;
@@ -93,14 +93,14 @@ export async function sendThreeBytes(
     const buffer = Buffer.from([byte1, byte2, byte3]);
     client.send(buffer, 0, buffer.length, PORT, HOST, err => {
       if (err) {
-        console.error("Errore durante l'invio dei byte:", err);
+        // console.error("Errore durante l'invio dei byte:", err);
       } else {
         console.log('Tre byte inviati con successo!', byte1, byte2, byte3);
         console.log("Indirizzo IP:", HOST);
       }
     });
   } catch (error) {
-    console.error('Errore:', error);
+    // console.error('Errore:', error);
   }
 }
 
@@ -109,12 +109,12 @@ export async function leggiStatoZona(Zona: number) {
     const buffer = Buffer.from([50, Zona, 0]);
     client.send(buffer, 0, buffer.length, PORT, HOST, err => {
       if (err) {
-        console.error("Errore durante l'invio della lettura zona:", err);
+        // console.error("Errore durante l'invio della lettura zona:", err);
       } else {
         /* console.log('lettura zona avvenuta successo!'); */
       }
     });
   } catch (error) {
-    console.error('Errore:', error);
+    // console.error('Errore:', error);
   }
 }

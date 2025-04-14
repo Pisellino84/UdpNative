@@ -34,17 +34,18 @@ import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../../../pages/firstView';
-
+import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
+export const udpEvents = new EventEmitter();
 const Zone = () => {
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
     FirstView: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
+  let ip = getIp()
   useEffect(() => {
-    const ip = getIp();
-    if (ip === "") {
+    
+    if (ip === '') {
       navigation.navigate('FirstView');
     }
   }, []);
@@ -76,39 +77,42 @@ const Zone = () => {
     names.fill(''); // Resetta i nomi delle zone
 
     for (const zoneId of zones) {
+      
       let nomeChanged = false; // Flag per controllare se Nome è cambiato
       let volumeChanged = false;
       let Byte5Changed = false;
-      while (!nomeChanged && !volumeChanged && zoneId !== 49) {
-        // Invia i tre byte richiesti
-        leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
-        sendThreeBytes(61, zoneId, 0);
-        console.log(Nome, zoneId, 'Nome'); // Log del nome
+      while (!nomeChanged && !volumeChanged && zoneId !== 49 && ip.length > 3) {
+        ip = getIp()
+          // Invia i tre byte richiesti
+          leggiStatoZona(zoneId);
+          await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
+          sendThreeBytes(61, zoneId, 0);
+          console.log(Nome, zoneId, 'Nome'); // Log del nome
 
-        if (Nome && Nome !== lastNome.current) {
-          names[zoneId - 1] = Nome; // Usa il nome caricato
-          if (Byte5) {
-            bytes5[zoneId - 1] = Byte5;
-            console.log('byte5', Byte5);
-          } else {
-            bytes5[zoneId - 1] = 0;
-          }
+          if (Nome && Nome !== lastNome.current) {
+            names[zoneId - 1] = Nome; // Usa il nome caricato
+            if (Byte5) {
+              bytes5[zoneId - 1] = Byte5;
+              console.log('byte5', Byte5);
+            } else {
+              bytes5[zoneId - 1] = 0;
+            }
 
-          if (Volume) {
-            volumes[zoneId - 1] = Volume;
-          } else {
-            volumes[zoneId - 1] = 0;
-          }
+            if (Volume) {
+              volumes[zoneId - 1] = Volume;
+            } else {
+              volumes[zoneId - 1] = 0;
+            }
 
-          setZoneNames([...names]); // Aggiorna lo stato
-          setZoneVolumes([...volumes]);
-          setZoneBytes5([...bytes5]);
-          setPerc(prevPerc => prevPerc + 1);
-          lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
-          nomeChanged = true; // Imposta il flag a true
-          volumeChanged = true;
-          Byte5Changed = true;
+            setZoneNames([...names]); // Aggiorna lo stato
+            setZoneVolumes([...volumes]);
+            setZoneBytes5([...bytes5]);
+            setPerc(prevPerc => prevPerc + 1);
+            lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
+            nomeChanged = true; // Imposta il flag a true
+            volumeChanged = true;
+            Byte5Changed = true;
+          
         }
       }
       // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
@@ -117,7 +121,6 @@ const Zone = () => {
       }
     }
   };
-
 
   function retrieveNumZone() {
     retrieveData(`numZone`).then(numString => {
@@ -157,10 +160,10 @@ const Zone = () => {
                 {
                   text: 'OK',
                   onPress: e => {
-                    const num = parseInt(e ?? '', 10); 
+                    const num = parseInt(e ?? '', 10);
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
-                      else setNumZone(num + 1); 
+                      else setNumZone(num + 1);
                       saveData('numZone', num.toString());
                     } else {
                       Alert.alert(
