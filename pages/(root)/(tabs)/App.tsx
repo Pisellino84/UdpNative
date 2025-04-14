@@ -15,6 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NavigationProp} from 'node_modules/@react-navigation/native/lib/typescript/commonjs/src';
 import FirstView from '../../../pages/firstView';
 import { getIp } from '../../../pages/firstView';
+import { CreateScenario } from './scenario';
 const ip = getIp()
 
 const TabIcon = ({
@@ -117,6 +118,11 @@ const App = () => {
         <Stack.Screen
           name="PaginaZona"
           component={PaginaZona}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="CreateScenario"
+          component={CreateScenario}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

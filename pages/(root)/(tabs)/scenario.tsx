@@ -1,22 +1,117 @@
-import AndroidSafeArea from "../../../components/AndroidSafeArea";
-import { MainHeader } from "../../../components/Header";
-import icons from "../../../constants/icons";
+import AndroidSafeArea from '../../../components/AndroidSafeArea';
+import {MainHeader, SecondaryHeader} from '../../../components/Header';
+import icons from '../../../constants/icons';
 import {
   Text,
   SafeAreaView,
   View,
   TouchableOpacity,
-} from "react-native";
+  TextInput,
+  Image,
+} from 'react-native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {useState} from 'react';
 
 export default function Scenario() {
+  type RootStackParamList = {
+    CreateScenario:
+      | {updateScenari: (newScenario: {nome: string}) => void}
+      | undefined;
+  };
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [scenari, setScenari] = useState<any[]>([]);
+
+  const handleCreateScenario = (newScenario: {nome: string}) => {
+    setScenari([...scenari, newScenario]);
+  };
+
   return (
     <AndroidSafeArea>
-        <MainHeader title={"Scenario"} icon={icons.scenario} />
-        <View className="flex flex-col gap-5 my-5">
-          <TouchableOpacity className="flex w-full p-5 bg-primary-300 rounded-2xl "><Text className="text-white font-medium text-xl uppercase w-full text-center">Party</Text></TouchableOpacity>
-          <TouchableOpacity className="flex w-full p-5 bg-primary-300 rounded-2xl "><Text className="text-white font-medium text-xl uppercase w-full text-center">Dinner</Text></TouchableOpacity>
-          <TouchableOpacity className="flex w-full p-5 bg-primary-300 rounded-2xl "><Text className="text-white font-medium text-xl uppercase w-full text-center">Weekend</Text></TouchableOpacity>
-        </View>
+      <MainHeader title={'Scenario'} icon={icons.scenario} />
+      <View className="flex flex-row justify-between mt-5">
+        <TouchableOpacity
+          className="flex w-32 items-center justify-center p-5 bg-green-600 rounded-2xl"
+          onPress={() =>
+            navigation.navigate('CreateScenario', {
+              updateScenari: handleCreateScenario,
+            })
+          }>
+          <Text className="text-white font-medium text-lg uppercase w-full text-center">
+            Crea Scenario
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex w-32 items-center justify-center p-5 bg-primary-300 rounded-2xl"
+          onPress={() => console.log(scenari)}>
+          <Text className="text-white font-medium text-lg uppercase w-full text-center">
+            Stampa Array
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl ">
+          <Text className="text-white font-medium text-lg uppercase w-full text-center">
+            Elimina Scenario
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        <Text className="text-2xl mt-2 font-extrabold text-primary-300">
+          Scenari:
+        </Text>
+        {scenari.map((scenario, index) => (
+          <View
+            key={index}
+            className="flex border-b border-black-50 py-3 space-y-10">
+            <View className="flex flex-row p-5">
+              <View className="flex flex-row gap-2">
+                <View className="flex justify-center items-center text-center w-full">
+                  <Text className="text-xl font-medium uppercase">
+                    {scenario.nome}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="flex flex-row mt-3 items-center justify-between">
+              <TouchableOpacity className="p-2 rounded-full bg-gray-300">
+                <Image source={icons.edit} className="size-6" />
+              </TouchableOpacity>
+              <TouchableOpacity className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300">
+                <Text className="text-white font-extrabold">APPLICA</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="p-2 rounded-full bg-red-100">
+                <Image source={icons.trash} className="size-8"/>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
+    </AndroidSafeArea>
+  );
+}
+
+export function CreateScenario({route}: {route: any}) {
+  const [nome, setNome] = useState('');
+  const {updateScenari} = route.params;
+  const navigation = useNavigation();
+
+  return (
+    <AndroidSafeArea>
+      <SecondaryHeader title={'Crea Scenario'} />
+      <View className="flex flex-col mt-5">
+        <Text className="text-lg font-bold mb-2">Nome Scenario:</Text>
+        <TextInput
+          onChangeText={e => setNome(e)}
+          placeholder="es: Soggiorno"
+          className="bg-white rounded-xl p-5"
+        />
+        <TouchableOpacity
+          className="flex rounded-xl mt-2 p-5 bg-green-500 justify-center items-center"
+          onPress={() => {
+            updateScenari({nome});
+            navigation.goBack();
+          }}>
+          <Text className="font-bold text-white text-xl">OK</Text>
+        </TouchableOpacity>
+      </View>
     </AndroidSafeArea>
   );
 }

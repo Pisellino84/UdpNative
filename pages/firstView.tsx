@@ -18,6 +18,7 @@ export function getIp() {
   return currentIp;
 }
 
+
 export default function FirstView() {
   type RootStackParamList = {
     ZoneStack: undefined;

@@ -254,9 +254,14 @@ const Zone = () => {
                 navigation.navigate('PaginaZona', {zoneId}); // Passa l'ID della zona
               }}>
               <View className="flex flex-row items-center gap-2">
-                <Text className="text-xl font-medium">
-                  {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
-                </Text>
+                <View>
+                  <Text className="text-xl font-medium">
+                    {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
+                  </Text>
+                  <Text className="text-md font-light">
+                    Id zona: {zoneId} {/* Mostra solo il nome caricato */}
+                  </Text>
+                </View>
                 <View className="flex flex-col gap-2">
                   <Image
                     source={icons.power}
