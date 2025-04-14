@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import icons  from '../constants/icons'; // Assicurati di avere il percorso corretto per le icone 
-import { udpEvents } from '../lib/udpClient';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from 'react-native';
+import icons from '../constants/icons'; // Assicurati di avere il percorso corretto per le icone
+import {udpEvents} from '../lib/udpClient';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 
-let currentIp = "";
+let currentIp = '';
 
 export function getIp() {
   return currentIp;
 }
 
 export default function FirstView() {
-  const [ip, setIp] = useState("");
+  type RootStackParamList = {
+    ZoneStack: undefined;
+  };
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [check, setCheck] = useState(false);
+  useEffect(() => {
+    if (check) {
+      navigation.navigate('ZoneStack');
+    }
+  });
+
+  const [ip, setIp] = useState('');
 
   const handleIpChange = (text: string) => {
     setIp(text);
@@ -28,7 +47,7 @@ export default function FirstView() {
       </Text>
       <View className="flex flex-row items-center justify-center border rounded-full mt-5">
         <TextInput
-          placeholder="Inserisci IP"
+          placeholder={(currentIp === "" ? null : currentIp) ?? "inserisci indirizzo Ip"}
           className="bg-white px-20 rounded-full"
           value={ip}
           onChangeText={handleIpChange}
@@ -38,21 +57,32 @@ export default function FirstView() {
         <TouchableOpacity
           className="bg-primary-300 rounded-full p-3"
           onPress={() => {
-            Alert.alert('Sei Sicuro?', `Sei sicuro di voler usare ${ip} come indirizzo IP?\n(puoi sempre cambiarlo succesivamente)`, [
-              {
-                text: 'Annulla',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel',
-              },
-              {
-                text: 'Continua',
-                onPress: () => {
-                  console.log('IP changed to:', ip);
-                  // Qui potresti voler fare qualcosa con l'IP,
-                  // magari chiamare un'altra funzione che usa getIp()
-                },
-              },
-            ]);
+            if (ip != '') {
+              Alert.alert(
+                'Sei Sicuro?',
+                `Sei sicuro di voler usare ${ip} come indirizzo IP?\n(puoi sempre cambiarlo succesivamente)`,
+                [
+                  {
+                    text: 'Annulla',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Continua',
+                    onPress: () => {
+                      setCheck(true);
+                      navigation.navigate('ZoneStack');
+                      console.log('IP changed to:', ip);
+                      // Qui potresti voler fare qualcosa con l'IP,
+                      // magari chiamare un'altra funzione che usa getIp()
+                    },
+                  },
+                ],
+              );
+            }
+            else{
+              Alert.alert("L'Ip non può essere vuoto", "Inserisci l'ip e riprova")
+            }
           }}>
           <Image
             source={icons.backArrow}

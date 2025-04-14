@@ -33,6 +33,7 @@ import {
 import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
+import {getIp} from '../../../pages/firstView';
 
 const Zone = () => {
   type RootStackParamList = {
@@ -41,8 +42,12 @@ const Zone = () => {
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  useEffect(() => {navigation.navigate("FirstView")}, [])
-    
+  useEffect(() => {
+    const ip = getIp();
+    if (ip === "") {
+      navigation.navigate('FirstView');
+    }
+  }, []);
 
   // Array di 48 zone
   const zones = Array.from({length: 49}, (_, i) => i + 1);
@@ -113,41 +118,6 @@ const Zone = () => {
     }
   };
 
-  /* useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-      let intervalId: NodeJS.Timeout;
-
-      const loadZoneStates = async () => {
-        const volumes: number[] = Array(48).fill(0); // Initialize a new array
-        if (isLoading || !isActive) return;
-        for (let i = 1; i <= 48; i++) {
-          await leggiStatoZona(i);
-          await new Promise(resolve => setTimeout(resolve, 100));
-      
-          if (Volume !== undefined) { // Check if Volume has a value
-            console.log(`Volume Zona ${i}`, Volume);
-            console.log(`Nome Zona ${i}`, zoneNames[i - 1]);
-            volumes[i - 1] = Volume ?? 999;
-            console.log('OK');
-          } else {
-            console.log('NO OK');
-            volumes[i - 1] = 999;
-          }
-        }
-        setZoneVolumes(volumes); // Update state only once after the loop
-      };
-
-      loadZoneStates();
-      intervalId = setInterval(loadZoneStates, 5000);
-  
-      return () => {
-        isActive = false;
-        clearInterval(intervalId);
-        console.log('Zone screen unfocused - interval cleared'); // Add this log
-      };
-    }, [isLoading, zoneVolumes]),
-  );  */
 
   function retrieveNumZone() {
     retrieveData(`numZone`).then(numString => {
@@ -155,7 +125,7 @@ const Zone = () => {
         const numZone = parseInt(numString, 10);
         if (!isNaN(numZone)) {
           if (numZone <= 9) setNumZone(numZone);
-          else setNumZone(numZone + 1); 
+          else setNumZone(numZone + 1);
           console.log('dato caricato', numString);
         } else {
           console.error('Il numZone recuperato non è un numero valido.');
@@ -187,11 +157,11 @@ const Zone = () => {
                 {
                   text: 'OK',
                   onPress: e => {
-                    const num = parseInt(e ?? '', 10); // Converte la stringa in un numero
+                    const num = parseInt(e ?? '', 10); 
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
-                      else setNumZone(num + 1); // Imposta il numero di zone
-                      saveData('numZone', num.toString()); // Salva il numero di zone nel database
+                      else setNumZone(num + 1); 
+                      saveData('numZone', num.toString());
                     } else {
                       Alert.alert(
                         'Numero non valido',

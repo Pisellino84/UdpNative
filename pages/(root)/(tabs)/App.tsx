@@ -15,8 +15,6 @@ import {useNavigation} from '@react-navigation/native';
 import {NavigationProp} from 'node_modules/@react-navigation/native/lib/typescript/commonjs/src';
 import FirstView from '../../../pages/firstView';
 
-
-
 const TabIcon = ({
   focused,
   icon,
@@ -104,6 +102,11 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
+          name="FirstView"
+          component={FirstView}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="ZoneStack"
           component={ZoneTabNavigator}
           options={{headerShown: false}}
@@ -111,11 +114,6 @@ const App = () => {
         <Stack.Screen
           name="PaginaZona"
           component={PaginaZona}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="FirstView"
-          component={FirstView}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
