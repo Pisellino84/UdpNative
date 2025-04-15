@@ -54,7 +54,6 @@ export default function PaginaZona() {
 
   const [power, setPower] = useState(0);
   const [mute, setMute] = useState(0);
-  const [night, setNight] = useState(0);
   const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
   const [nome, setNome] = useState(Nome);

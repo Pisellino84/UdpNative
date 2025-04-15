@@ -116,15 +116,6 @@ export default function Scenario() {
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
     for (const setting of scenario.settings) {
-      await sendThreeBytes(15, setting.id, 0);
-      await delay(50);
-      await sendThreeBytes(22, setting.id, 0);
-      await delay(50);
-      await sendThreeBytes(19, setting.id, 1);
-      await delay(50);
-      await sendThreeBytes(4, setting.id, 0);
-      await delay(50);
-
       console.log('Impostazione:', setting);
       console.log('  ID:', setting.id);
       console.log('  Volume:', setting.volume);
@@ -133,15 +124,15 @@ export default function Scenario() {
       await delay(50);
 
       console.log('  Mute:', setting.mute);
-      if (setting.power === 0 && setting.mute === 0) {
-      } else {
         await sendThreeBytes(4, setting.id, 1);
         await delay(50);
         await sendThreeBytes(22, setting.id, setting.mute);
         await delay(50);
+        await sendThreeBytes(19, setting.id, setting.source);
+        await delay(50);
         await sendThreeBytes(4, setting.id, 0);
         await delay(50);
-      }
+      
 
       console.log('  Source:', setting.source);
 
@@ -187,13 +178,13 @@ export default function Scenario() {
               Crea Scenario
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             className="flex w-full items-center justify-center p-5 bg-primary-300 rounded-2xl"
             onPress={() => console.log('Stampa Array:', scenari)}>
             <Text className="text-white font-medium text-lg uppercase w-full text-center">
               Stampa Array
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View>
           {scenari.map((scenario, index) => (

@@ -86,7 +86,7 @@ const Zone = () => {
         ip = getIp();
         // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 10)); // Ritardo per evitare di saltare zone in ms
+        await new Promise(resolve => setTimeout(resolve, 50)); // Ritardo per evitare di saltare zone in ms
         sendThreeBytes(61, zoneId, 0);
         console.log("NOME DELLA ZONA: ", Nome, zoneId); // Log del nome
 
