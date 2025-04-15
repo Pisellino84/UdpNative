@@ -165,7 +165,7 @@ export default function Scenario() {
 
   return (
     <AndroidSafeArea>
-      <ScrollView>
+      <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
         <MainHeader title={'Scenario'} icon={icons.scenario} />
         <View className="flex flex-col justify-between mt-5">
           <TouchableOpacity
@@ -360,7 +360,7 @@ export function EditScenario({route}: {route: any}) {
 
   return (
     <AndroidSafeArea>
-      <ScrollView>
+      <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
         <SecondaryHeader title={`Modifica ${nome}`} />
         <View className="mt-5">
           <Text className="text-lg font-bold mb-2">Scegli Zona:</Text>
@@ -500,7 +500,7 @@ export function EditScenario({route}: {route: any}) {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="flex justify-center items-center bg-red-100 rounded-full my-3"
+                  className="flex justify-center items-center bg-red-100 rounded-full  my-3"
                   onPress={() => {
                     handleDelete(settingIndex);
                   }}>
