@@ -71,7 +71,7 @@ export default function PaginaZona() {
           console.error('Il volume recuperato non è un numero valido.');
         }
       } else {
-        console.error('Volume non trovato.');
+        setVolume(Volume)
       }
     });
   }
