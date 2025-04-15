@@ -219,7 +219,7 @@ const Zone = () => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-primary-300 p-3 rounded-xl justify-end"
+              className="bg-zinc-700 p-3 rounded-xl justify-end"
               onPress={() => {
                 loadZoneData();
               }}>

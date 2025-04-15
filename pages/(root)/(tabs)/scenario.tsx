@@ -10,6 +10,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
@@ -105,27 +106,70 @@ export default function Scenario() {
     await new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  const [isLoading, setIsLoading] = useState(false);
+  async function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async function Applica(scenario: any) {
+    setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
-    await scenario.settings.reduce(async (previousPromise: Promise<void>, setting: any) => {
-        await previousPromise;
-        console.log('Impostazione:', setting);
-        console.log('  ID:', setting.id);
-        console.log('  Power:', setting.power);
-        await sendThreeBytes(4, setting.id, setting.power);
 
-        console.log('  Volume:', setting.volume);
-        await sendThreeBytes(15, setting.id, setting.volume);
+    for (const setting of scenario.settings) {
+      await sendThreeBytes(15, setting.id, 0);
+      await delay(50);
+      await sendThreeBytes(22, setting.id, 0);
+      await delay(50);
+      await sendThreeBytes(19, setting.id, 1);
+      await delay(50);
+      await sendThreeBytes(4, setting.id, 0);
+      await delay(50);
 
-        console.log('  Mute:', setting.mute);
+      console.log('Impostazione:', setting);
+      console.log('  ID:', setting.id);
+      console.log('  Volume:', setting.volume);
+      await saveData(`volume_${setting.id}`, setting.volume?.toString());
+      await sendThreeBytes(15, setting.id, setting.volume);
+      await delay(50);
+
+      console.log('  Mute:', setting.mute);
+      if (setting.power === 0 && setting.mute === 0) {
+      } else {
+        await sendThreeBytes(4, setting.id, 1);
+        await delay(50);
         await sendThreeBytes(22, setting.id, setting.mute);
+        await delay(50);
+        await sendThreeBytes(4, setting.id, 0);
+        await delay(50);
+      }
 
-        console.log('  Source:', setting.source);
-        await sendThreeBytes(19, setting.id, setting.source);
+      console.log('  Source:', setting.source);
 
-        console.log('---');
-    }, Promise.resolve());
-}
+      await sendThreeBytes(19, setting.id, setting.source);
+      await delay(50);
+
+      console.log('  Power:', setting.power);
+
+      await sendThreeBytes(4, setting.id, setting.power);
+      await delay(50);
+
+      console.log('---');
+    }
+    setIsLoading(false);
+  }
+
+  if (isLoading) {
+    return (
+      <AndroidSafeArea>
+        <View className="flex h-screen justify-center items-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text className="text-lg mt-4">
+            Applicazione dello scenario in corso...
+          </Text>
+        </View>
+      </AndroidSafeArea>
+    );
+  }
 
   return (
     <AndroidSafeArea>
@@ -329,10 +373,11 @@ export function EditScenario({route}: {route: any}) {
           <View className="flex flex-row gap-10 items-center">
             <TextInput
               placeholder="es: 6"
+              maxLength={2}
               className="bg-white w-full rounded-xl p-5"
               onChangeText={e => {
                 const numeroId = parseInt(e, 10);
-                if (!isNaN(numeroId)) {
+                if (!isNaN(numeroId) && numeroId <= 48) {
                   setId(numeroId);
                 } else {
                   console.warn("Input non valido per l'ID");
