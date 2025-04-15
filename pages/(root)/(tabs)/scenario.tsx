@@ -11,10 +11,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import {
-  NavigationProp,
-  useNavigation,
-} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
@@ -32,9 +29,22 @@ export default function Scenario() {
   }, []);
 
   const handleCreateScenario = (newScenario: { nome: string }) => {
+    const isDuplicateName = scenari.some(
+      (scenario) => scenario.nome.toLowerCase() === newScenario.nome.toLowerCase()
+    );
+
+    if (isDuplicateName) {
+      Alert.alert(
+        'Nome Scenario Duplicato',
+        `Lo scenario "${newScenario.nome}" esiste già. Inserisci un nome diverso.`,
+        [{ text: 'OK' }]
+      );
+      return; // Non aggiungere il nuovo scenario
+    }
+
     scenari = [...scenari, { ...newScenario, settings: [] }];
     saveData('scenari', JSON.stringify(scenari)).then(() => {
-      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il salvataggio
+      setRenderTrigger((prev) => prev + 1); // Forza il re-render dopo il salvataggio
     });
     console.log('Scenari dopo la creazione:', scenari);
   };
@@ -42,14 +52,14 @@ export default function Scenario() {
   const handleUpdateScenarioSettings = (index: number, newSetting: any) => {
     const updatedScenari = scenari.map((scenario, i) =>
       i === index
-        ? { ...scenario, settings: [...scenario.settings, newSetting] }
-        : scenario
+        ? {...scenario, settings: [...scenario.settings, newSetting]}
+        : scenario,
     );
     scenari = updatedScenari;
     saveData('scenari', JSON.stringify(updatedScenari)).then(() => {
       setRenderTrigger(prev => prev + 1); // Forza il re-render dopo l'aggiornamento
     });
-    console.log('Scenari dopo l\'aggiornamento:', scenari);
+    console.log("Scenari dopo l'aggiornamento:", scenari);
   };
 
   function retrieveScenari() {
@@ -62,73 +72,98 @@ export default function Scenario() {
     });
   }
 
+  function handleDeleteScenario(indexToDelete: number) {
+    Alert.alert(
+      'Elimina Scenario',
+      `Sei sicuro di voler eliminare lo scenario "${scenari[indexToDelete].nome}"?`,
+      [
+        {
+          text: 'Annulla',
+          style: 'cancel',
+        },
+        {
+          text: 'Elimina',
+          style: 'destructive',
+          onPress: () => {
+            const updatedScenari = scenari.filter(
+              (_, index) => index !== indexToDelete,
+            );
+            scenari = updatedScenari;
+            saveData('scenari', JSON.stringify(scenari)).then(() => {
+              setRenderTrigger(prev => prev + 1); // Forza il re-render dopo l'eliminazione
+              console.log('Scenario eliminato. Scenari aggiornati:', scenari);
+            });
+          },
+        },
+      ],
+    );
+  }
+
   return (
     <AndroidSafeArea>
-      <MainHeader title={'Scenario'} icon={icons.scenario} />
-      <View className="flex flex-row justify-between mt-5">
-        <TouchableOpacity
-          className="flex w-32 items-center justify-center p-5 bg-green-600 rounded-2xl"
-          onPress={() =>
-            navigation.navigate('CreateScenario', {
-              updateScenari: handleCreateScenario,
-            })
-          }>
-          <Text className="text-white font-medium text-lg uppercase w-full text-center">
-            Crea Scenario
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex w-32 items-center justify-center p-5 bg-primary-300 rounded-2xl"
-          onPress={() => console.log('Stampa Array:', scenari)}>
-          <Text className="text-white font-medium text-lg uppercase w-full text-center">
-            Stampa Array
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl" onPress={() => { clearAllData(); scenari = []; console.log('Scenari dopo la cancellazione:', scenari); }}>
-          <Text className="text-white font-medium text-lg uppercase w-full text-center">
-            Elimina Scenario
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <Text className="text-2xl mt-2 font-extrabold text-primary-300">
-          Scenari:
-        </Text>
-        {scenari.map((scenario, index) => (
-          <View
-            key={index}
-            className="flex border-b border-black-50 py-3 space-y-10">
-            <View className="flex flex-row p-5">
-              <View className="flex flex-row gap-2">
-                <View className="flex justify-center items-center text-center w-full">
-                  <Text className="text-xl font-medium uppercase">
-                    {scenario.nome}
-                  </Text>
+      <ScrollView>
+        <MainHeader title={'Scenario'} icon={icons.scenario} />
+        <View className="flex flex-col justify-between mt-5">
+          <TouchableOpacity
+            className="flex w-full items-center justify-center p-5 bg-green-600 rounded-2xl"
+            onPress={() =>
+              navigation.navigate('CreateScenario', {
+                updateScenari: handleCreateScenario,
+              })
+            }>
+            <Text className="text-white font-medium text-lg uppercase w-full text-center">
+              Crea Scenario
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="flex w-full items-center justify-center p-5 bg-primary-300 rounded-2xl"
+            onPress={() => console.log('Stampa Array:', scenari)}>
+            <Text className="text-white font-medium text-lg uppercase w-full text-center">
+              Stampa Array
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View>
+          {scenari.map((scenario, index) => (
+            <View
+              key={index}
+              className="flex border-b border-black-50 py-3 space-y-10">
+              <View className="flex flex-row p-5">
+                <View className="flex flex-row gap-2">
+                  <View className="flex justify-center items-center text-center w-full">
+                    <Text className="text-xl font-medium uppercase">
+                      {scenario.nome}
+                    </Text>
+                  </View>
                 </View>
               </View>
+              <View className="flex flex-row mt-3 items-center justify-between">
+                <TouchableOpacity
+                  className="p-2 rounded-full bg-gray-300"
+                  onPress={() =>
+                    navigation.navigate('EditScenario', {
+                      nome: scenario.nome,
+                      index,
+                      updateScenarioSettings: handleUpdateScenarioSettings, // Passiamo la funzione modificata
+                    })
+                  }>
+                  <Image source={icons.edit} className="size-6" />
+                </TouchableOpacity>
+                <TouchableOpacity className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300">
+                  <Text className="text-white font-extrabold">APPLICA</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="p-2 rounded-full bg-red-100"
+                  onPress={() => {
+                    handleDeleteScenario(index);
+                  }}>
+                  <Image source={icons.trash} className="size-8" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View className="flex flex-row mt-3 items-center justify-between">
-              <TouchableOpacity
-                className="p-2 rounded-full bg-gray-300"
-                onPress={() =>
-                  navigation.navigate('EditScenario', {
-                    nome: scenario.nome,
-                    index,
-                    updateScenarioSettings: handleUpdateScenarioSettings, // Passiamo la funzione modificata
-                  })
-                }>
-                <Image source={icons.edit} className="size-6" />
-              </TouchableOpacity>
-              <TouchableOpacity className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300">
-                <Text className="text-white font-extrabold">APPLICA</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="p-2 rounded-full bg-red-100">
-                <Image source={icons.trash} className="size-8" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
+      </ScrollView>
     </AndroidSafeArea>
   );
 }
@@ -207,25 +242,27 @@ export function EditScenario({route}: {route: any}) {
   function handleSave() {
     if (id !== null) {
       // Verifica se l'ID esiste già nelle impostazioni correnti
-      const isDuplicateId = currentScenarioSettings.some(setting => setting.id === id);
+      const isDuplicateId = currentScenarioSettings.some(
+        setting => setting.id === id,
+      );
 
       if (isDuplicateId) {
         Alert.alert(
           'ID Duplicato',
           `L'ID ${id} esiste già nelle impostazioni per lo scenario "${nome}". Inserisci un ID diverso.`,
-          [{ text: 'OK' }]
+          [{text: 'OK'}],
         );
         return; // Non aggiungere la nuova impostazione
       }
 
-      const newSetting: Setting = { id, power, mute, volume, source };
+      const newSetting: Setting = {id, power, mute, volume, source};
       updateScenarioSettings(index, newSetting);
       // Aggiorniamo immediatamente lo stato locale per la visualizzazione
       setCurrentScenarioSettings(prevSettings => [...prevSettings, newSetting]);
       console.log(
         'Impostazioni salvate per lo scenario con indice:',
         index,
-        newSetting
+        newSetting,
       );
       // Resetta gli stati del form
       setId(null);
@@ -238,11 +275,23 @@ export function EditScenario({route}: {route: any}) {
     }
   }
 
+  function handleDelete(settingIndex: any) {
+    const newSettings = [...currentScenarioSettings];
+    newSettings.splice(settingIndex, 1);
+    setCurrentScenarioSettings(newSettings);
+    // Dovresti anche aggiornare l'array globale 'scenari' qui se vuoi che la modifica sia persistente
+    const updatedScenari = [...scenari];
+    if (updatedScenari[index]) {
+      updatedScenari[index].settings = newSettings;
+      scenari = updatedScenari;
+      saveData('scenari', JSON.stringify(scenari));
+    }
+  }
 
   return (
     <AndroidSafeArea>
       <ScrollView>
-        <SecondaryHeader title={`Modifica ${nome} ${index}`} />
+        <SecondaryHeader title={`Modifica ${nome}`} />
         <View className="mt-5">
           <Text className="text-lg font-bold mb-2">Scegli Zona:</Text>
           <View className="flex flex-row gap-10 items-center">
@@ -349,9 +398,10 @@ export function EditScenario({route}: {route: any}) {
               Impostazioni Salvate:
             </Text>
             {currentScenarioSettings.map((setting, settingIndex) => (
-              <View className='flex flex-row justify-between' key={settingIndex}>
-                <View
-                  className="bg-gray-100 p-3 rounded-md mb-2">
+              <View
+                className="flex flex-row justify-between"
+                key={settingIndex}>
+                <View className="bg-gray-100 p-3 rounded-md mb-2">
                   <Text>Zona ID: {setting.id}</Text>
                   <Text>Power: {setting.power ? 'On' : 'Off'}</Text>
                   <Text>Mute: {setting.mute ? 'Muted' : 'Unmuted'}</Text>
@@ -362,19 +412,12 @@ export function EditScenario({route}: {route: any}) {
                       'Sconosciuta'}
                   </Text>
                 </View>
-                <TouchableOpacity className='flex justify-center items-center bg-red-100 rounded-full my-3' onPress={() => {
-                  const newSettings = [...currentScenarioSettings];
-                  newSettings.splice(settingIndex, 1);
-                  setCurrentScenarioSettings(newSettings);
-                  // Dovresti anche aggiornare l'array globale 'scenari' qui se vuoi che la modifica sia persistente
-                  const updatedScenari = [...scenari];
-                  if (updatedScenari[index]) {
-                    updatedScenari[index].settings = newSettings;
-                    scenari = updatedScenari;
-                    saveData('scenari', JSON.stringify(scenari));
-                  }
-                }}>
-                  <Image source={icons.trash} className='size-10' />
+                <TouchableOpacity
+                  className="flex justify-center items-center bg-red-100 rounded-full my-3"
+                  onPress={() => {
+                    handleDelete(settingIndex);
+                  }}>
+                  <Image source={icons.trash} className="size-10" />
                 </TouchableOpacity>
               </View>
             ))}
