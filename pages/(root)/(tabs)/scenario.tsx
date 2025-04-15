@@ -21,7 +21,7 @@ import {useEffect, useState} from 'react';
 import {sendThreeBytes} from '../../../lib/udpClient';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
-import {retrieveData, saveData} from '../../../lib/db';
+import {clearAllData, retrieveData, saveData} from '../../../lib/db';
 
 export default function Scenario() {
   type RootStackParamList = {
@@ -85,7 +85,7 @@ export default function Scenario() {
             Stampa Array
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl ">
+        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl" onPress={() => {clearAllData()}}>
           <Text className="text-white font-medium text-lg uppercase w-full text-center">
             Elimina Scenario
           </Text>
