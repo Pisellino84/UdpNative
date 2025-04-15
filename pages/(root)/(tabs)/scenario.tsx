@@ -8,57 +8,56 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Alert,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {
   NavigationProp,
-  RouteProp,
   useNavigation,
-  useRoute,
 } from '@react-navigation/native';
 import {useEffect, useState} from 'react';
-import {sendThreeBytes} from '../../../lib/udpClient';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {clearAllData, retrieveData, saveData} from '../../../lib/db';
 
+// Definiamo l'array scenari al di fuori del componente Scenario
+let scenari: any[] = [];
+
 export default function Scenario() {
-  type RootStackParamList = {
-    CreateScenario:
-      | {updateScenari: (newScenario: {nome: string; settings: any[]}) => void}
-      | undefined;
-    EditScenario: {
-      nome: string;
-      index: number;
-      updateScenarioSettings: (index: number, newSetting: any) => void; // Modificato per ricevere una singola impostazione
-    };
-  };
+  const navigation = useNavigation<NavigationProp<any>>();
+  const [renderTrigger, setRenderTrigger] = useState(0); // Nuovo stato per forzare il re-render
+
   useEffect(() => {
     retrieveScenari();
   }, []);
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [scenari, setScenari] = useState<any[]>([]);
 
-  const handleCreateScenario = (newScenario: {nome: string}) => {
-    setScenari([...scenari, {...newScenario, settings: []}]); // Inizializziamo settings come array vuoto
-    saveData('scenari', JSON.stringify(scenari));
+  const handleCreateScenario = (newScenario: { nome: string }) => {
+    scenari = [...scenari, { ...newScenario, settings: [] }];
+    saveData('scenari', JSON.stringify(scenari)).then(() => {
+      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il salvataggio
+    });
+    console.log('Scenari dopo la creazione:', scenari);
   };
 
   const handleUpdateScenarioSettings = (index: number, newSetting: any) => {
     const updatedScenari = scenari.map((scenario, i) =>
       i === index
-        ? {...scenario, settings: [...scenario.settings, newSetting]}
-        : scenario,
+        ? { ...scenario, settings: [...scenario.settings, newSetting] }
+        : scenario
     );
-    setScenari(updatedScenari);
-    saveData('scenari', JSON.stringify(updatedScenari)); // Aggiorna i dati salvati
+    scenari = updatedScenari;
+    saveData('scenari', JSON.stringify(updatedScenari)).then(() => {
+      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo l'aggiornamento
+    });
+    console.log('Scenari dopo l\'aggiornamento:', scenari);
   };
 
   function retrieveScenari() {
     retrieveData('scenari').then(array => {
       if (array !== null) {
-        setScenari(JSON.parse(array));
+        scenari = JSON.parse(array);
+        console.log('Scenari recuperati:', scenari);
+        setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il recupero
       }
     });
   }
@@ -80,12 +79,12 @@ export default function Scenario() {
         </TouchableOpacity>
         <TouchableOpacity
           className="flex w-32 items-center justify-center p-5 bg-primary-300 rounded-2xl"
-          onPress={() => console.log(scenari)}>
+          onPress={() => console.log('Stampa Array:', scenari)}>
           <Text className="text-white font-medium text-lg uppercase w-full text-center">
             Stampa Array
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl" onPress={() => {clearAllData()}}>
+        <TouchableOpacity className="flex w-32 items-center justify-center p-5 bg-red-600 rounded-2xl" onPress={() => { clearAllData(); scenari = []; console.log('Scenari dopo la cancellazione:', scenari); }}>
           <Text className="text-white font-medium text-lg uppercase w-full text-center">
             Elimina Scenario
           </Text>
@@ -161,6 +160,7 @@ export function CreateScenario({route}: {route: any}) {
     </AndroidSafeArea>
   );
 }
+
 interface Setting {
   id: number | null;
   power: number;
@@ -169,10 +169,9 @@ interface Setting {
   source: number;
 }
 
-interface Scenario {
+interface ScenarioType {
   nome: string;
-  settings: any[]; // O specifica un tipo più preciso se lo conosci
-  // Altre proprietà dello scenario, se presenti
+  settings: any[];
 }
 
 export function EditScenario({route}: {route: any}) {
@@ -185,7 +184,7 @@ export function EditScenario({route}: {route: any}) {
   const [currentScenarioSettings, setCurrentScenarioSettings] = useState<any[]>(
     [],
   );
-  const [allScenari, setAllScenari] = useState<Scenario[]>([]); // Tipizzato come array di Scenario
+  // Non abbiamo bisogno di recuperare tutti gli scenari qui per aggiornare una singola impostazione.
 
   const Sources = [
     {label: 'Tuner', value: 0},
@@ -199,35 +198,34 @@ export function EditScenario({route}: {route: any}) {
   ];
 
   useEffect(() => {
-    retrieveScenariForEdit();
-  }, []);
-
-  function retrieveScenariForEdit() {
-    retrieveData('scenari').then(array => {
-      if (array !== null) {
-        const parsedScenari: Scenario[] = JSON.parse(array); // Tipizzato come array di Scenario
-        setAllScenari(parsedScenari);
-        // Trova lo scenario corrente e imposta le sue impostazioni per la visualizzazione
-        const currentScenario = parsedScenari.find(
-          (scenario: Scenario, i) => i === index,
-        );
-        if (currentScenario && currentScenario.settings) {
-          setCurrentScenarioSettings(currentScenario.settings);
-        }
-      }
-    });
-  }
+    // Recuperiamo le impostazioni dello scenario corrente all'avvio
+    if (scenari[index] && scenari[index].settings) {
+      setCurrentScenarioSettings(scenari[index].settings);
+    }
+  }, [index]); // Dipendenza da index per aggiornare se cambiamo scenario da modificare
 
   function handleSave() {
-    if (id !== null || id !== id) {
-      const newSetting: Setting = {id, power, mute, volume, source}; // Tipizzato come Setting
+    if (id !== null) {
+      // Verifica se l'ID esiste già nelle impostazioni correnti
+      const isDuplicateId = currentScenarioSettings.some(setting => setting.id === id);
+
+      if (isDuplicateId) {
+        Alert.alert(
+          'ID Duplicato',
+          `L'ID ${id} esiste già nelle impostazioni per lo scenario "${nome}". Inserisci un ID diverso.`,
+          [{ text: 'OK' }]
+        );
+        return; // Non aggiungere la nuova impostazione
+      }
+
+      const newSetting: Setting = { id, power, mute, volume, source };
       updateScenarioSettings(index, newSetting);
-      // Ottimisticamente aggiorna la visualizzazione locale
+      // Aggiorniamo immediatamente lo stato locale per la visualizzazione
       setCurrentScenarioSettings(prevSettings => [...prevSettings, newSetting]);
       console.log(
         'Impostazioni salvate per lo scenario con indice:',
         index,
-        newSetting,
+        newSetting
       );
       // Resetta gli stati del form
       setId(null);
@@ -239,6 +237,7 @@ export function EditScenario({route}: {route: any}) {
       console.warn("L'ID non è valido.");
     }
   }
+
 
   return (
     <AndroidSafeArea>
@@ -259,15 +258,12 @@ export function EditScenario({route}: {route: any}) {
                 }
               }}
             />
-            {/* <Image source={icons.plus} className='size-14 w-fit'/> */}
           </View>
 
           <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
             <TouchableOpacity
               className={`flex flex-row items-center gap-2 `}
-              onPress={() => {
-                setPower(prev => (prev === 0 ? 1 : 0));
-              }}>
+              onPress={() => setPower(prev => (prev === 0 ? 1 : 0))}>
               <Image
                 source={icons.power}
                 className="size-11"
@@ -284,16 +280,7 @@ export function EditScenario({route}: {route: any}) {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {
-                setMute(prev => (prev === 0 ? 1 : 0));
-                if (id !== null) {
-                  sendThreeBytes(22, id, mute === 0 ? 1 : 0);
-                } else {
-                  console.warn(
-                    'ID non impostato, impossibile inviare comando Mute.',
-                  );
-                }
-              }}
+              onPress={() => setMute(prev => (prev === 0 ? 1 : 0))}
               className={`flex flex-row items-center gap-2 `}>
               <Image
                 source={icons.mute}
@@ -362,9 +349,8 @@ export function EditScenario({route}: {route: any}) {
               Impostazioni Salvate:
             </Text>
             {currentScenarioSettings.map((setting, settingIndex) => (
-              <View className='flex flex-row justify-between'>
+              <View className='flex flex-row justify-between' key={settingIndex}>
                 <View
-                  key={settingIndex}
                   className="bg-gray-100 p-3 rounded-md mb-2">
                   <Text>Zona ID: {setting.id}</Text>
                   <Text>Power: {setting.power ? 'On' : 'Off'}</Text>
@@ -376,7 +362,18 @@ export function EditScenario({route}: {route: any}) {
                       'Sconosciuta'}
                   </Text>
                 </View>
-                <TouchableOpacity className='flex justify-center items-center bg-red-100 rounded-full my-3' onPress={() => currentScenarioSettings.splice(settingIndex, 1)}>
+                <TouchableOpacity className='flex justify-center items-center bg-red-100 rounded-full my-3' onPress={() => {
+                  const newSettings = [...currentScenarioSettings];
+                  newSettings.splice(settingIndex, 1);
+                  setCurrentScenarioSettings(newSettings);
+                  // Dovresti anche aggiornare l'array globale 'scenari' qui se vuoi che la modifica sia persistente
+                  const updatedScenari = [...scenari];
+                  if (updatedScenari[index]) {
+                    updatedScenari[index].settings = newSettings;
+                    scenari = updatedScenari;
+                    saveData('scenari', JSON.stringify(scenari));
+                  }
+                }}>
                   <Image source={icons.trash} className='size-10' />
                 </TouchableOpacity>
               </View>
