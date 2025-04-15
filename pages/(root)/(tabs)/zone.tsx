@@ -80,6 +80,9 @@ const Zone = () => {
         zoneId !== 49 &&
         ip.length >= 7
       ) {
+        if(Nome === "mem_free" && zoneId < 48) {
+          sendThreeBytes(61, zoneId, 0)
+        }
         ip = getIp();
         // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
@@ -162,8 +165,8 @@ const Zone = () => {
                     const num = parseInt(e ?? '', 10);
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
-                      else if(num == 48) setNumZone(num - 1)
-                      else setNumZone(num + 1);
+                      else if(num == 48) setNumZone(num)
+                      else setNumZone(num);
                       saveData('numZone', num.toString());
                     } else {
                       Alert.alert(
