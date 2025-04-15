@@ -16,6 +16,7 @@ import {useEffect, useState} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {clearAllData, retrieveData, saveData} from '../../../lib/db';
+import {sendThreeBytes} from '../../../lib/udpClient';
 
 // Definiamo l'array scenari al di fuori del componente Scenario
 let scenari: any[] = [];
@@ -28,23 +29,24 @@ export default function Scenario() {
     retrieveScenari();
   }, []);
 
-  const handleCreateScenario = (newScenario: { nome: string }) => {
+  const handleCreateScenario = (newScenario: {nome: string}) => {
     const isDuplicateName = scenari.some(
-      (scenario) => scenario.nome.toLowerCase() === newScenario.nome.toLowerCase()
+      scenario =>
+        scenario.nome.toLowerCase() === newScenario.nome.toLowerCase(),
     );
 
     if (isDuplicateName) {
       Alert.alert(
         'Nome Scenario Duplicato',
         `Lo scenario "${newScenario.nome}" esiste già. Inserisci un nome diverso.`,
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
       return; // Non aggiungere il nuovo scenario
     }
 
-    scenari = [...scenari, { ...newScenario, settings: [] }];
+    scenari = [...scenari, {...newScenario, settings: []}];
     saveData('scenari', JSON.stringify(scenari)).then(() => {
-      setRenderTrigger((prev) => prev + 1); // Forza il re-render dopo il salvataggio
+      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il salvataggio
     });
     console.log('Scenari dopo la creazione:', scenari);
   };
@@ -99,6 +101,32 @@ export default function Scenario() {
     );
   }
 
+  async function Wait(ms: number) {
+    await new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function Applica(scenario: any) {
+    console.log(`Applicando lo scenario: ${scenario.nome}`);
+    await scenario.settings.reduce(async (previousPromise: Promise<void>, setting: any) => {
+        await previousPromise;
+        console.log('Impostazione:', setting);
+        console.log('  ID:', setting.id);
+        console.log('  Power:', setting.power);
+        await sendThreeBytes(4, setting.id, setting.power);
+
+        console.log('  Volume:', setting.volume);
+        await sendThreeBytes(15, setting.id, setting.volume);
+
+        console.log('  Mute:', setting.mute);
+        await sendThreeBytes(22, setting.id, setting.mute);
+
+        console.log('  Source:', setting.source);
+        await sendThreeBytes(19, setting.id, setting.source);
+
+        console.log('---');
+    }, Promise.resolve());
+}
+
   return (
     <AndroidSafeArea>
       <ScrollView>
@@ -149,7 +177,11 @@ export default function Scenario() {
                   }>
                   <Image source={icons.edit} className="size-6" />
                 </TouchableOpacity>
-                <TouchableOpacity className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300">
+                <TouchableOpacity
+                  className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300"
+                  onPress={() => {
+                    Applica(scenario);
+                  }}>
                   <Text className="text-white font-extrabold">APPLICA</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
