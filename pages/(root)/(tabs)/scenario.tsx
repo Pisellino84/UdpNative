@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TextBase,
 } from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
@@ -265,6 +266,7 @@ export function CreateScenario({route}: {route: any}) {
 
 interface Setting {
   id: number | null;
+  note: string
   power: number;
   mute: number;
   volume: number;
@@ -279,6 +281,7 @@ interface ScenarioType {
 export function EditScenario({route}: {route: any}) {
   const {nome, index, updateScenarioSettings} = route.params;
   const [id, setId] = useState<number | null>(null);
+  const [note, setNote] = useState("");
   const [power, setPower] = useState(0);
   const [mute, setMute] = useState(0);
   const [volume, setVolume] = useState(0);
@@ -322,7 +325,7 @@ export function EditScenario({route}: {route: any}) {
         return; // Non aggiungere la nuova impostazione
       }
 
-      const newSetting: Setting = {id, power, mute, volume, source};
+      const newSetting: Setting = {id, note, power, mute, volume, source};
       updateScenarioSettings(index, newSetting);
       // Aggiorniamo immediatamente lo stato locale per la visualizzazione
       setCurrentScenarioSettings(prevSettings => [...prevSettings, newSetting]);
@@ -332,7 +335,7 @@ export function EditScenario({route}: {route: any}) {
         newSetting,
       );
       // Resetta gli stati del form
-      setId(null);
+      setNote("")
       setPower(0);
       setMute(0);
       setVolume(0);
@@ -363,7 +366,7 @@ export function EditScenario({route}: {route: any}) {
           <Text className="text-lg font-bold mb-2">Scegli Zona:</Text>
           <View className="flex flex-row gap-10 items-center">
             <TextInput
-              placeholder="es: 6"
+              placeholder="Inserisci Id della Zona (es: 4)"
               maxLength={2}
               className="bg-white w-full rounded-xl p-5"
               onChangeText={e => {
@@ -373,6 +376,21 @@ export function EditScenario({route}: {route: any}) {
                 } else {
                   console.warn("Input non valido per l'ID");
                 }
+              }}
+            />
+          </View>
+          
+          <Text className="text-lg font-bold mb-2 mt-5">Note:</Text>
+          <View className="flex flex-row gap-10 items-center">
+            <TextInput
+              placeholder="Inserisci le tue note"
+              maxLength={120}
+              className="bg-white w-full  rounded-xl p-5 justify-start"
+              value={note}
+              multiline
+              onChangeText={e => {
+                setNote(e)
+                
               }}
             />
           </View>
@@ -462,7 +480,7 @@ export function EditScenario({route}: {route: any}) {
           </TouchableOpacity>
 
           <View className="mt-5">
-            <Text className="text-lg font-bold mb-2">
+            <Text className="text-xl text-primary-300 font-bold mb-2">
               Impostazioni Salvate:
             </Text>
             {currentScenarioSettings.map((setting, settingIndex) => (
@@ -470,14 +488,15 @@ export function EditScenario({route}: {route: any}) {
                 className="flex flex-row justify-between"
                 key={settingIndex}>
                 <View className="bg-gray-100 p-3 rounded-md mb-2">
-                  <Text>Zona ID: {setting.id}</Text>
-                  <Text>Power: {setting.power ? 'On' : 'Off'}</Text>
-                  <Text>Mute: {setting.mute ? 'Muted' : 'Unmuted'}</Text>
-                  <Text>Volume: {setting.volume}</Text>
-                  <Text>
+                  <Text className='font-medium'>Zona ID: <Text className='font-extrabold text-lg text-primary-300'>{setting.id}</Text></Text>
+                  <Text className='font-medium'>Note: <Text className='font-extrabold text-lg text-primary-300'>{setting.note}</Text></Text>
+                  <Text className='font-medium'>Power: <Text className='font-extrabold text-lg text-primary-300'>{setting.power ? 'On' : 'Off'}</Text></Text>
+                  <Text className='font-medium'>Mute: <Text className='font-extrabold text-lg text-primary-300'>{setting.mute ? 'Muted' : 'Unmuted'}</Text></Text>
+                  <Text className='font-medium'>Volume: <Text className='font-extrabold text-lg text-primary-300'>{setting.volume}</Text></Text>
+                  <Text className='font-medium'>
                     Source:{' '}
-                    {Sources.find(s => s.value === setting.source)?.label ||
-                      'Sconosciuta'}
+                    <Text className='font-extrabold text-lg text-primary-300'>{Sources.find(s => s.value === setting.source)?.label ||
+                      'Sconosciuta'}</Text>
                   </Text>
                 </View>
                 <TouchableOpacity
