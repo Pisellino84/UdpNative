@@ -177,8 +177,7 @@ export default function Scenario() {
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        className='mb-5'
-        >
+        className="mb-5">
         <MainHeader title={'Scenario'} icon={icons.scenario} />
         <View className="flex flex-col justify-between mt-5">
           <TouchableOpacity
@@ -366,6 +365,29 @@ export function EditScenario({route}: {route: any}) {
   }
 
   function handleSaveNome() {
+    if (!nome.trim()) {
+      Alert.alert(
+        'Nome Invalido',
+        'Il nome dello scenario non può essere vuoto.',
+        [{text: 'OK'}],
+      );
+      return;
+    }
+
+    const isDuplicateName = scenari.some(
+      (scenario, i) =>
+        i !== index && scenario.nome.toLowerCase() === nome.toLowerCase(),
+    );
+
+    if (isDuplicateName) {
+      Alert.alert(
+        'Nome Duplicato',
+        `Lo scenario "${nome}" esiste già. Inserisci un nome diverso.`,
+        [{text: 'OK'}],
+      );
+      return;
+    }
+
     const updatedScenari = [...scenari];
     if (updatedScenari[index]) {
       updatedScenari[index].nome = nome;
@@ -376,6 +398,7 @@ export function EditScenario({route}: {route: any}) {
           `Il nome dello scenario è stato aggiornato a "${nome}".`,
           [{text: 'OK'}],
         );
+        navigation.goBack();
       });
     }
   }

@@ -181,7 +181,7 @@ const Zone = () => {
       <AndroidSafeArea>
         <View className="flex h-screen justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text className="text-lg mt-4">Caricamento in corso...</Text>
+          <Text className="text-lg mt-4">Recupero Dati in corso...</Text>
           <ProgressBar progress={perc} />
         </View>
       </AndroidSafeArea>
