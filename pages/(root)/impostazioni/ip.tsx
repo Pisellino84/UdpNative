@@ -31,7 +31,7 @@ export default function IpPage() {
 
   function retrieveIp() {
     retrieveData('FW').then(fw => {
-      if (fw == 'no') {
+      if (fw === 'no') {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
@@ -90,7 +90,7 @@ export default function IpPage() {
       <Text className="text-primary-300 font-extrabold text-4xl">
         Benvenuto in liveMt!
       </Text>
-      <Text className="text-primary-300 font-extrabold text-xl">
+      <Text className="text-black-300 font-semibold text-xl">
         Inizia ad usare l'app:
       </Text>
       <View className="flex flex-row items-center justify-center border rounded-full mt-5">

@@ -21,7 +21,7 @@ export default function About() {
           <View className="flex flex-row gap-2 justify-center items-center">
             <Image source={icons.zone} className="size-9" />
             <Text className="font-medium " onPress={() => Linking.openURL('https://maps.app.goo.gl/2X7ek9usks8Yuau78')}>
-              via Nobel 8, Noventa di Piave, VE
+              Via Nobel 8, Noventa di Piave, VE
             </Text>
           </View>
           <View className="flex flex-row gap-2 items-center">
@@ -30,7 +30,7 @@ export default function About() {
           </View>
           <View className="flex flex-row gap-2 items-center">
             <Image source={icons.email} className="size-9" />
-            <Text className="font-medium" onPress={() => Linking.openURL('https://maps.app.goo.gl/2X7ek9usks8Yuau78')}>marketing@tutondo.com</Text>
+            <Text className="font-medium">marketing@tutondo.com</Text>
           </View>
           <View className="flex flex-row gap-2 items-center">
             <Image source={icons.standard} className="size-9" />
