@@ -22,6 +22,8 @@ import trash from '../assets/icons/trash.png';
 import email from '../assets/icons/email.png';
 import phone from '../assets/icons/phone.png';
 import lp from '../assets/icons/lp.png';
+import tut from '../assets/icons/tut.png';
+import ndo from '../assets/icons/ndo.png';
 
 export default {
   backArrow,
@@ -48,4 +50,6 @@ export default {
   email,
   phone,
   lp,
+  tut,
+  ndo,
 };

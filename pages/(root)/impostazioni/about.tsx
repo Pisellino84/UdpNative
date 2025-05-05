@@ -9,7 +9,13 @@ export default function About() {
     <AndroidSafeArea>
       <SecondaryHeader title="About" />
       <View className="flex flex-col gap-5 mt-5 items-center">
-        <Image source={images.tutondo} className=" h-16 w-96" />
+        {/* <Image source={images.tutondo} className=" h-16 w-96" /> */}
+        <View className='flex flex-row items-center'>
+          <Image source={icons.tut} className='h-16 w-44' />
+          <Image source={icons.lp} className='size-24 animate-spin' tintColor={"red"}/>
+          <Image source={icons.ndo} className='h-16 w-44' />
+
+        </View>
         <Text className="text-primary-300 font-extrabold text-xl">
           Tutondo A.T.E.C. Srl
         </Text>
@@ -33,7 +39,6 @@ export default function About() {
             <Text className="font-bold underline">www.tutondo.com</Text>
           </View>
         </View>
-        <Image source={icons.lp} className="size-12 mt-10 animate-spin" />
       </View>
     </AndroidSafeArea>
   );
