@@ -25,7 +25,7 @@ export default function IpPage() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   useEffect(() => {
     retrieveIp();
-  });
+  }, []);
 
   const [ip, setIp] = useState('');
 
@@ -106,7 +106,6 @@ export default function IpPage() {
         <TouchableOpacity
           className="bg-primary-300 rounded-full p-3"
           onPress={() => {
-            isValidIP();
             if (isValidIP()) {
               Alert.alert(
                 'Sei Sicuro?',
@@ -129,7 +128,7 @@ export default function IpPage() {
                 ],
               );
             } else {
-              Alert.alert('smerdoz');
+              Alert.alert('Ip non valido', 'Controlla l\'ip inserito');
             }
           }}>
           <Image
