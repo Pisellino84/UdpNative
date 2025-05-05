@@ -9,14 +9,10 @@ import icons from '../../../constants/icons';
 import Scenario, { EditScenario } from './scenario';
 import Zone from './zone';
 import PaginaZona from '../zone/paginaZona';
-import {useEffect} from 'react';
 import Impostazioni from '../impostazioni/impostazioni';
-import {useNavigation} from '@react-navigation/native';
-import {NavigationProp} from '@react-navigation/native';
-import FirstView from '../../../pages/firstView';
-import { getIp } from '../../../pages/firstView';
+import IpPage from '../impostazioni/ip';
 import { CreateScenario } from './scenario';
-const ip = getIp()
+import About from '../impostazioni/about';
 
 const TabIcon = ({
   focused,
@@ -106,8 +102,8 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
-          name="FirstView"
-          component={FirstView}
+          name="IpPage"
+          component={IpPage}
           options={{headerShown: false}}
         />
         <Stack.Screen
@@ -128,6 +124,11 @@ const App = () => {
         <Stack.Screen
           name="EditScenario"
           component={EditScenario}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="About"
+          component={About}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

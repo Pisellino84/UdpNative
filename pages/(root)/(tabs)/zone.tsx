@@ -34,13 +34,12 @@ import {
 import {useEffect, useState, useRef, useCallback} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
-import {getIp} from '../../../pages/firstView';
+import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 export const udpEvents = new EventEmitter();
 const Zone = () => {
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
-    FirstView: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   let ip = getIp();

@@ -7,10 +7,10 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import icons from '../constants/icons'; // Assicurati di avere il percorso corretto per le icone
-import {clearUdp, udpEvents} from '../lib/udpClient';
+import icons from '../../../constants/icons'; // Assicurati di avere il percorso corretto per le icone
+import {clearUdp, udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {retrieveData, saveData} from '../lib/db';
+import {retrieveData, saveData} from '../../../lib/db';
 
 let currentIp = '';
 
@@ -19,7 +19,7 @@ export function getIp() {
 }
 
 
-export default function FirstView() {
+export default function IpPage() {
   type RootStackParamList = {
     ZoneStack: undefined;
   };
@@ -107,7 +107,6 @@ export default function FirstView() {
             (currentIp === '' ? null : currentIp) ?? 'inserisci indirizzo Ip'
           }
           className="bg-white px-20 rounded-full"
-          value={ip}
           onChangeText={handleIpChange}
           keyboardType="numeric"
           maxLength={15}

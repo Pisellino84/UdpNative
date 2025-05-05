@@ -2,7 +2,7 @@ import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
 import {Alert} from 'react-native';
 import EventEmitter from 'events';
-import { getIp } from '../pages/firstView';
+import { getIp } from '../pages/(root)/impostazioni/ip';
 import { useEffect } from 'react';
 
 export const udpEvents = new EventEmitter();

@@ -30,6 +30,8 @@ import plus from "../assets/icons/plus.png"
 import settings from "../assets/icons/settings.png"
 import edit from "../assets/icons/edit.png"
 import trash from "../assets/icons/trash.png"
+import email from "../assets/icons/email.png"
+import phone from "../assets/icons/phone.png"
 
 export default {
     backArrow,
@@ -53,4 +55,6 @@ export default {
     settings,
     edit,
     trash,
+    email,
+    phone,
 }
