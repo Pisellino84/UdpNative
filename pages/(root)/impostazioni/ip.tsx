@@ -35,9 +35,10 @@ export default function IpPage() {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
+            saveData('FW', 'yes');
           }
         });
-      } else {
+      } else if(fw === 'yes') {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
