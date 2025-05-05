@@ -21,6 +21,7 @@ import edit from '../assets/icons/edit.png';
 import trash from '../assets/icons/trash.png';
 import email from '../assets/icons/email.png';
 import phone from '../assets/icons/phone.png';
+import lp from '../assets/icons/lp.png';
 
 export default {
   backArrow,
@@ -46,4 +47,5 @@ export default {
   trash,
   email,
   phone,
+  lp,
 };
