@@ -1,7 +1,6 @@
-import {Text, View, Image} from 'react-native';
+import {Text, View, Image, Linking} from 'react-native';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import {SecondaryHeader} from '../../../components/Header';
-import images from '../../../constants/images';
 import icons from '../../../constants/icons';
 
 export default function About() {
@@ -9,35 +8,37 @@ export default function About() {
     <AndroidSafeArea>
       <SecondaryHeader title="About" />
       <View className="flex flex-col gap-5 mt-5 items-center">
-        {/* <Image source={images.tutondo} className=" h-16 w-96" /> */}
         <View className='flex flex-row items-center'>
           <Image source={icons.tut} className='h-16 w-44' />
           <Image source={icons.lp} className='size-24 animate-spin' tintColor={"red"}/>
           <Image source={icons.ndo} className='h-16 w-44' />
 
         </View>
-        <Text className="text-primary-300 font-extrabold text-xl">
+        <Text className="text-black-300  text-sm -mt-7 flex text-right px-5 w-screen">
           Tutondo A.T.E.C. Srl
         </Text>
         <View className="flex flex-col gap-2">
           <View className="flex flex-row gap-2 justify-center items-center">
             <Image source={icons.zone} className="size-9" />
-            <Text className="font-bold ">
+            <Text className="font-medium " onPress={() => Linking.openURL('https://maps.app.goo.gl/2X7ek9usks8Yuau78')}>
               via Nobel 8, Noventa di Piave, VE
             </Text>
           </View>
           <View className="flex flex-row gap-2 items-center">
             <Image source={icons.phone} className="size-9" />
-            <Text className="font-bold ">0421 65288</Text>
+            <Text className="font-medium ">0421 65288</Text>
           </View>
           <View className="flex flex-row gap-2 items-center">
             <Image source={icons.email} className="size-9" />
-            <Text className="font-bold ">marketing@tutondo.com</Text>
+            <Text className="font-medium" onPress={() => Linking.openURL('https://maps.app.goo.gl/2X7ek9usks8Yuau78')}>marketing@tutondo.com</Text>
           </View>
           <View className="flex flex-row gap-2 items-center">
             <Image source={icons.standard} className="size-9" />
-            <Text className="font-bold underline">www.tutondo.com</Text>
+            <Text className="font-medium" onPress={() => Linking.openURL('https://www.tutondo.com/')}>www.tutondo.com</Text>
           </View>
+        </View>
+        <View>
+          <Text className='text-black-300  text-sm font-extrabold flex text-right px-5 w-screen'>Designed by @zaccaria_cesaro</Text>
         </View>
       </View>
     </AndroidSafeArea>
