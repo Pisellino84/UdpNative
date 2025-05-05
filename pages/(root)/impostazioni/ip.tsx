@@ -7,8 +7,8 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import icons from '../../../constants/icons'; // Assicurati di avere il percorso corretto per le icone
-import {clearUdp, udpEvents} from '../../../lib/udpClient';
+import icons from '../../../constants/icons';
+import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
 
@@ -18,13 +18,11 @@ export function getIp() {
   return currentIp;
 }
 
-
 export default function IpPage() {
   type RootStackParamList = {
     ZoneStack: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [check, setCheck] = useState(false);
   useEffect(() => {
     retrieveIp();
   });
@@ -39,14 +37,13 @@ export default function IpPage() {
             handleIpChange(ipData);
           }
         });
-      }
-      else{
+      } else {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
-            navigation.navigate("ZoneStack")
+            navigation.navigate('ZoneStack');
           }
-        })
+        });
       }
     });
   }
@@ -54,7 +51,7 @@ export default function IpPage() {
   const handleIpChange = (text: string) => {
     setIp(text);
     currentIp = text;
-    udpEvents.emit('ipChanged', text); // Emetti un evento quando l'IP cambia
+    udpEvents.emit('ipChanged', text);
   };
 
   function isValidIP() {
@@ -65,25 +62,20 @@ export default function IpPage() {
       return false;
     } else check++;
 
-    // Dividi la stringa per i punti
     const parts = ip.split('.');
 
-    // Un IP valido deve avere esattamente 4 parti
     if (parts.length !== 4) {
       console.log('no 4 parts');
       return false;
     } else check++;
     for (const part of parts) {
-      // Verifica che ogni parte sia un numero
       if (!/^\d+$/.test(part)) {
         console.log('boh');
         return false;
       } else check++;
 
-      // Converti la parte in un numero
       const num = parseInt(part, 10);
 
-      // Verifica che il numero sia compreso tra 0 e 255
       if (isNaN(num) || num < 0 || num > 255) {
         console.log('ip maggiorne  o minrnwe di 0 e 255');
         return false;
@@ -129,11 +121,9 @@ export default function IpPage() {
                     text: 'Continua',
                     onPress: () => {
                       saveData('ip', ip);
-                      saveData('FW', "yes")
+                      saveData('FW', 'yes');
                       navigation.navigate('ZoneStack');
                       console.log('IP changed to:', ip);
-                      // Qui potresti voler fare qualcosa con l'IP,
-                      // magari chiamare un'altra funzione che usa getIp()
                     },
                   },
                 ],

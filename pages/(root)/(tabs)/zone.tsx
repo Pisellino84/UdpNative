@@ -4,7 +4,6 @@ import {
   Image,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -14,8 +13,7 @@ import {
   leggiStatoZona,
   Volume,
   Byte5,
-  clearUdp,
-} from '../../../lib/udpClient'; // Importa Nome
+} from '../../../lib/udpClient';
 
 import '../../../global.css';
 import prompt from 'react-native-prompt-android';
@@ -26,12 +24,8 @@ import ProgressBar from '../../../components/ProgressBar';
 
 import icons from '../../../constants/icons';
 
-import {
-  useNavigation,
-  NavigationProp,
-  useFocusEffect,
-} from '@react-navigation/native';
-import {useEffect, useState, useRef, useCallback} from 'react';
+import {useNavigation, NavigationProp} from '@react-navigation/native';
+import {useEffect, useState, useRef} from 'react';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
@@ -44,33 +38,28 @@ const Zone = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   let ip = getIp();
 
-  // Array di 48 zone
   const zones = Array.from({length: 49}, (_, i) => i + 1);
 
-  // Stato per memorizzare i nomi delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
-  const [numZone, setNumZone] = useState(6); // Stato per il numero di zone
+  const [numZone, setNumZone] = useState(6);
 
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
 
-  // useRef per memorizzare l'ultimo valore di Nome
   const lastNome = useRef<string | null>(null);
 
-  // Funzione per caricare i nomi uno alla volta
   const loadZoneData = async () => {
-
-    setIsLoading(true); // Resetta i nomi delle zone
+    setIsLoading(true);
     setPerc(0);
 
-    const names: string[] = [...zoneNames]; // Copia dello stato attuale
+    const names: string[] = [...zoneNames];
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
-    names.fill("")
+    names.fill('');
     for (const zoneId of zones) {
-      let nomeChanged = false; // Flag per controllare se Nome è cambiato
+      let nomeChanged = false;
       let volumeChanged = false;
       let Byte5Changed = false;
       while (
@@ -79,18 +68,17 @@ const Zone = () => {
         zoneId !== 49 &&
         ip.length >= 7
       ) {
-        if(Nome === "mem_free" && zoneId < 48) {
-          sendThreeBytes(61, zoneId, 0)
+        if (Nome === 'mem_free' && zoneId < 48) {
+          sendThreeBytes(61, zoneId, 0);
         }
         ip = getIp();
-        // Invia i tre byte richiesti
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 50)); // Ritardo per evitare di saltare zone in ms
+        await new Promise(resolve => setTimeout(resolve, 50));
         sendThreeBytes(61, zoneId, 0);
-        console.log("NOME DELLA ZONA: ", Nome, zoneId); // Log del nome
+        console.log('NOME DELLA ZONA: ', Nome, zoneId);
 
         if (Nome && Nome !== lastNome.current) {
-          names[zoneId - 1] = Nome; // Usa il nome caricato
+          names[zoneId - 1] = Nome;
           if (Byte5) {
             bytes5[zoneId - 1] = Byte5;
             console.log('byte5', Byte5);
@@ -104,18 +92,17 @@ const Zone = () => {
             volumes[zoneId - 1] = 0;
           }
 
-          setZoneNames([...names]); // Aggiorna lo stato
+          setZoneNames([...names]);
           setZoneVolumes([...volumes]);
           setZoneBytes5([...bytes5]);
           setPerc(prevPerc => prevPerc + 1);
-          lastNome.current = Nome; // Aggiorna l'ultimo valore di Nome
-          nomeChanged = true; // Imposta il flag a true
+          lastNome.current = Nome;
+          nomeChanged = true;
           volumeChanged = true;
           Byte5Changed = true;
-          
         }
       }
-      // Se siamo all'ultima zona (zonaId 48), impostiamo isLoading a false
+
       if (zoneId === 48) {
         setIsLoading(false);
       }
@@ -128,7 +115,7 @@ const Zone = () => {
         const numZone = parseInt(numString, 10);
         if (!isNaN(numZone)) {
           if (numZone <= 9) setNumZone(numZone);
-          else if(numZone == 48) setNumZone(numZone)
+          else if (numZone == 48) setNumZone(numZone);
           else setNumZone(numZone + 1);
           console.log('dato caricato', numString);
         } else {
@@ -164,7 +151,7 @@ const Zone = () => {
                     const num = parseInt(e ?? '', 10);
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
-                      else if(num == 48) setNumZone(num)
+                      else if (num == 48) setNumZone(num);
                       else setNumZone(num);
                       saveData('numZone', num.toString());
                     } else {
@@ -182,15 +169,14 @@ const Zone = () => {
       ],
     );
   }
-  // Carica i nomi all'avvio
+
   useEffect(() => {
-    new Promise(resolve => setTimeout(resolve, 10))
+    new Promise(resolve => setTimeout(resolve, 10));
     loadZoneData();
     retrieveNumZone();
   }, []);
 
   if (isLoading) {
-    // Mostra la schermata di caricamento
     return (
       <AndroidSafeArea>
         <View className="flex h-screen justify-center items-center">
@@ -247,22 +233,20 @@ const Zone = () => {
               </Text>
             </TouchableOpacity>
           </View>
-          {/* Genera dinamicamente i pulsanti per le zone */}
+
           {zones.slice(0, numZone).map(zoneId => (
             <TouchableOpacity
               key={zoneId}
               className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
               onPress={() => {
-                navigation.navigate('PaginaZona', {zoneId}); // Passa l'ID della zona
+                navigation.navigate('PaginaZona', {zoneId});
               }}>
               <View className="flex flex-row items-center gap-2">
                 <View>
                   <Text className="text-xl font-medium">
-                    {zoneNames[zoneId - 1]} {/* Mostra solo il nome caricato */}
+                    {zoneNames[zoneId - 1]}
                   </Text>
-                  <Text className="text-md font-light">
-                    Id zona: {zoneId} {/* Mostra solo il nome caricato */}
-                  </Text>
+                  <Text className="text-md font-light">Id zona: {zoneId}</Text>
                 </View>
                 <View className="flex flex-col gap-2">
                   <Image

@@ -3,7 +3,6 @@ import {MainHeader, SecondaryHeader} from '../../../components/Header';
 import icons from '../../../constants/icons';
 import {
   Text,
-  SafeAreaView,
   View,
   TouchableOpacity,
   TextInput,
@@ -11,21 +10,19 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  TextBase,
 } from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
-import {clearAllData, retrieveData, saveData} from '../../../lib/db';
+import {retrieveData, saveData} from '../../../lib/db';
 import {sendThreeBytes} from '../../../lib/udpClient';
 
-// Definiamo l'array scenari al di fuori del componente Scenario
 let scenari: any[] = [];
 
 export default function Scenario() {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [renderTrigger, setRenderTrigger] = useState(0); // Nuovo stato per forzare il re-render
+  const [renderTrigger, setRenderTrigger] = useState(0);
 
   useEffect(() => {
     retrieveScenari();
@@ -43,12 +40,12 @@ export default function Scenario() {
         `Lo scenario "${newScenario.nome}" esiste già. Inserisci un nome diverso.`,
         [{text: 'OK'}],
       );
-      return; // Non aggiungere il nuovo scenario
+      return;
     }
 
     scenari = [...scenari, {...newScenario, settings: []}];
     saveData('scenari', JSON.stringify(scenari)).then(() => {
-      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il salvataggio
+      setRenderTrigger(prev => prev + 1);
     });
     console.log('Scenari dopo la creazione:', scenari);
   };
@@ -61,7 +58,7 @@ export default function Scenario() {
     );
     scenari = updatedScenari;
     saveData('scenari', JSON.stringify(updatedScenari)).then(() => {
-      setRenderTrigger(prev => prev + 1); // Forza il re-render dopo l'aggiornamento
+      setRenderTrigger(prev => prev + 1);
     });
     console.log("Scenari dopo l'aggiornamento:", scenari);
   };
@@ -71,7 +68,7 @@ export default function Scenario() {
       if (array !== null) {
         scenari = JSON.parse(array);
         console.log('Scenari recuperati:', scenari);
-        setRenderTrigger(prev => prev + 1); // Forza il re-render dopo il recupero
+        setRenderTrigger(prev => prev + 1);
       }
     });
   }
@@ -94,7 +91,7 @@ export default function Scenario() {
             );
             scenari = updatedScenari;
             saveData('scenari', JSON.stringify(scenari)).then(() => {
-              setRenderTrigger(prev => prev + 1); // Forza il re-render dopo l'eliminazione
+              setRenderTrigger(prev => prev + 1);
               console.log('Scenario eliminato. Scenari aggiornati:', scenari);
             });
           },
@@ -125,15 +122,14 @@ export default function Scenario() {
       await delay(50);
 
       console.log('  Mute:', setting.mute);
-        await sendThreeBytes(4, setting.id, 1);
-        await delay(50);
-        await sendThreeBytes(22, setting.id, setting.mute);
-        await delay(50);
-        await sendThreeBytes(19, setting.id, setting.source);
-        await delay(50);
-        await sendThreeBytes(4, setting.id, 0);
-        await delay(50);
-      
+      await sendThreeBytes(4, setting.id, 1);
+      await delay(50);
+      await sendThreeBytes(22, setting.id, setting.mute);
+      await delay(50);
+      await sendThreeBytes(19, setting.id, setting.source);
+      await delay(50);
+      await sendThreeBytes(4, setting.id, 0);
+      await delay(50);
 
       console.log('  Source:', setting.source);
 
@@ -165,7 +161,9 @@ export default function Scenario() {
 
   return (
     <AndroidSafeArea>
-      <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}>
         <MainHeader title={'Scenario'} icon={icons.scenario} />
         <View className="flex flex-col justify-between mt-5">
           <TouchableOpacity
@@ -179,13 +177,6 @@ export default function Scenario() {
               Crea Scenario
             </Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-            className="flex w-full items-center justify-center p-5 bg-primary-300 rounded-2xl"
-            onPress={() => console.log('Stampa Array:', scenari)}>
-            <Text className="text-white font-medium text-lg uppercase w-full text-center">
-              Stampa Array
-            </Text>
-          </TouchableOpacity> */}
         </View>
         <View>
           {scenari.map((scenario, index) => (
@@ -208,7 +199,7 @@ export default function Scenario() {
                     navigation.navigate('EditScenario', {
                       nome: scenario.nome,
                       index,
-                      updateScenarioSettings: handleUpdateScenarioSettings, // Passiamo la funzione modificata
+                      updateScenarioSettings: handleUpdateScenarioSettings,
                     })
                   }>
                   <Image source={icons.edit} className="size-6" />
@@ -266,7 +257,7 @@ export function CreateScenario({route}: {route: any}) {
 
 interface Setting {
   id: number | null;
-  note: string
+  note: string;
   power: number;
   mute: number;
   volume: number;
@@ -281,7 +272,7 @@ interface ScenarioType {
 export function EditScenario({route}: {route: any}) {
   const {nome, index, updateScenarioSettings} = route.params;
   const [id, setId] = useState<number | null>(null);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState('');
   const [power, setPower] = useState(0);
   const [mute, setMute] = useState(0);
   const [volume, setVolume] = useState(0);
@@ -289,7 +280,6 @@ export function EditScenario({route}: {route: any}) {
   const [currentScenarioSettings, setCurrentScenarioSettings] = useState<any[]>(
     [],
   );
-  // Non abbiamo bisogno di recuperare tutti gli scenari qui per aggiornare una singola impostazione.
 
   const Sources = [
     {label: 'Tuner', value: 0},
@@ -303,15 +293,13 @@ export function EditScenario({route}: {route: any}) {
   ];
 
   useEffect(() => {
-    // Recuperiamo le impostazioni dello scenario corrente all'avvio
     if (scenari[index] && scenari[index].settings) {
       setCurrentScenarioSettings(scenari[index].settings);
     }
-  }, [index]); // Dipendenza da index per aggiornare se cambiamo scenario da modificare
+  }, [index]);
 
   function handleSave() {
     if (id !== null) {
-      // Verifica se l'ID esiste già nelle impostazioni correnti
       const isDuplicateId = currentScenarioSettings.some(
         setting => setting.id === id,
       );
@@ -322,20 +310,20 @@ export function EditScenario({route}: {route: any}) {
           `L'ID ${id} esiste già nelle impostazioni per lo scenario "${nome}". Inserisci un ID diverso.`,
           [{text: 'OK'}],
         );
-        return; // Non aggiungere la nuova impostazione
+        return;
       }
 
       const newSetting: Setting = {id, note, power, mute, volume, source};
       updateScenarioSettings(index, newSetting);
-      // Aggiorniamo immediatamente lo stato locale per la visualizzazione
+
       setCurrentScenarioSettings(prevSettings => [...prevSettings, newSetting]);
       console.log(
         'Impostazioni salvate per lo scenario con indice:',
         index,
         newSetting,
       );
-      // Resetta gli stati del form
-      setNote("")
+
+      setNote('');
       setPower(0);
       setMute(0);
       setVolume(0);
@@ -349,7 +337,7 @@ export function EditScenario({route}: {route: any}) {
     const newSettings = [...currentScenarioSettings];
     newSettings.splice(settingIndex, 1);
     setCurrentScenarioSettings(newSettings);
-    // Dovresti anche aggiornare l'array globale 'scenari' qui se vuoi che la modifica sia persistente
+
     const updatedScenari = [...scenari];
     if (updatedScenari[index]) {
       updatedScenari[index].settings = newSettings;
@@ -360,7 +348,9 @@ export function EditScenario({route}: {route: any}) {
 
   return (
     <AndroidSafeArea>
-      <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}>
         <SecondaryHeader title={`Modifica ${nome}`} />
         <View className="mt-5">
           <Text className="text-lg font-bold mb-2">Scegli Zona:</Text>
@@ -379,7 +369,7 @@ export function EditScenario({route}: {route: any}) {
               }}
             />
           </View>
-          
+
           <Text className="text-lg font-bold mb-2 mt-5">Note:</Text>
           <View className="flex flex-row gap-10 items-center">
             <TextInput
@@ -389,8 +379,7 @@ export function EditScenario({route}: {route: any}) {
               value={note}
               multiline
               onChangeText={e => {
-                setNote(e)
-                
+                setNote(e);
               }}
             />
           </View>
@@ -488,15 +477,42 @@ export function EditScenario({route}: {route: any}) {
                 className="flex flex-row justify-between"
                 key={settingIndex}>
                 <View className="bg-gray-100 p-3 rounded-md mb-2">
-                  <Text className='font-medium'>Zona ID: <Text className='font-extrabold text-lg text-primary-300'>{setting.id}</Text></Text>
-                  <Text className='font-medium'>Note: <Text className='font-extrabold text-lg text-primary-300'>{setting.note}</Text></Text>
-                  <Text className='font-medium'>Power: <Text className='font-extrabold text-lg text-primary-300'>{setting.power ? 'On' : 'Off'}</Text></Text>
-                  <Text className='font-medium'>Mute: <Text className='font-extrabold text-lg text-primary-300'>{setting.mute ? 'Muted' : 'Unmuted'}</Text></Text>
-                  <Text className='font-medium'>Volume: <Text className='font-extrabold text-lg text-primary-300'>{setting.volume}</Text></Text>
-                  <Text className='font-medium'>
+                  <Text className="font-medium">
+                    Zona ID:{' '}
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {setting.id}
+                    </Text>
+                  </Text>
+                  <Text className="font-medium">
+                    Note:{' '}
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {setting.note}
+                    </Text>
+                  </Text>
+                  <Text className="font-medium">
+                    Power:{' '}
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {setting.power ? 'On' : 'Off'}
+                    </Text>
+                  </Text>
+                  <Text className="font-medium">
+                    Mute:{' '}
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {setting.mute ? 'Muted' : 'Unmuted'}
+                    </Text>
+                  </Text>
+                  <Text className="font-medium">
+                    Volume:{' '}
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {setting.volume}
+                    </Text>
+                  </Text>
+                  <Text className="font-medium">
                     Source:{' '}
-                    <Text className='font-extrabold text-lg text-primary-300'>{Sources.find(s => s.value === setting.source)?.label ||
-                      'Sconosciuta'}</Text>
+                    <Text className="font-extrabold text-lg text-primary-300">
+                      {Sources.find(s => s.value === setting.source)?.label ||
+                        'Sconosciuta'}
+                    </Text>
                   </Text>
                 </View>
                 <TouchableOpacity

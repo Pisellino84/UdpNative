@@ -1,19 +1,16 @@
 import dgram from 'react-native-udp';
 import {Buffer} from 'buffer';
-import {Alert} from 'react-native';
 import EventEmitter from 'events';
-import { getIp } from '../pages/(root)/impostazioni/ip';
-import { useEffect } from 'react';
+import {getIp} from '../pages/(root)/impostazioni/ip';
 
 export const udpEvents = new EventEmitter();
 const PORT = 53280;
-let HOST = getIp(); // Inizializza con l'IP iniziale
+let HOST = getIp();
 
 export const client = dgram.createSocket({type: 'udp4'});
 
 client.bind(PORT, (err: any) => {
   if (err) {
-    // console.error("Errore durante l'associazione del client:", err);
     return;
   } else {
     console.log(`client UDP in ascolto - Port: ${PORT}`);
@@ -24,9 +21,7 @@ client.on('listening', () => {
   console.log('client is listening');
 });
 
-client.on('error', (err: any) => {
-  // console.error('Errore del client:', err);
-});
+client.on('error', (err: any) => {});
 
 export let Byte5: number | null = null;
 export let Byte6: number | null = null;
@@ -47,7 +42,6 @@ client.on('message', (msg, rinfo) => {
   }
 
   if (msg.length > 0 && msg[0] === 50) {
-    /*  console.log('Message received (buffer)', msg, rinfo);  */
     const [byte5, byte6, volume] = [msg[4], msg[6], msg[5]];
 
     Byte5 = byte5;
@@ -78,8 +72,7 @@ function resetTimeout() {
 
 resetTimeout();
 
-// Ascolta l'evento 'ipChanged' e aggiorna HOST
-udpEvents.on('ipChanged', (newIp) => {
+udpEvents.on('ipChanged', newIp => {
   HOST = `${newIp}`;
   console.log('Indirizzo IP UDP aggiornato a:', HOST);
 });
@@ -92,34 +85,22 @@ export async function sendThreeBytes(
   try {
     const buffer = Buffer.from([byte1, byte2, byte3]);
     client.send(buffer, 0, buffer.length, PORT, HOST, err => {
-      if (err) {
-        // console.error("Errore durante l'invio dei byte:", err);
-      } else {
+      if (!err) {
         console.log('Tre byte inviati con successo!', byte1, byte2, byte3);
-        console.log("Indirizzo IP:", HOST);
+        console.log('Indirizzo IP:', HOST);
       }
     });
-  } catch (error) {
-    // console.error('Errore:', error);
-  }
+  } catch (error) {}
 }
 
 export async function leggiStatoZona(Zona: number) {
   try {
     const buffer = Buffer.from([50, Zona, 0]);
-    client.send(buffer, 0, buffer.length, PORT, HOST, err => {
-      if (err) {
-        // console.error("Errore durante l'invio della lettura zona:", err);
-      } else {
-        /* console.log('lettura zona avvenuta successo!'); */
-      }
-    });
-  } catch (error) {
-    // console.error('Errore:', error);
-  }
+    client.send(buffer, 0, buffer.length, PORT, HOST, err => {});
+  } catch (error) {}
 }
 
 export function clearUdp() {
-  sendThreeBytes(61, 1 , 0)
-  leggiStatoZona(1)
+  sendThreeBytes(61, 1, 0);
+  leggiStatoZona(1);
 }

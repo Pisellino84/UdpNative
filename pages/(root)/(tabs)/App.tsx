@@ -6,12 +6,12 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import icons from '../../../constants/icons';
 
-import Scenario, { EditScenario } from './scenario';
+import Scenario, {EditScenario} from './scenario';
 import Zone from './zone';
 import PaginaZona from '../zone/paginaZona';
 import Impostazioni from '../impostazioni/impostazioni';
 import IpPage from '../impostazioni/ip';
-import { CreateScenario } from './scenario';
+import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
 
 const TabIcon = ({
@@ -95,7 +95,6 @@ function ZoneTabNavigator() {
     </Tab.Navigator>
   );
 }
-
 
 const App = () => {
   return (

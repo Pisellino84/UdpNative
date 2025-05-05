@@ -11,8 +11,8 @@ export default function About() {
       <View className="flex flex-col gap-5 mt-5 justify-center items-center">
         <Image source={images.tutondo} className=" h-16 w-96" />
         <Text className="text-primary-300 font-extrabold text-xl">
-            Tutondo A.T.E.C. Srl
-          </Text>
+          Tutondo A.T.E.C. Srl
+        </Text>
         <View className="flex flex-col gap-2">
           <View className="flex flex-row gap-2 justify-center items-center">
             <Image source={icons.zone} className="size-9" />
