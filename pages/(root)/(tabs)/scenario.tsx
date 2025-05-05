@@ -176,7 +176,9 @@ export default function Scenario() {
     <AndroidSafeArea>
       <ScrollView
         showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        className='mb-5'
+        >
         <MainHeader title={'Scenario'} icon={icons.scenario} />
         <View className="flex flex-col justify-between mt-5">
           <TouchableOpacity
