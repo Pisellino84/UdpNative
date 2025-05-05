@@ -42,6 +42,14 @@ export default function Scenario() {
       );
       return;
     }
+    else if (newScenario.nome === '') {
+      Alert.alert(
+        'Nome Scenario Vuoto',
+        `Inserisci un nome per lo scenario.`,
+        [{text: 'OK'}],
+      );
+      return;
+    }
 
     scenari = [...scenari, {...newScenario, settings: []}];
     saveData('scenari', JSON.stringify(scenari)).then(() => {
@@ -239,6 +247,7 @@ export function CreateScenario({route}: {route: any}) {
         <Text className="text-lg font-bold mb-2">Nome Scenario:</Text>
         <TextInput
           onChangeText={e => setNome(e)}
+          maxLength={20}
           placeholder="es: Soggiorno"
           className="bg-white rounded-xl p-5"
         />
