@@ -50,7 +50,7 @@ export default function About() {
         </View>
         <View>
           <Text className="text-black-300  text-sm font-extrabold flex text-right px-5 w-screen">
-            Designed by @zaccaria_cesaro
+            App Designed by @zaccaria_cesaro
           </Text>
         </View>
       </View>
