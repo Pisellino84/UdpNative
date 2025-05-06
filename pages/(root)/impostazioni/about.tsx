@@ -1,4 +1,4 @@
-import {Text, View, Image, Linking} from 'react-native';
+import {Text, View, Image, Linking, ScrollView} from 'react-native';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import {SecondaryHeader} from '../../../components/Header';
 import icons from '../../../constants/icons';
@@ -6,6 +6,7 @@ import images from '../../../constants/images';
 
 export default function About() {
   return (
+    <ScrollView showsVerticalScrollIndicator={false}>
     <AndroidSafeArea>
       <SecondaryHeader title="About" />
       <View className="flex flex-col gap-5 mt-5 items-center">
@@ -60,6 +61,8 @@ export default function About() {
           </Text>
         </View>
       </View>
+      
     </AndroidSafeArea>
+    </ScrollView>
   );
 }
