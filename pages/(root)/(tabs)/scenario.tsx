@@ -184,9 +184,10 @@ export default function Scenario() {
       <AndroidSafeArea>
         <View className="flex h-screen justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text className="text-lg mt-4">
+          <Text className="text-lg mt-4 animate-pulse">
             Applicazione dello scenario in corso...
           </Text>
+          <Text className='font-extrabold text-2xl animate-pulse'>Non cambiare pagina</Text>
         </View>
       </AndroidSafeArea>
     );
