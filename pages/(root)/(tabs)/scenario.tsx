@@ -413,7 +413,7 @@ export function EditScenario({route}: {route: any}) {
         <SecondaryHeader title={`Modifica ${initialNome}`} />
         <View className="mt-5 ">
           <Text className="text-lg font-bold mb-2">Nome Scenario:</Text>
-          <View className="flex flex-row  justify-between">
+          <View className="flex flex-row">
             <TextInput
               onChangeText={setNome}
               maxLength={20}
@@ -421,7 +421,7 @@ export function EditScenario({route}: {route: any}) {
               className="bg-white w-1/2 rounded-xl p-5"
             />
             <TouchableOpacity
-              className="bg-primary-300 p-5 flex items-center justify-center rounded-xl "
+              className="bg-primary-300 p-5 w-1/2 flex items-center justify-center rounded-xl "
               onPress={handleSaveNome}>
               <Text className="font-bold text-white text-xl">Salva Nome</Text>
             </TouchableOpacity>
