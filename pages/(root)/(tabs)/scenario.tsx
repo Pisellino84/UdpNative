@@ -15,12 +15,13 @@ import {
   NavigationProp,
   useNavigation,
   useFocusEffect,
+  TabActions,
 } from '@react-navigation/native';
 import {useEffect, useState, useCallback} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
-import {sendThreeBytes} from '../../../lib/udpClient';
+import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
 import Zone from './zone';
 
 let scenari: any[] = [];
@@ -124,7 +125,26 @@ export default function Scenario() {
   }
 
   async function Applica(scenario: any) {
-    const time = 50;
+    try {
+      const statoZona = await leggiStatoZona(1);
+      if (statoZona === undefined || statoZona === null) {
+        Alert.alert(
+          'Errore',
+          'Nessuna risposta ricevuta dal dispositivo. Applicazione dello scenario annullata.',
+          [{text: 'OK'}],
+        );
+        return;
+      }
+    } catch (error) {
+      Alert.alert(
+        'Errore',
+        'Si è verificato un errore durante la lettura dello stato della zona. Applicazione dello scenario annullata.',
+        [{text: 'OK'}],
+      );
+      return;
+    }
+
+    const time = 30;
     setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 

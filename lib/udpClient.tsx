@@ -93,11 +93,36 @@ export async function sendThreeBytes(
   } catch (error) {}
 }
 
-export async function leggiStatoZona(Zona: number) {
-  try {
-    const buffer = Buffer.from([50, Zona, 0]);
-    client.send(buffer, 0, buffer.length, PORT, HOST, err => {});
-  } catch (error) {}
+export async function leggiStatoZona(Zona: number): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      udpEvents.off('Byte5Changed', onResponse);
+      reject(null);
+    }, 3000); // Timeout di 3 secondi
+
+    const onResponse = (byte5: number) => {
+      clearTimeout(timeout);
+      udpEvents.off('Byte5Changed', onResponse);
+      resolve(byte5);
+    };
+
+    udpEvents.on('Byte5Changed', onResponse);
+
+    try {
+      const buffer = Buffer.from([50, Zona, 0]);
+      client.send(buffer, 0, buffer.length, PORT, HOST, err => {
+        if (err) {
+          clearTimeout(timeout);
+          udpEvents.off('Byte5Changed', onResponse);
+          reject(null);
+        }
+      });
+    } catch (error) {
+      clearTimeout(timeout);
+      udpEvents.off('Byte5Changed', onResponse);
+      reject(null);
+    }
+  });
 }
 
 export function clearUdp() {
