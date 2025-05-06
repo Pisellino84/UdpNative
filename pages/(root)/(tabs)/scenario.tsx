@@ -550,7 +550,7 @@ export function EditScenario({route}: {route: any}) {
               .sort((a, b) => a.id - b.id)
               .map((setting, settingIndex) => (
                 <View
-                  className="flex flex-row justify-between"
+                  className="flex flex-row justify-between border-y border-black-50 py-3 space-y-10"
                   key={settingIndex}>
                   <View className="bg-gray-100 p-3 rounded-md mb-2">
                     <Text className="font-medium">
@@ -591,32 +591,36 @@ export function EditScenario({route}: {route: any}) {
                       </Text>
                     </Text>
                   </View>
-                  <TouchableOpacity
-                    className="flex justify-center items-center bg-gray-300 rounded-full  my-3"
-                    onPress={() => {
-                      navigation.navigate('EditSetting', {
-                        setting,
-                        settingIndex,
-                        scenarioIndex: index,
-                        onSettingUpdated: (
-                          updatedSetting: any,
-                          idx: any | number,
-                        ) => {
-                          const updatedSettings = [...currentScenarioSettings];
-                          updatedSettings[idx] = updatedSetting;
-                          setCurrentScenarioSettings(updatedSettings);
-                        },
-                      });
-                    }}>
-                    <Image source={icons.edit} className="size-10" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="flex justify-center items-center bg-red-100 rounded-full  my-3"
-                    onPress={() => {
-                      handleDelete(settingIndex);
-                    }}>
-                    <Image source={icons.trash} className="size-10" />
-                  </TouchableOpacity>
+                  <View className='flex flex-row gap-5'>
+                    <TouchableOpacity
+                      className="flex justify-center items-center bg-gray-300 rounded-full  my-3"
+                      onPress={() => {
+                        navigation.navigate('EditSetting', {
+                          setting,
+                          settingIndex,
+                          scenarioIndex: index,
+                          onSettingUpdated: (
+                            updatedSetting: any,
+                            idx: any | number,
+                          ) => {
+                            const updatedSettings = [
+                              ...currentScenarioSettings,
+                            ];
+                            updatedSettings[idx] = updatedSetting;
+                            setCurrentScenarioSettings(updatedSettings);
+                          },
+                        });
+                      }}>
+                      <Image source={icons.edit} className="size-10" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="flex justify-center items-center bg-red-100 rounded-full  my-3"
+                      onPress={() => {
+                        handleDelete(settingIndex);
+                      }}>
+                      <Image source={icons.trash} className="size-10" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ))}
             {currentScenarioSettings.length === 0 && (

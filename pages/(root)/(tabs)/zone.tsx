@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -47,6 +48,7 @@ const Zone = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const lastNome = useRef<string | null>(null);
 
@@ -190,30 +192,20 @@ const Zone = () => {
 
   return (
     <AndroidSafeArea>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={loadZoneData} />
+        }>
         <MainHeader title="Zone" icon={icons.zone} />
+        <View className="flex flex-col items-center justify-center mt-2">
+          <Image source={icons.backArrow} className="-rotate-90 size-6" />
+          <Text className="text-black-200 font-extrabold text-sm">
+            trascina verso il basso per aggiornare
+          </Text>
+        </View>
         <View className="my-5 flex flex-col gap-3">
-          <View className="w-full flex flex-row justify-between items-center mb-5">
-            <TouchableOpacity
-              className="bg-primary-300 p-3 rounded-xl"
-              onPress={() => {
-                modificaNumZone();
-              }}>
-              <Text className="text-white font-bold text-md text-center uppercase">
-                Visualizza Zone
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-zinc-700 p-3 rounded-xl justify-end"
-              onPress={() => {
-                loadZoneData();
-              }}>
-              <Text className="text-white font-bold text-md text-center uppercase">
-                Aggiorna Stato
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="flex flex-row justify-between items-center">
+          <View className="flex flex-row justify-between items-center gap-3">
             <TouchableOpacity>
               <Text
                 className="text-primary-300 font-light"
@@ -221,6 +213,15 @@ const Zone = () => {
                   zones.forEach(zoneId => sendThreeBytes(4, zoneId, 1));
                 }}>
                 Turn all Zones ON
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-primary-300 p-3 rounded-xl"
+              onPress={() => {
+                modificaNumZone();
+              }}>
+              <Text className="text-white font-bold text-md text-center uppercase">
+                Visualizza Zone
               </Text>
             </TouchableOpacity>
             <TouchableOpacity>
