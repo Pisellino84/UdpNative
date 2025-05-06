@@ -75,6 +75,7 @@ function ZoneTabNavigator() {
       <Tab.Screen
         name="Zone"
         component={Zone}
+        
         options={{
           title: 'Zone',
           headerShown: false,

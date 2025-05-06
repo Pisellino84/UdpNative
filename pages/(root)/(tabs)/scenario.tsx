@@ -22,13 +22,14 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
-import Zone from './zone';
+import {useLoading} from './zone'; 
 
 let scenari: any[] = [];
 
 export default function Scenario() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [renderTrigger, setRenderTrigger] = useState(0);
+
 
   const retrieveScenari = useCallback(() => {
     retrieveData('scenari').then(array => {
@@ -119,7 +120,7 @@ export default function Scenario() {
     await new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  const [isLoading, setIsLoading] = useState(false);
+  const {isLoading, setIsLoading} = useLoading()
   async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -127,7 +128,7 @@ export default function Scenario() {
   async function Applica(scenario: any) {
     try {
       const statoZona = await leggiStatoZona(1);
-      if (statoZona === undefined || statoZona === null) {
+      if (statoZona === undefined || statoZona === null || isLoading) {
         Alert.alert(
           'Errore',
           'Nessuna risposta ricevuta dal dispositivo. Applicazione dello scenario annullata.',
