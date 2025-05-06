@@ -31,7 +31,32 @@ import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
+import React, {createContext, useContext} from 'react';
+
 export const udpEvents = new EventEmitter();
+
+const LoadingContext = createContext<{
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+} | null>(null);
+
+export const useLoading = () => {
+  const context = useContext(LoadingContext);
+  if (!context) {
+    throw new Error('useLoading must be used within a LoadingProvider');
+  }
+  return context;
+};
+
+export const LoadingProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  return (
+    <LoadingContext.Provider value={{isLoading, setIsLoading}}>
+      {children}
+    </LoadingContext.Provider>
+  );
+};
+
 const Zone = () => {
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
@@ -46,7 +71,7 @@ const Zone = () => {
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
   const [numZone, setNumZone] = useState(6);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const {isLoading, setIsLoading} = useLoading();
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 

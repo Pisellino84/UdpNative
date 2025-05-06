@@ -1,4 +1,10 @@
-import {Image, ImageSourcePropType, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import '../../../global.css';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -13,6 +19,7 @@ import Impostazioni from '../impostazioni/impostazioni';
 import IpPage from '../impostazioni/ip';
 import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
+import {useLoading, LoadingProvider} from './zone';
 
 const TabIcon = ({
   focused,
@@ -43,6 +50,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function ZoneTabNavigator() {
+  const {isLoading} = useLoading();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -57,7 +65,8 @@ function ZoneTabNavigator() {
         tabBarButton: ({children, onPress}) => (
           <TouchableOpacity
             className="flex-1 pb-4 justify-center items-center"
-            onPress={onPress}>
+            onPress={onPress}
+            disabled={isLoading}>
             {children}
           </TouchableOpacity>
         ),
@@ -106,45 +115,47 @@ function ZoneTabNavigator() {
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="IpPage"
-          component={IpPage}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="ZoneStack"
-          component={ZoneTabNavigator}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="PaginaZona"
-          component={PaginaZona}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="CreateScenario"
-          component={CreateScenario}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="EditScenario"
-          component={EditScenario}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="EditSetting"
-          component={EditSetting}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="About"
-          component={About}
-          options={{headerShown: false}}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <LoadingProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="IpPage"
+            component={IpPage}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="ZoneStack"
+            component={ZoneTabNavigator}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="PaginaZona"
+            component={PaginaZona}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="CreateScenario"
+            component={CreateScenario}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="EditScenario"
+            component={EditScenario}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="EditSetting"
+            component={EditSetting}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="About"
+            component={About}
+            options={{headerShown: false}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LoadingProvider>
   );
 };
 
