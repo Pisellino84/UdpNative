@@ -21,6 +21,7 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {sendThreeBytes} from '../../../lib/udpClient';
+import Zone from './zone';
 
 let scenari: any[] = [];
 
@@ -309,11 +310,13 @@ export function EditScenario({route}: {route: any}) {
     {label: 'TV', value: 7},
   ];
 
-  useEffect(() => {
-    if (scenari[index] && scenari[index].settings) {
-      setCurrentScenarioSettings(scenari[index].settings);
-    }
-  }, [index]);
+  useFocusEffect(
+    useCallback(() => {
+      if (scenari[index] && scenari[index].settings) {
+        setCurrentScenarioSettings(scenari[index].settings);
+      }
+    }, [index]),
+  );
 
   function handleSaveSetting() {
     if (id !== null) {
@@ -543,58 +546,79 @@ export function EditScenario({route}: {route: any}) {
             <Text className="text-xl text-primary-300 font-bold mb-2">
               Impostazioni Salvate:
             </Text>
-            {currentScenarioSettings.map((setting, settingIndex) => (
-              <View
-                className="flex flex-row justify-between"
-                key={settingIndex}>
-                <View className="bg-gray-100 p-3 rounded-md mb-2">
-                  <Text className="font-medium">
-                    Zona ID:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {setting.id}
+            {currentScenarioSettings
+              .sort((a, b) => a.id - b.id)
+              .map((setting, settingIndex) => (
+                <View
+                  className="flex flex-row justify-between"
+                  key={settingIndex}>
+                  <View className="bg-gray-100 p-3 rounded-md mb-2">
+                    <Text className="font-medium">
+                      Zona ID:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {setting.id}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text className="font-medium">
-                    Note:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {setting.note}
+                    <Text className="font-medium">
+                      Note:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {setting.note}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text className="font-medium">
-                    Power:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {setting.power ? 'On' : 'Off'}
+                    <Text className="font-medium">
+                      Power:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {setting.power ? 'On' : 'Off'}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text className="font-medium">
-                    Mute:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {setting.mute ? 'Muted' : 'Unmuted'}
+                    <Text className="font-medium">
+                      Mute:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {setting.mute ? 'Muted' : 'Unmuted'}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text className="font-medium">
-                    Volume:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {setting.volume}
+                    <Text className="font-medium">
+                      Volume:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {setting.volume}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text className="font-medium">
-                    Source:{' '}
-                    <Text className="font-extrabold text-lg text-primary-300">
-                      {Sources.find(s => s.value === setting.source)?.label ||
-                        'Sconosciuta'}
+                    <Text className="font-medium">
+                      Source:{' '}
+                      <Text className="font-extrabold text-lg text-primary-300">
+                        {Sources.find(s => s.value === setting.source)?.label ||
+                          'Sconosciuta'}
+                      </Text>
                     </Text>
-                  </Text>
+                  </View>
+                  <TouchableOpacity
+                    className="flex justify-center items-center bg-gray-300 rounded-full  my-3"
+                    onPress={() => {
+                      navigation.navigate('EditSetting', {
+                        setting,
+                        settingIndex,
+                        scenarioIndex: index,
+                        onSettingUpdated: (
+                          updatedSetting: any,
+                          idx: any | number,
+                        ) => {
+                          const updatedSettings = [...currentScenarioSettings];
+                          updatedSettings[idx] = updatedSetting;
+                          setCurrentScenarioSettings(updatedSettings);
+                        },
+                      });
+                    }}>
+                    <Image source={icons.edit} className="size-10" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex justify-center items-center bg-red-100 rounded-full  my-3"
+                    onPress={() => {
+                      handleDelete(settingIndex);
+                    }}>
+                    <Image source={icons.trash} className="size-10" />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  className="flex justify-center items-center bg-red-100 rounded-full  my-3"
-                  onPress={() => {
-                    handleDelete(settingIndex);
-                  }}>
-                  <Image source={icons.trash} className="size-10" />
-                </TouchableOpacity>
-              </View>
-            ))}
+              ))}
             {currentScenarioSettings.length === 0 && (
               <Text className="text-gray-500">
                 Nessuna impostazione salvata per questo scenario.
@@ -603,6 +627,157 @@ export function EditScenario({route}: {route: any}) {
           </View>
         </View>
       </ScrollView>
+    </AndroidSafeArea>
+  );
+}
+
+export function EditSetting({
+  route,
+  navigation,
+}: {
+  route: any;
+  navigation: any;
+}) {
+  const {setting, settingIndex, scenarioIndex, onSettingUpdated} = route.params;
+  const [note, setNote] = useState(setting.note);
+  const [power, setPower] = useState(setting.power);
+  const [mute, setMute] = useState(setting.mute);
+  const [volume, setVolume] = useState(setting.volume);
+  const [source, setSource] = useState(setting.source);
+
+  const Sources = [
+    {label: 'Tuner', value: 0},
+    {label: 'CD', value: 1},
+    {label: 'DVD', value: 2},
+    {label: 'SAT', value: 3},
+    {label: 'PC', value: 4},
+    {label: 'Multi CD', value: 5},
+    {label: 'Multi DVD', value: 6},
+    {label: 'TV', value: 7},
+  ];
+
+  const handleSave = () => {
+    const updatedSetting = {
+      ...setting,
+      note,
+      power,
+      mute,
+      volume,
+      source,
+    };
+
+    const updatedScenari = [...scenari];
+    if (
+      updatedScenari[scenarioIndex] &&
+      updatedScenari[scenarioIndex].settings
+    ) {
+      updatedScenari[scenarioIndex].settings[settingIndex] = updatedSetting;
+      scenari = updatedScenari;
+
+      saveData('scenari', JSON.stringify(scenari)).then(() => {
+        if (onSettingUpdated) {
+          onSettingUpdated(updatedSetting, settingIndex);
+        }
+        navigation.goBack();
+      });
+    }
+  };
+
+  return (
+    <AndroidSafeArea>
+      <SecondaryHeader title={`Modifica Zona ${setting.id}`} />
+      <View className="mt-5 p-5">
+        <Text className="text-lg font-bold mb-2">Note:</Text>
+        <TextInput
+          placeholder="Inserisci le tue note"
+          maxLength={120}
+          className="bg-white w-full rounded-xl p-5 justify-start"
+          value={note}
+          multiline
+          onChangeText={setNote}
+        />
+
+        <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
+          <TouchableOpacity
+            className={`flex flex-row items-center gap-2`}
+            onPress={() => setPower((prev: number) => (prev === 0 ? 1 : 0))}>
+            <Image
+              source={icons.power}
+              className="size-11"
+              tintColor={power ? '#228BE6' : '#D4D4D8'}
+            />
+            <Text
+              className={
+                power
+                  ? 'text-primary-300 font-base'
+                  : 'text-black-50 font-light'
+              }>
+              Power
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setMute((prev: number) => (prev === 0 ? 1 : 0))}
+            className={`flex flex-row items-center gap-2`}>
+            <Image
+              source={icons.mute}
+              className="size-11"
+              tintColor={mute ? '#228BE6' : '#D4D4D8'}
+            />
+            <Text
+              className={
+                mute ? 'text-primary-300 font' : 'text-black-50 font-light'
+              }>
+              Mute
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="my-2.5">
+          <Text className="text-black-300 text-lg font-medium mb-1">
+            Volume:{' '}
+            <Text className="text-2xl font-extrabold text-primary-300">
+              {volume}
+            </Text>
+          </Text>
+          <Slider
+            minimumTrackTintColor="#228BE6"
+            maximumTrackTintColor="#FFFFFF"
+            step={1}
+            minimumValue={0}
+            maximumValue={80}
+            value={volume ?? 0}
+            onValueChange={setVolume}
+          />
+        </View>
+
+        <View className="my-2.5">
+          <Text className="text-black-300 text-lg font-medium">Source:</Text>
+          <Dropdown
+            data={Sources}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Seleziona sorgente"
+            value={source}
+            onChange={item => setSource(item.value)}
+            style={{
+              padding: 20,
+              backgroundColor: 'white',
+              borderRadius: 12,
+            }}
+            containerStyle={{borderRadius: 12}}
+          />
+        </View>
+
+        <TouchableOpacity
+          onPress={handleSave}
+          className="bg-green-500 p-5 flex items-center justify-center rounded-xl mt-5">
+          <Text className="text-white font-extrabold text-xl">
+            Salva Modifiche
+          </Text>
+        </TouchableOpacity>
+      </View>
     </AndroidSafeArea>
   );
 }

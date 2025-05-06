@@ -6,7 +6,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import icons from '../../../constants/icons';
 
-import Scenario, {EditScenario} from './scenario';
+import Scenario, {EditScenario, EditSetting} from './scenario';
 import Zone from './zone';
 import PaginaZona from '../zone/paginaZona';
 import Impostazioni from '../impostazioni/impostazioni';
@@ -123,6 +123,11 @@ const App = () => {
         <Stack.Screen
           name="EditScenario"
           component={EditScenario}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="EditSetting"
+          component={EditSetting}
           options={{headerShown: false}}
         />
         <Stack.Screen

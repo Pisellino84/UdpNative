@@ -2,7 +2,7 @@ import icons from '../../../constants/icons';
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import {View, Text, TouchableOpacity} from 'react-native';
 import {MainHeader} from '../../../components/Header';
-import {NavigationProp, useNavigation,} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {saveData} from '../../../lib/db';
 
 export default function Impostazioni() {

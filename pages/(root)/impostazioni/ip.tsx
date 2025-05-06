@@ -38,7 +38,7 @@ export default function IpPage() {
             saveData('FW', 'yes');
           }
         });
-      } else if(fw === 'yes') {
+      } else if (fw === 'yes') {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
@@ -129,7 +129,7 @@ export default function IpPage() {
                 ],
               );
             } else {
-              Alert.alert('Ip non valido', 'Controlla l\'ip inserito');
+              Alert.alert('Ip non valido', "Controlla l'ip inserito");
             }
           }}>
           <Image
