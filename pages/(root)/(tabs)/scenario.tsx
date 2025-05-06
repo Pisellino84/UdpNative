@@ -124,6 +124,7 @@ export default function Scenario() {
   }
 
   async function Applica(scenario: any) {
+    const time = 50;
     setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
@@ -133,27 +134,25 @@ export default function Scenario() {
       console.log('  Volume:', setting.volume);
       await saveData(`volume_${setting.id}`, setting.volume?.toString());
       await sendThreeBytes(15, setting.id, setting.volume);
-      await delay(50);
+      await delay(time);
 
       console.log('  Mute:', setting.mute);
       await sendThreeBytes(4, setting.id, 1);
-      await delay(50);
+      await delay(time);
       await sendThreeBytes(22, setting.id, setting.mute);
-      await delay(50);
+      await delay(time);
       await sendThreeBytes(19, setting.id, setting.source);
-      await delay(50);
-      await sendThreeBytes(4, setting.id, 0);
-      await delay(50);
+      await delay(time);
 
       console.log('  Source:', setting.source);
 
       await sendThreeBytes(19, setting.id, setting.source);
-      await delay(50);
+      await delay(time);
 
       console.log('  Power:', setting.power);
 
       await sendThreeBytes(4, setting.id, setting.power);
-      await delay(50);
+      await delay(time);
 
       console.log('---');
     }
@@ -544,7 +543,10 @@ export function EditScenario({route}: {route: any}) {
 
           <View className="mt-5">
             <Text className="text-xl text-primary-300 font-bold mb-2">
-              Impostazioni Salvate:
+              Impostazioni Salvate:{' '}
+              {currentScenarioSettings.length > 0
+                ? currentScenarioSettings.length
+                : null}
             </Text>
             {currentScenarioSettings
               .sort((a, b) => a.id - b.id)
@@ -591,7 +593,7 @@ export function EditScenario({route}: {route: any}) {
                       </Text>
                     </Text>
                   </View>
-                  <View className='flex flex-row gap-5'>
+                  <View className="flex flex-row gap-5">
                     <TouchableOpacity
                       className="flex justify-center items-center bg-gray-300 rounded-full  my-3"
                       onPress={() => {
@@ -616,7 +618,22 @@ export function EditScenario({route}: {route: any}) {
                     <TouchableOpacity
                       className="flex justify-center items-center bg-red-100 rounded-full  my-3"
                       onPress={() => {
-                        handleDelete(settingIndex);
+                        Alert.alert(
+                          'Elimina Impostazione',
+                          `Sei sicuro di voler eliminare l'impostazione per la zona ${setting.id}?`,
+                          [
+                            {
+                              text: 'Annulla',
+                              style: 'cancel',
+                            },
+                            {
+                              text: 'Elimina',
+                              onPress: () => {
+                                handleDelete(settingIndex);
+                              },
+                            },
+                          ],
+                        );
                       }}>
                       <Image source={icons.trash} className="size-10" />
                     </TouchableOpacity>
@@ -775,7 +792,22 @@ export function EditSetting({
         </View>
 
         <TouchableOpacity
-          onPress={handleSave}
+          onPress={() => {
+            Alert.alert(
+              'Conferma Modifica',
+              `Sei sicuro di voler modificare le impostazioni per la zona ${setting.id}?`,
+              [
+                {
+                  text: 'Annulla',
+                  style: 'cancel',
+                },
+                {
+                  text: 'Conferma',
+                  onPress: handleSave,
+                },
+              ],
+            );
+          }}
           className="bg-green-500 p-5 flex items-center justify-center rounded-xl mt-5">
           <Text className="text-white font-extrabold text-xl">
             Salva Modifiche
