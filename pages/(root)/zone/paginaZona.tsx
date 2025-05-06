@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ViewComponent,
-} from 'react-native';
+import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
@@ -23,21 +16,19 @@ import {
   Volume,
   Nome,
 } from '../../../lib/udpClient';
-import {clearAllData, retrieveData, saveData} from '../../../lib/db';
+import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useZonaMonitor} from '../../../lib/useZonaMonitor';
 
 export default function PaginaZona() {
-  // Define RootStackParamList if not already defined elsewhere
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
   };
 
   const route = useRoute<RouteProp<RootStackParamList, 'PaginaZona'>>();
-  const {zoneId} = route.params; // Recupera il parametro zoneId
+  const {zoneId} = route.params;
 
   React.useEffect(() => {
-    // Usa il parametro zoneId per chiamare leggiStatoZona
     sendThreeBytes(61, zoneId, 0);
   }, [zoneId]);
 
@@ -70,7 +61,7 @@ export default function PaginaZona() {
           console.error('Il volume recuperato non è un numero valido.');
         }
       } else {
-        setVolume(Volume)
+        setVolume(Volume);
       }
     });
   }
@@ -81,22 +72,19 @@ export default function PaginaZona() {
   }
 
   useEffect(() => {
-    // Leggi lo stato della zona all'inizio
-
     leggiStatoZona(zoneId);
 
-    // Ascolta i cambiamenti di Power
     const handleByte5Change = () => {
       if (Byte5 == 33 || Byte5 == 1) {
         setPower(0);
         setMute(0);
         setVolume(Volume);
-        saveSetting()
+        saveSetting();
       } else if (Byte5 == 35 || Byte5 == 3) {
         setPower(1);
         setMute(0);
         setVolume(Volume);
-        saveSetting()
+        saveSetting();
       } else if (Byte5 == 37 || Byte5 == 5) {
         setPower(0);
         setMute(1);
@@ -110,7 +98,7 @@ export default function PaginaZona() {
 
     const handleByte6Change = () => {
       if (Byte6 !== null) {
-        const sourceValue = Byte6 % 16; // Calcola il valore della sorgente
+        const sourceValue = Byte6 % 16;
         if (sourceValue >= 0 && sourceValue <= 7) {
           setSource(sourceValue);
         }
@@ -130,7 +118,6 @@ export default function PaginaZona() {
     udpEvents.on('VolumeChanged', handleVolumeChange);
     udpEvents.on('NomeChanged', handleNomeChange);
 
-    // Cleanup: rimuovi il listener quando il componente viene smontato
     return () => {
       udpEvents.off('Byte5Changed', handleByte5Change);
       udpEvents.off('Byte6Changed', handleByte6Change);

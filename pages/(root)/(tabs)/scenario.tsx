@@ -187,7 +187,9 @@ export default function Scenario() {
           <Text className="text-lg mt-4">
             Applicazione dello scenario in corso...
           </Text>
-          <Text className='text-primary-300 font-extrabold text-2xl animate-pulse'>Non cambiare pagina</Text>
+          <Text className="text-primary-300 font-extrabold text-2xl animate-pulse">
+            Non cambiare pagina
+          </Text>
         </View>
       </AndroidSafeArea>
     );
