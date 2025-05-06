@@ -1,4 +1,4 @@
-import {Image, ImageSourcePropType, Text, View} from 'react-native';
+import {Image, ImageSourcePropType, Text, TouchableOpacity, View} from 'react-native';
 import '../../../global.css';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -54,6 +54,14 @@ function ZoneTabNavigator() {
           borderTopWidth: 1,
           minHeight: 100,
         },
+        tabBarButton: ({children, onPress}) => (
+          <TouchableOpacity
+            className="flex-1 pb-4 justify-center items-center"
+            onPress={onPress}>
+            {children}
+          </TouchableOpacity>
+        ),
+        headerShown: false,
       }}>
       <Tab.Screen
         name="Zone"
