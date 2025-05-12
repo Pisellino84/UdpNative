@@ -26,14 +26,10 @@ export default function ProgressBar({progress}: {progress: number}) {
           className={`bg-primary-300 h-5 flex items-center justify-center rounded-xl`}
           style={{width: width}}></View>
       </View>
-      {showWarning ? (
+      {showWarning ?? (
         <Text className="text-red-500 font-bold text-sm text-center mb-2">
           Il caricamento è troppo lento, controlla la connessione o verifica che
           l'indirizzo IP inserito sia corretto.
-        </Text>
-      ) : (
-        <Text className="text-primary-300 font-extrabold text-2xl animate-pulse">
-          Non cambiare pagina
         </Text>
       )}
     </View>

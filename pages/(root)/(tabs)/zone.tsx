@@ -69,7 +69,6 @@ const Zone = () => {
       return;
     }
     setIsUseLoading(true);
-    setIsUseRefreshing(true);
     setIsLoading(true);
     setPerc(0);
 
@@ -147,7 +146,7 @@ const Zone = () => {
 
       ip = getIp();
       await leggiStatoZona(zone);
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 50));
   
       // Aggiorna Volume se è cambiato
       if (Volume !== undefined && Volume !== null && Volume !== updatedVolumes[zone - 1]) {
@@ -235,6 +234,7 @@ const Zone = () => {
   }
 
   useEffect(() => {
+    setIsUseRefreshing(true);
     new Promise(resolve => setTimeout(resolve, 500));
     loadZoneData();
     retrieveNumZone();
@@ -245,9 +245,9 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
-        /* await new Promise(resolve => setTimeout(resolve, 200)); */
+        await new Promise(resolve => setTimeout(resolve, 200));
         await refreshZoneData(); // Aspetta che la funzione termini
-        /* await new Promise(resolve => setTimeout(resolve, 200));  */// Attendi prima di ripetere
+        await new Promise(resolve => setTimeout(resolve, 200));  // Attendi prima di ripetere
       }
     };
 
