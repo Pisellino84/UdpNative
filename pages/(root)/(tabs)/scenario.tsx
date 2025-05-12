@@ -22,14 +22,13 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
-import {useLoading} from './zone'; 
+import {useLoading} from '../../../lib/useIsLoading';
 
 let scenari: any[] = [];
 
 export default function Scenario() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [renderTrigger, setRenderTrigger] = useState(0);
-
 
   const retrieveScenari = useCallback(() => {
     retrieveData('scenari').then(array => {
@@ -120,18 +119,25 @@ export default function Scenario() {
     await new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  const {isLoading, setIsLoading} = useLoading()
+  const {isUseLoading, setIsUseLoading} = useLoading();
   async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-
+  const [isLoading, setIsLoading] = useState(false);
   async function Applica(scenario: any) {
     try {
       const statoZona = await leggiStatoZona(1);
-      if (statoZona === undefined || statoZona === null || isLoading) {
+      if (statoZona === undefined || statoZona === null) {
         Alert.alert(
           'Errore',
           'Nessuna risposta ricevuta dal dispositivo. Applicazione dello scenario annullata.',
+          [{text: 'OK'}],
+        );
+        return;
+      } else if (isUseLoading) {
+        Alert.alert(
+          'Errore',
+          'Aspetta che il recupero dei dati sia completato prima di applicare lo scenario.',
           [{text: 'OK'}],
         );
         return;
@@ -147,6 +153,7 @@ export default function Scenario() {
 
     const time = 30;
     setIsLoading(true);
+    setIsUseLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
     for (const setting of scenario.settings) {
@@ -177,6 +184,7 @@ export default function Scenario() {
 
       console.log('---');
     }
+    setIsUseLoading(false);
     setIsLoading(false);
   }
 

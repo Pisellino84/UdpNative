@@ -19,7 +19,7 @@ import Impostazioni from '../impostazioni/impostazioni';
 import IpPage from '../impostazioni/ip';
 import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
-import {useLoading, LoadingProvider} from './zone';
+import {useLoading, LoadingProvider} from '../../../lib/useIsLoading';
 
 const TabIcon = ({
   focused,
@@ -50,7 +50,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function ZoneTabNavigator() {
-  const {isLoading} = useLoading();
+  const {isUseLoading} = useLoading();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -66,7 +66,8 @@ function ZoneTabNavigator() {
           <TouchableOpacity
             className="flex-1 pb-4 justify-center items-center"
             onPress={onPress}
-            disabled={isLoading}>
+            /* disabled={isLoading} */
+          >
             {children}
           </TouchableOpacity>
         ),
