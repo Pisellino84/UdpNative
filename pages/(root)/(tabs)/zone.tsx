@@ -289,9 +289,18 @@ const Zone = () => {
               key={zona}
               className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
               onPress={() => {
-                setIsUseRefreshing(true);
-                new Promise(resolve => setTimeout(resolve, 50));
-                navigation.navigate('PaginaZona', {zoneId: zoneIds[zona - 1]});
+                if (!isUseApplying) {
+                  setIsUseRefreshing(true);
+                  new Promise(resolve => setTimeout(resolve, 50));
+                  navigation.navigate('PaginaZona', {
+                    zoneId: zoneIds[zona - 1],
+                  });
+                } else {
+                  Alert.alert(
+                    'Errore',
+                    'Applicazione dello scenario in corso, attendere',
+                  );
+                }
               }}>
               <View className="flex flex-row items-center gap-2">
                 <View>

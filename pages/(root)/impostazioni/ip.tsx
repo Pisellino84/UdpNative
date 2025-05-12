@@ -11,6 +11,7 @@ import icons from '../../../constants/icons';
 import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
+import { useApply, useRefresh } from '../../../lib/useIsLoading';
 
 let currentIp = '';
 
@@ -23,8 +24,12 @@ export default function IpPage() {
     ZoneStack: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const {setIsUseApplying} = useApply()
+  const {setIsUseRefreshing} = useRefresh()
   useEffect(() => {
+    
     retrieveIp();
+    
   }, []);
 
   const [ip, setIp] = useState('');
@@ -126,6 +131,7 @@ export default function IpPage() {
                       saveData('FW', 'yes');
                       navigation.navigate('ZoneStack');
                       console.log('IP changed to:', ip);
+                      setIsUseRefreshing(true)
                     },
                   },
                 ],
