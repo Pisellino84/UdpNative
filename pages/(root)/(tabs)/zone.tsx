@@ -32,7 +32,7 @@ import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 import React, {createContext, useContext} from 'react';
-import {useLoading, useRefresh} from '../../../lib/useIsLoading';
+import {useLoading, useRefresh, useApply} from '../../../lib/useIsLoading';
 
 export const udpEvents = new EventEmitter();
 
@@ -53,6 +53,7 @@ const Zone = () => {
 
   const {isUseLoading, setIsUseLoading} = useLoading();
   const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
+  const {isUseApplying, setIsUseApplying} = useApply()
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -61,7 +62,7 @@ const Zone = () => {
   const isUseRefreshingRef = useRef(isUseRefreshing);
 
   const loadZoneData = async () => {
-    if (isUseLoading) {
+    if (isUseApplying) {
       Alert.alert(
         'Attenzione',
         "L'applicazione dello scenario è in corso, attendere il termine del processo",
@@ -146,7 +147,7 @@ const Zone = () => {
 
       ip = getIp();
       await leggiStatoZona(zone);
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 15));
   
       // Aggiorna Volume se è cambiato
       if (Volume !== undefined && Volume !== null && Volume !== updatedVolumes[zone - 1]) {
@@ -245,13 +246,13 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 25));
         await refreshZoneData(); // Aspetta che la funzione termini
-        await new Promise(resolve => setTimeout(resolve, 200));  // Attendi prima di ripetere
+        await new Promise(resolve => setTimeout(resolve, 25));  // Attendi prima di ripetere
       }
     };
 
-    if (!isUseRefreshing && !isUseLoading) {
+    if (!isUseRefreshing && !isUseLoading && !isUseApplying) {
       executeRefresh();
     }
   }, [isUseRefreshing]);
