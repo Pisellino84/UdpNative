@@ -32,7 +32,7 @@ import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 import React, {createContext, useContext} from 'react';
-import { useLoading } from '../../../lib/useIsLoading';
+import {useLoading, useRefresh} from '../../../lib/useIsLoading';
 
 export const udpEvents = new EventEmitter();
 
@@ -48,26 +48,32 @@ const Zone = () => {
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
+  const [zoneIds, setZoneIds] = useState<number[]>(Array(48).fill(0));
   const [numZone, setNumZone] = useState(6);
 
   const {isUseLoading, setIsUseLoading} = useLoading();
+  const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-
+  
   const lastNome = useRef<string | null>(null);
+  const isUseRefreshingRef = useRef(isUseRefreshing);
 
   const loadZoneData = async () => {
-    if(isUseLoading) {
+    if (isUseLoading) {
       Alert.alert(
         'Attenzione',
-        'L\'applicazione dello scenario è in corso, attendere il termine del processo',)
-        return;
+        "L'applicazione dello scenario è in corso, attendere il termine del processo",
+      );
+      return;
     }
     setIsUseLoading(true);
+    setIsUseRefreshing(true);
     setIsLoading(true);
     setPerc(0);
 
+    const ids: number[] = [...zoneIds];
     const names: string[] = [...zoneNames];
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
@@ -93,6 +99,7 @@ const Zone = () => {
 
         if (Nome && Nome !== lastNome.current) {
           names[zoneId - 1] = Nome;
+          ids[zoneId - 1] = zoneId;
           if (Byte5) {
             bytes5[zoneId - 1] = Byte5;
             console.log('byte5', Byte5);
@@ -106,6 +113,7 @@ const Zone = () => {
             volumes[zoneId - 1] = 0;
           }
 
+          setZoneIds([...ids]);
           setZoneNames([...names]);
           setZoneVolumes([...volumes]);
           setZoneBytes5([...bytes5]);
@@ -119,7 +127,49 @@ const Zone = () => {
 
       if (zoneId === 48) {
         setIsLoading(false);
+        setIsUseRefreshing(false);
         setIsUseLoading(false);
+      }
+    }
+  };
+
+  const refreshZoneData = async () => {
+    console.log('refreshZoneData');
+    const volumes: number[] = [...zoneVolumes];
+    const bytes5: number[] = [...zoneBytes5];
+    for (let zone = 1; zone <= numZone + 1; zone++) {
+      let nomeChanged = false;
+      let volumeChanged = false;
+      let Byte5Changed = false;
+      while (
+        !isUseRefreshingRef.current &&
+        !nomeChanged &&
+        zone !== numZone &&
+        ip.length >= 7
+      ) {
+        ip = getIp();
+        leggiStatoZona(zone);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        sendThreeBytes(61, zone, 0);
+        console.log('NOME DELLA ZONA: ', Nome, zone);
+
+        if (Nome && Nome !== lastNome.current) {
+          if(Byte5) {
+            bytes5[zone - 1] = Byte5;
+            console.log('byte5', Byte5);
+          } 
+
+          if (Volume) {
+            volumes[zone - 1] = Volume;
+          } 
+
+          setZoneVolumes([...volumes]);
+          setZoneBytes5([...bytes5]);
+          lastNome.current = Nome;
+          nomeChanged = true;
+          volumeChanged = true;
+          Byte5Changed = true;
+        }
       }
     }
   };
@@ -129,9 +179,7 @@ const Zone = () => {
       if (numString !== null) {
         const numZone = parseInt(numString, 10);
         if (!isNaN(numZone)) {
-          if (numZone <= 9) setNumZone(numZone);
-          else if (numZone == 48) setNumZone(numZone);
-          else setNumZone(numZone + 1);
+         setNumZone(numZone);
           console.log('dato caricato', numString);
         } else {
           console.error('Il numZone recuperato non è un numero valido.');
@@ -141,6 +189,7 @@ const Zone = () => {
   }
 
   function modificaNumZone() {
+    setIsUseRefreshing(true),
     Alert.alert(
       'Modifica numero zone',
       'Modifica il numero di zone da 1 a 48',
@@ -148,6 +197,10 @@ const Zone = () => {
         {
           text: 'Annulla',
           style: 'cancel',
+          onPress: () => {
+            setIsUseRefreshing(false);
+          },
+
         },
         {
           text: 'OK',
@@ -159,10 +212,14 @@ const Zone = () => {
                 {
                   text: 'Annulla',
                   style: 'cancel',
+                  onPress: () => {
+                    setIsUseRefreshing(false);
+                  }
                 },
                 {
                   text: 'OK',
                   onPress: e => {
+                    setIsUseRefreshing(false)
                     const num = parseInt(e ?? '', 10);
                     if (!isNaN(num) && num >= 1 && num <= 48) {
                       if (num <= 9) setNumZone(num);
@@ -186,10 +243,25 @@ const Zone = () => {
   }
 
   useEffect(() => {
-    new Promise(resolve => setTimeout(resolve, 10));
+    new Promise(resolve => setTimeout(resolve, 500));
     loadZoneData();
     retrieveNumZone();
   }, []);
+
+  useEffect(() => {
+    isUseRefreshingRef.current = isUseRefreshing;
+    const executeRefresh = async () => {
+      while (!isUseRefreshingRef.current) {
+        console.log('Esecuzione ripetitiva');
+        await refreshZoneData(); // Aspetta che la funzione termini
+        await new Promise(resolve => setTimeout(resolve, 200)); // Attendi prima di ripetere
+      }
+    };
+
+    if (!isUseRefreshing) {
+      executeRefresh();
+    }
+  }, [isUseRefreshing]);
 
   if (isLoading) {
     return (
@@ -239,29 +311,31 @@ const Zone = () => {
             </TouchableOpacity>
           </View>
 
-          {zones.slice(0, numZone).map(zoneId => (
+          {zones.slice(0, numZone).map(zona => (
             <TouchableOpacity
-              key={zoneId}
+              key={zona}
               className="flex flex-row border-b p-5 border-black-50 justify-between items-center"
               onPress={() => {
-                navigation.navigate('PaginaZona', {zoneId});
+                setIsUseRefreshing(true);
+                new Promise(resolve => setTimeout(resolve, 50));
+                navigation.navigate('PaginaZona', {zoneId: zoneIds[zona - 1]});
               }}>
               <View className="flex flex-row items-center gap-2">
                 <View>
                   <Text className="text-xl font-medium">
-                    {zoneNames[zoneId - 1]}
+                    {zoneNames[zona - 1]}
                   </Text>
-                  <Text className="text-md font-light">Id zona: {zoneId}</Text>
+                  <Text className="text-md font-light">Id zona: {zoneIds[zona - 1]}</Text>
                 </View>
                 <View className="flex flex-col gap-2">
                   <Image
                     source={icons.power}
                     className="size-6"
                     tintColor={
-                      zoneBytes5[zoneId - 1] == 35 ||
-                      zoneBytes5[zoneId - 1] == 3 ||
-                      zoneBytes5[zoneId - 1] == 39 ||
-                      zoneBytes5[zoneId - 1] == 7
+                      zoneBytes5[zona - 1] == 35 ||
+                      zoneBytes5[zona - 1] == 3 ||
+                      zoneBytes5[zona - 1] == 39 ||
+                      zoneBytes5[zona - 1] == 7
                         ? '#228BE6'
                         : '#D4D4D8'
                     }
@@ -270,10 +344,10 @@ const Zone = () => {
                     source={icons.mute}
                     className="size-6 ml-1"
                     tintColor={
-                      zoneBytes5[zoneId - 1] == 37 ||
-                      zoneBytes5[zoneId - 1] == 5 ||
-                      zoneBytes5[zoneId - 1] == 39 ||
-                      zoneBytes5[zoneId - 1] == 7
+                      zoneBytes5[zona - 1] == 37 ||
+                      zoneBytes5[zona - 1] == 5 ||
+                      zoneBytes5[zona - 1] == 39 ||
+                      zoneBytes5[zona - 1] == 7
                         ? '#228BE6'
                         : '#D4D4D8'
                     }
@@ -285,12 +359,12 @@ const Zone = () => {
                     step={2}
                     minimumValue={0}
                     maximumValue={80}
-                    value={zoneVolumes[zoneId - 1]}
+                    value={zoneVolumes[zona - 1]}
                     style={{width: 150}}
                     disabled
                   />
                   <Text className="font-bold">
-                    {zoneVolumes[zoneId - 1] ?? 0}
+                    {zoneVolumes[zona - 1] ?? 0}
                   </Text>
                 </View>
               </View>

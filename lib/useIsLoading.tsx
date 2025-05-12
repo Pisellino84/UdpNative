@@ -14,11 +14,32 @@ export const useLoading = () => {
   return context;
 };
 
+
+/* -------------------------------------------------------- */
+
+const RefreshingContext = createContext<{
+  isUseRefreshing: boolean;
+  setIsUseRefreshing: React.Dispatch<React.SetStateAction<boolean>>;
+} | null>(null);
+
+export const useRefresh = () => {
+  const context = useContext(RefreshingContext);
+  if (!context) {
+    throw new Error('useLoading must be used within a LoadingProvider');
+  }
+  return context;
+};
+
+/* ---------------------------------------------- */
+
 export const LoadingProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+  const [isUseRefreshing, setIsUseRefreshing] = useState(false);
   const [isUseLoading, setIsUseLoading] = useState(false);
   return (
     <LoadingContext.Provider value={{isUseLoading, setIsUseLoading}}>
-      {children}
+      <RefreshingContext.Provider value={{isUseRefreshing, setIsUseRefreshing}}>
+        {children}
+      </RefreshingContext.Provider>
     </LoadingContext.Provider>
   );
 };

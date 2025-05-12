@@ -1,5 +1,5 @@
 import {useEffect, useRef} from 'react';
-import {leggiStatoZona} from './udpClient';
+import {leggiStatoZona, sendThreeBytes} from './udpClient';
 
 export function useZonaMonitor(
   zoneId: number,
@@ -10,6 +10,7 @@ export function useZonaMonitor(
 
   useEffect(() => {
     const fetchZonaState = () => {
+      sendThreeBytes(61, zoneId, 0);
       leggiStatoZona(zoneId);
     };
 

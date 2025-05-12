@@ -19,8 +19,10 @@ import {
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useZonaMonitor} from '../../../lib/useZonaMonitor';
+import { useRefresh } from '../../../lib/useIsLoading';
 
 export default function PaginaZona() {
+  const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
   };
@@ -29,7 +31,9 @@ export default function PaginaZona() {
   const {zoneId} = route.params;
 
   React.useEffect(() => {
-    sendThreeBytes(61, zoneId, 0);
+    return () => {
+      setIsUseRefreshing(false);
+    }
   }, [zoneId]);
 
   const Sources = [
@@ -47,9 +51,12 @@ export default function PaginaZona() {
   const [mute, setMute] = useState(0);
   const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
+
+
+
+  useZonaMonitor(zoneId, 200, volume);
   const [nome, setNome] = useState(Nome);
   const [slider, setSlider] = useState(volume);
-
   function retrieveVolume() {
     retrieveData(`volume_${zoneId}`).then(volumeString => {
       if (volumeString !== null) {
@@ -125,7 +132,7 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
     };
   }, []);
-  useZonaMonitor(zoneId, 200, volume);
+  
   return (
     <AndroidSafeArea>
       <View className="px-5">
