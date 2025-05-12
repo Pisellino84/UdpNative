@@ -22,7 +22,7 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
-import {useLoading} from '../../../lib/useIsLoading';
+import {useLoading, useRefresh} from '../../../lib/useIsLoading';
 
 let scenari: any[] = [];
 
@@ -120,6 +120,7 @@ export default function Scenario() {
   }
 
   const {isUseLoading, setIsUseLoading} = useLoading();
+  const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
   async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -154,6 +155,7 @@ export default function Scenario() {
     const time = 30;
     setIsLoading(true);
     setIsUseLoading(true);
+    setIsUseRefreshing(true)
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
     for (const setting of scenario.settings) {
@@ -185,6 +187,7 @@ export default function Scenario() {
       console.log('---');
     }
     setIsUseLoading(false);
+    setIsUseRefreshing(false)
     setIsLoading(false);
   }
 

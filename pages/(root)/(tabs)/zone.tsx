@@ -134,37 +134,37 @@ const Zone = () => {
   };
 
   const refreshZoneData = async () => {
-    console.log('refreshZoneData');
-    const volumes: number[] = [...zoneVolumes];
-    const bytes5: number[] = [...zoneBytes5];
-    for (const zoneId of zones) {
-      let changed = false;
-      while (
-        !isUseRefreshingRef.current &&
-        !changed &&
-        zoneId <= numZone &&
-        ip.length >= 7
-      ) {
-        console.log('ZONA: ', zoneId);
-        ip = getIp();
-        await new Promise(resolve => setTimeout(resolve, 50));
-        leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 50));
+    console.log('Aggiornamento dei valori di Volume e Byte5 per ogni zona...');
+    
+    const updatedVolumes: number[] = [...zoneVolumes];
+    const updatedBytes5: number[] = [...zoneBytes5];
+  
+    for (let zone = 1; zone <= numZone; zone++) {
+      if (isUseRefreshingRef.current) {
+        console.log('Interruzione di refreshZoneData: isUseRefreshingRef.current è true');
+        return; // Interrompe immediatamente la funzione
+      }
 
-        if (Byte5) {
-          bytes5[zoneId - 1] = Byte5;
-          setZoneBytes5([...bytes5]);
-          console.log('byte5', Byte5);
-        }
-
-        if (Volume) {
-          volumes[zoneId - 1] = Volume;
-          setZoneVolumes([...volumes]);
-        }
-
-        changed = true;
+      ip = getIp();
+      await leggiStatoZona(zone);
+      await new Promise(resolve => setTimeout(resolve, 10));
+  
+      // Aggiorna Volume se è cambiato
+      if (Volume !== undefined && Volume !== null && Volume !== updatedVolumes[zone - 1]) {
+        updatedVolumes[zone - 1] = Volume;
+        console.log(`Zona ${zone}: Volume aggiornato a ${Volume}`);
+      }
+  
+      // Aggiorna Byte5 se è cambiato
+      if (Byte5 !== undefined && Byte5 !== null && Byte5 !== updatedBytes5[zone - 1]) {
+        updatedBytes5[zone - 1] = Byte5;
+        console.log(`Zona ${zone}: Byte5 aggiornato a ${Byte5}`);
       }
     }
+  
+    // Aggiorna lo stato con i nuovi valori
+    setZoneVolumes(updatedVolumes);
+    setZoneBytes5(updatedBytes5);
   };
 
   function retrieveNumZone() {
@@ -245,9 +245,9 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
-        await new Promise(resolve => setTimeout(resolve, 200));
+        /* await new Promise(resolve => setTimeout(resolve, 200)); */
         await refreshZoneData(); // Aspetta che la funzione termini
-        await new Promise(resolve => setTimeout(resolve, 200)); // Attendi prima di ripetere
+        /* await new Promise(resolve => setTimeout(resolve, 200));  */// Attendi prima di ripetere
       }
     };
 
@@ -283,27 +283,6 @@ const Zone = () => {
           </Text>
         </View>
         <View className="my-5 flex flex-col">
-          <View className="flex flex-row justify-between items-center gap-1">
-            <TouchableOpacity>
-              <Text
-                className="text-primary-300 font-light"
-                onPress={() => {
-                  zones.forEach(zoneId => sendThreeBytes(4, zoneId, 1));
-                }}>
-                Turn all Zones ON
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                className="text-primary-300 font-light"
-                onPress={() => {
-                  zones.forEach(zoneId => sendThreeBytes(4, zoneId, 0));
-                }}>
-                Turn all Zones OFF
-              </Text>
-            </TouchableOpacity>
-          </View>
-
           {zones.slice(0, numZone).map(zona => (
             <TouchableOpacity
               key={zona}

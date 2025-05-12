@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Image, Alert, ActivityIndicator} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
@@ -23,6 +23,10 @@ import { useRefresh } from '../../../lib/useIsLoading';
 
 export default function PaginaZona() {
   const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
+  const [isLoading, setIsLoading] = useState(false)
+
+  
+
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
   };
@@ -31,6 +35,7 @@ export default function PaginaZona() {
   const {zoneId} = route.params;
 
   React.useEffect(() => {
+
     return () => {
       setIsUseRefreshing(false);
     }
@@ -78,7 +83,14 @@ export default function PaginaZona() {
     saveData(`volume_${zoneId}`, Volume?.toString());
   }
 
+  async function bomboclat() {
+    setIsLoading(true)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsLoading(false)
+  }
+
   useEffect(() => {
+    bomboclat()
     leggiStatoZona(zoneId);
 
     const handleByte5Change = () => {
@@ -124,7 +136,6 @@ export default function PaginaZona() {
     udpEvents.on('Byte6Changed', handleByte6Change);
     udpEvents.on('VolumeChanged', handleVolumeChange);
     udpEvents.on('NomeChanged', handleNomeChange);
-
     return () => {
       udpEvents.off('Byte5Changed', handleByte5Change);
       udpEvents.off('Byte6Changed', handleByte6Change);
@@ -132,6 +143,14 @@ export default function PaginaZona() {
       udpEvents.off('NomeChanged', handleNomeChange);
     };
   }, []);
+
+  if(isLoading)
+    {
+      return(
+      <View className='h-screen w-screen flex justify-center items-center'>
+        <ActivityIndicator className='size-24' />
+      </View>)
+    }
   
   return (
     <AndroidSafeArea>
