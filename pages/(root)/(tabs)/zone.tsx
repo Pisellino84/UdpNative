@@ -56,7 +56,7 @@ const Zone = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
 
@@ -138,38 +138,29 @@ const Zone = () => {
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
     for (let zone = 1; zone <= numZone; zone++) {
-      let nomeChanged = false;
-      let volumeChanged = false;
-      let Byte5Changed = false;
+      let changed = false;
       while (
         !isUseRefreshingRef.current &&
-        !nomeChanged &&
+        !changed &&
         zone <= numZone &&
         ip.length >= 7
       ) {
         ip = getIp();
         leggiStatoZona(zone);
         await new Promise(resolve => setTimeout(resolve, 50));
-        sendThreeBytes(61, zone, 0);
-        console.log('NOME DELLA ZONA: ', Nome, zone);
 
-      
-          if(Byte5) {
-            bytes5[zone - 1] = Byte5;
-            console.log('byte5', Byte5);
-          } 
+        if (Byte5) {
+          bytes5[zone - 1] = Byte5;
+          console.log('byte5', Byte5);
+        }
 
-          if (Volume) {
-            volumes[zone - 1] = Volume;
-          } 
+        if (Volume) {
+          volumes[zone - 1] = Volume;
+        }
 
-          setZoneVolumes([...volumes]);
-          setZoneBytes5([...bytes5]);
-          lastNome.current = Nome;
-          nomeChanged = true;
-          volumeChanged = true;
-          Byte5Changed = true;
-        
+        setZoneVolumes([...volumes]);
+        setZoneBytes5([...bytes5]);
+        changed = true;
       }
     }
   };
@@ -179,7 +170,7 @@ const Zone = () => {
       if (numString !== null) {
         const numZone = parseInt(numString, 10);
         if (!isNaN(numZone)) {
-         setNumZone(numZone);
+          setNumZone(numZone);
           console.log('dato caricato', numString);
         } else {
           console.error('Il numZone recuperato non è un numero valido.');
@@ -190,56 +181,55 @@ const Zone = () => {
 
   function modificaNumZone() {
     setIsUseRefreshing(true),
-    Alert.alert(
-      'Modifica numero zone',
-      'Modifica il numero di zone da 1 a 48',
-      [
-        {
-          text: 'Annulla',
-          style: 'cancel',
-          onPress: () => {
-            setIsUseRefreshing(false);
+      Alert.alert(
+        'Modifica numero zone',
+        'Modifica il numero di zone da 1 a 48',
+        [
+          {
+            text: 'Annulla',
+            style: 'cancel',
+            onPress: () => {
+              setIsUseRefreshing(false);
+            },
           },
-
-        },
-        {
-          text: 'OK',
-          onPress: () => {
-            prompt(
-              'Modifica numero zone',
-              'Inserisci il numero di zone (1-48)',
-              [
-                {
-                  text: 'Annulla',
-                  style: 'cancel',
-                  onPress: () => {
-                    setIsUseRefreshing(false);
-                  }
-                },
-                {
-                  text: 'OK',
-                  onPress: e => {
-                    setIsUseRefreshing(false)
-                    const num = parseInt(e ?? '', 10);
-                    if (!isNaN(num) && num >= 1 && num <= 48) {
-                      if (num <= 9) setNumZone(num);
-                      else if (num == 48) setNumZone(num);
-                      else setNumZone(num);
-                      saveData('numZone', num.toString());
-                    } else {
-                      Alert.alert(
-                        'Numero non valido',
-                        'Inserisci un numero tra 1 e 48.',
-                      );
-                    }
+          {
+            text: 'OK',
+            onPress: () => {
+              prompt(
+                'Modifica numero zone',
+                'Inserisci il numero di zone (1-48)',
+                [
+                  {
+                    text: 'Annulla',
+                    style: 'cancel',
+                    onPress: () => {
+                      setIsUseRefreshing(false);
+                    },
                   },
-                },
-              ],
-            );
+                  {
+                    text: 'OK',
+                    onPress: e => {
+                      setIsUseRefreshing(false);
+                      const num = parseInt(e ?? '', 10);
+                      if (!isNaN(num) && num >= 1 && num <= 48) {
+                        if (num <= 9) setNumZone(num);
+                        else if (num == 48) setNumZone(num);
+                        else setNumZone(num);
+                        saveData('numZone', num.toString());
+                      } else {
+                        Alert.alert(
+                          'Numero non valido',
+                          'Inserisci un numero tra 1 e 48.',
+                        );
+                      }
+                    },
+                  },
+                ],
+              );
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
   }
 
   useEffect(() => {
@@ -253,6 +243,7 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
+        await new Promise(resolve => setTimeout(resolve, 200)); 
         await refreshZoneData(); // Aspetta che la funzione termini
         await new Promise(resolve => setTimeout(resolve, 200)); // Attendi prima di ripetere
       }
@@ -325,7 +316,9 @@ const Zone = () => {
                   <Text className="text-xl font-medium">
                     {zoneNames[zona - 1]}
                   </Text>
-                  <Text className="text-md font-light">Id zona: {zoneIds[zona - 1]}</Text>
+                  <Text className="text-md font-light">
+                    Id zona: {zoneIds[zona - 1]}
+                  </Text>
                 </View>
                 <View className="flex flex-col gap-2">
                   <Image
