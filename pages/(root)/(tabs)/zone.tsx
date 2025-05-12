@@ -137,14 +137,14 @@ const Zone = () => {
     console.log('refreshZoneData');
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
-    for (let zone = 1; zone <= numZone + 1; zone++) {
+    for (let zone = 1; zone <= numZone; zone++) {
       let nomeChanged = false;
       let volumeChanged = false;
       let Byte5Changed = false;
       while (
         !isUseRefreshingRef.current &&
         !nomeChanged &&
-        zone !== numZone &&
+        zone <= numZone &&
         ip.length >= 7
       ) {
         ip = getIp();
@@ -153,7 +153,7 @@ const Zone = () => {
         sendThreeBytes(61, zone, 0);
         console.log('NOME DELLA ZONA: ', Nome, zone);
 
-        if (Nome && Nome !== lastNome.current) {
+      
           if(Byte5) {
             bytes5[zone - 1] = Byte5;
             console.log('byte5', Byte5);
@@ -169,7 +169,7 @@ const Zone = () => {
           nomeChanged = true;
           volumeChanged = true;
           Byte5Changed = true;
-        }
+        
       }
     }
   };
@@ -258,7 +258,7 @@ const Zone = () => {
       }
     };
 
-    if (!isUseRefreshing) {
+    if (!isUseRefreshing && !isUseLoading) {
       executeRefresh();
     }
   }, [isUseRefreshing]);
