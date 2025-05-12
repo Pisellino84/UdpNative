@@ -137,29 +137,31 @@ const Zone = () => {
     console.log('refreshZoneData');
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
-    for (let zone = 1; zone <= numZone; zone++) {
+    for (const zoneId of zones) {
       let changed = false;
       while (
         !isUseRefreshingRef.current &&
         !changed &&
-        zone <= numZone &&
+        zoneId <= numZone &&
         ip.length >= 7
       ) {
+        console.log('ZONA: ', zoneId);
         ip = getIp();
-        leggiStatoZona(zone);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        leggiStatoZona(zoneId);
         await new Promise(resolve => setTimeout(resolve, 50));
 
         if (Byte5) {
-          bytes5[zone - 1] = Byte5;
+          bytes5[zoneId - 1] = Byte5;
+          setZoneBytes5([...bytes5]);
           console.log('byte5', Byte5);
         }
 
         if (Volume) {
-          volumes[zone - 1] = Volume;
+          volumes[zoneId - 1] = Volume;
+          setZoneVolumes([...volumes]);
         }
 
-        setZoneVolumes([...volumes]);
-        setZoneBytes5([...bytes5]);
         changed = true;
       }
     }
@@ -243,7 +245,7 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
-        await new Promise(resolve => setTimeout(resolve, 200)); 
+        await new Promise(resolve => setTimeout(resolve, 200));
         await refreshZoneData(); // Aspetta che la funzione termini
         await new Promise(resolve => setTimeout(resolve, 200)); // Attendi prima di ripetere
       }
