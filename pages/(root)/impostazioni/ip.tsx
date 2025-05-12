@@ -51,19 +51,21 @@ export default function IpPage() {
 
   const handleIpChange = (text: string) => {
     setIp(text);
-    currentIp = text;
-    udpEvents.emit('ipChanged', text);
+    if (isValidIP(text)) {
+      currentIp = text; // Aggiorna currentIp solo se l'IP è valido
+      udpEvents.emit('ipChanged', text);
+    }
   };
 
-  function isValidIP() {
-    console.log('isValideip: ', ip);
+  function isValidIP(ipToValidate: string = ip) {
+    console.log('isValideip: ', ipToValidate);
     let check = 0;
-    if (!ip) {
+    if (!ipToValidate) {
       console.log('no ip');
       return false;
     } else check++;
 
-    const parts = ip.split('.');
+    const parts = ipToValidate.split('.');
 
     if (parts.length !== 4) {
       console.log('no 4 parts');
@@ -78,12 +80,12 @@ export default function IpPage() {
       const num = parseInt(part, 10);
 
       if (isNaN(num) || num < 0 || num > 255) {
-        console.log('ip maggiorne  o minrnwe di 0 e 255');
+        console.log('ip maggiore o minore di 0 e 255');
         return false;
       } else check++;
     }
     console.log('check:', check);
-    if (check == 10) return true;
+    return check === 10;
   }
 
   return (
