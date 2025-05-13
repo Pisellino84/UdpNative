@@ -143,6 +143,14 @@ export default function Scenario() {
           [{text: 'OK'}],
         );
         return;
+      } 
+      if (!scenario.settings || !Array.isArray(scenario.settings) || scenario.settings.length === 0) {
+        Alert.alert(
+          'Errore',
+          'Nessuna impostazione selezionata',
+          [{text: 'OK'}],
+        );
+        return;
       }
     } catch (error) {
       Alert.alert(

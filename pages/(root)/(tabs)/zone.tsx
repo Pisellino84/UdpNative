@@ -252,6 +252,7 @@ const Zone = () => {
                         else if (num == 48) setNumZone(num);
                         else setNumZone(num);
                         saveData('numZone', num.toString());
+                        loadZoneData()
                       } else {
                         Alert.alert(
                           'Numero non valido',
