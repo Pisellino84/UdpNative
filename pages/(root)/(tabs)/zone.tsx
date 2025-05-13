@@ -76,6 +76,10 @@ const Zone = () => {
   const isUseRefreshingRef = useRef(isUseRefreshing);
   const isUseIpRef = useRef(isUseIp);
 
+  useEffect(() => {
+    isUseIpRef.current = isUseIp;
+  }, [isUseIp]);
+
   const loadZoneData = async () => {
     if (isUseApplying) {
       Alert.alert(
@@ -103,6 +107,7 @@ const Zone = () => {
         !nomeChanged &&
         !volumeChanged &&
         zoneId !== 49 &&
+        !isUseIpRef.current &&
         ip.length >= 7
       ) {
         if (Nome === 'mem_free' && zoneId < 48) {
@@ -319,19 +324,8 @@ const Zone = () => {
     <AndroidSafeArea>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        /* refreshControl={
-          <RefreshControl
-            refreshing={refreshing} /* onRefresh={loadZoneData}  */
-        // />
-        // }
       >
         <MainHeader title="Zone" icon={icons.zone} />
-        {/* <View className="flex flex-col items-center justify-center mt-2">
-          <Image source={icons.backArrow} className="-rotate-90 size-6" />
-          <Text className="text-black-200 font-extrabold text-sm">
-          trascina verso il basso per aggiornare
-          </Text>
-          </View> */}
         <View className="my-5 flex flex-col">
           <View className="flex flex-row items-center mb-5">
             <TouchableOpacity
