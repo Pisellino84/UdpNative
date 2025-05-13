@@ -38,7 +38,6 @@ export default function IpPage() {
   const {isUseIp, setIsUseIp} = useIp();
   useEffect(() => {
     retrieveIp();
-    setIsUseIp(true)
 
     return () => {
       setIsUseIp(false)

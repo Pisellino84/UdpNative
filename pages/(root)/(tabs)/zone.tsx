@@ -116,7 +116,7 @@ const Zone = () => {
 
         ip = getIp();
         leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 25));
+        await new Promise(resolve => setTimeout(resolve, 50));
         sendThreeBytes(61, zoneId, 0);
         console.log('NOME DELLA ZONA: ', Nome, zoneId);
 
