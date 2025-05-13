@@ -1,5 +1,6 @@
-import {View, Text} from 'react-native';
+import {View, Text, Image} from 'react-native';
 import {useEffect, useState} from 'react';
+import icons from '../constants/icons';
 
 export default function ProgressBar({progress}: {progress: number}) {
   const maxWidth = 200;
@@ -9,15 +10,6 @@ export default function ProgressBar({progress}: {progress: number}) {
   const clampedProgress = Math.min(progress, maxValue);
   const width = (clampedProgress / maxValue) * maxWidth;
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (clampedProgress < maxValue / 2) {
-        setShowWarning(true);
-      }
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, [clampedProgress]);
 
   return (
     <View className="justify-center items-center">
@@ -26,12 +18,6 @@ export default function ProgressBar({progress}: {progress: number}) {
           className={`bg-primary-300 h-5 flex items-center justify-center rounded-xl`}
           style={{width: width}}></View>
       </View>
-      {showWarning ?? (
-        <Text className="text-red-500 font-bold text-sm text-center mb-2">
-          Il caricamento è troppo lento, controlla la connessione o verifica che
-          l'indirizzo IP inserito sia corretto.
-        </Text>
-      )}
     </View>
   );
 }

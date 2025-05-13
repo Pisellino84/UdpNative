@@ -71,12 +71,14 @@ const Zone = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false)
 
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
   const isUseIpRef = useRef(isUseIp);
 
   const loadZoneData = async () => {
+    setError(false)
     if (isUseApplying) {
       Alert.alert(
         'Attenzione',
@@ -98,15 +100,20 @@ const Zone = () => {
       let nomeChanged = false;
       let volumeChanged = false;
       let Byte5Changed = false;
-
+      let i = 0;
       while (
         !nomeChanged &&
         !volumeChanged &&
         zoneId !== 49 &&
         ip.length >= 7
       ) {
+        i++;
         if (Nome === 'mem_free' && zoneId < 48) {
           sendThreeBytes(61, zoneId, 0);
+        }
+        if (i === 10) {
+          setError(true)
+          return;
         }
 
         ip = getIp();
@@ -158,7 +165,10 @@ const Zone = () => {
     const updatedBytes5: number[] = [...refreshBytes5];
 
     for (let zone = 1; zone <= numZone; zone++) {
-      console.log('refreshZoneData ciclo', { zone, isUseRefreshing: isUseRefreshingRef.current });
+      console.log('refreshZoneData ciclo', {
+        zone,
+        isUseRefreshing: isUseRefreshingRef.current,
+      });
       if (isUseRefreshingRef.current) {
         console.log(
           'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
@@ -304,13 +314,22 @@ const Zone = () => {
   }, [isUseRefreshing, isUseLoading, isUseApplying]);
 
   if (isLoading) {
+    
     return (
       <AndroidSafeArea>
-        <View className="flex h-screen justify-center items-center">
+        {error ? <View className="flex h-screen  justify-center items-center">
+          <TouchableOpacity className='my-5' onPress={loadZoneData}><Image source={icons.repeat}/></TouchableOpacity>
+          
+          <Text className="text-red-500 font-bold text-sm text-center mb-2">
+          Il caricamento è troppo lento, controlla la connessione o verifica che
+          l'indirizzo IP inserito sia corretto. e riprova
+        </Text>
+          <ProgressBar progress={perc} />
+        </View> : <View className="flex h-screen justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
           <Text className="text-lg mt-4 ">Recupero Dati in corso...</Text>
           <ProgressBar progress={perc} />
-        </View>
+        </View>}
       </AndroidSafeArea>
     );
   }

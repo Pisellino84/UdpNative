@@ -17,6 +17,8 @@ import {
   useLoading,
   useIp,
 } from '../../../lib/useIsLoading';
+import AndroidSafeArea from '../../../components/AndroidSafeArea';
+import prompt from 'react-native-prompt-android';
 
 let currentIp = '';
 
@@ -40,10 +42,10 @@ export default function IpPage() {
     retrieveIp();
 
     return () => {
-      setIsUseIp(false)
-      setIsUseLoading(false)
-      setIsUseRefreshing(false)
-    }
+      setIsUseIp(false);
+      setIsUseLoading(false);
+      setIsUseRefreshing(false);
+    };
   }, []);
 
   const [ip, setIp] = useState('');
@@ -117,60 +119,177 @@ export default function IpPage() {
     return check === 10;
   }
 
-  return (
-    <View className="flex-1 flex-col bg-white justify-center items-center">
-      <Text className="text-primary-300 font-extrabold text-4xl">
-        Benvenuto in liveMt!
-      </Text>
-      <Text className="text-black-300 font-semibold text-xl">
-        Inizia ad usare l'app:
-      </Text>
-      <View className="flex flex-row items-center justify-center border rounded-full mt-5">
-        <TextInput
-          placeholder={
-            (currentIp === '' ? null : currentIp) ?? 'inserisci indirizzo Ip'
+  function retrieveArray() {
+    retrieveData("ipArray").then(array => {
+      if (array !== null) {
+        try {
+          const parsed = JSON.parse(array);
+          if (Array.isArray(parsed)) {
+            setIpArray(parsed);
           }
-          className="bg-white px-20 rounded-full"
-          onChangeText={handleIpChange}
-          keyboardType="numeric"
-          maxLength={15}
-        />
-        <TouchableOpacity
-          className="bg-primary-300 rounded-full p-3"
-          onPress={() => {
-            if (isValidIP()) {
+        } catch {
+          // fallback per vecchi dati non in formato array
+          setIpArray([array]);
+        }
+      }
+    });
+  }
+
+  const [add, setAdd] = useState(false);
+  const [ipArray, setIpArray] = useState<string[]>([]);
+
+  useEffect(() => {
+    retrieveArray()
+  }, [])
+
+  console.log('ipArray', ipArray);
+
+  return (
+    <AndroidSafeArea>
+      <View className="flex flex-col   items-center">
+        <Text className="text-primary-300 font-extrabold text-4xl">
+          Benvenuto in liveMt!
+        </Text>
+        <Text className="text-black-300 font-semibold text-xl">
+          Inizia ad usare l'app:
+        </Text>
+        <View className="flex flex-col items-center justify-center rounded-full mt-5">
+          {add ? <Text></Text> : null}
+
+          {ipArray.map(asd => (
+            <View key={asd} className="my-5">
+              <View className="flex flex-row gap-2 justify-between w-screen px-5">
+                <View className="flex justify-center items-center">
+                  <TouchableOpacity className="bg-gray-300 rounded-full p-3">
+                    <Image source={icons.edit} className="size-8" />
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  className=" flex flex-row"
+                  onPress={() => {
+                    saveData('ip', asd);
+                    saveData('FW', 'yes');
+                    handleIpChange(asd);
+                    // Chiamata diretta a handleSave con l'IP selezionato
+                    if (isValidIP(asd)) {
+                      currentIp = asd;
+                      getIp();
+                      udpEvents.emit('ipChanged', asd);
+                    }
+                    navigation.navigate('ZoneStack');
+                    console.log('IP changed to:', asd);
+                  }}>
+                  <View className="p-5 flex border-y border-l rounded-l-full w-52 justify-center items-center">
+                    <Text className="font-bold text-black-100">{asd}</Text>
+                  </View>
+                  <View className="bg-primary-300 border-r border-y border-primary-300 w-20  rounded-r-full flex justify-center items-center">
+                    <Image
+                      source={icons.backArrow}
+                      className="size-8 rotate-180"
+                      tintColor={'#FFFF'}
+                    />
+                  </View>
+                </TouchableOpacity>
+
+                <View className="flex justify-center items-center">
+                  <TouchableOpacity className="bg-red-200 rounded-full p-3">
+                    <Image source={icons.trash} className="size-8" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          ))}
+          <TouchableOpacity
+            onPress={() => {
               Alert.alert(
-                'Sei Sicuro?',
-                `Sei sicuro di voler usare ${ip} come indirizzo IP?\n(puoi sempre cambiarlo succesivamente)`,
+                'Aggiungi indirizzo IP',
+                "Aggiungi un indirizzo IP da salvare per l'accesso rapido",
                 [
                   {
                     text: 'Annulla',
-                    onPress: () => console.log('Cancel Pressed'),
                     style: 'cancel',
                   },
                   {
-                    text: 'Continua',
+                    text: 'OK',
                     onPress: () => {
-                      saveData('ip', ip);
-                      saveData('FW', 'yes');
-                      handleSave()
-                      navigation.navigate('ZoneStack');
-                      console.log('IP changed to:', currentIp);
+                      prompt(
+                        'Aggiungi indirizzo IP',
+                        'Inserisci indirizzo IP',
+                        [
+                          {
+                            text: 'Annulla',
+                            style: 'cancel',
+                          },
+                          {
+                            text: 'OK',
+                            onPress: e => {
+                              if (isValidIP(e)) {
+                                const newArray = [...ipArray, e];
+                                setIpArray(newArray);
+                                saveData('ipArray', JSON.stringify(newArray));
+                                console.log('IP array:', newArray);
+                              }
+                            },
+                          },
+                        ],
+                      );
                     },
                   },
                 ],
               );
-            } else {
-              Alert.alert('Ip non valido', "Controlla l'ip inserito");
+
+              console.log([...ipArray]);
+            }}>
+            <Image source={icons.plus} tintColor={'green'} />
+          </TouchableOpacity>
+
+          {/* <TextInput
+            placeholder={
+              (currentIp === '' ? null : currentIp) ?? 'inserisci indirizzo Ip'
             }
-          }}>
-          <Image
-            source={icons.backArrow}
-            className="size-6 rotate-180"
-            tintColor={'#FFFF'}
+            className="bg-white px-20 rounded-full"
+            onChangeText={handleIpChange}
+            keyboardType="numeric"
+            maxLength={15}
           />
-        </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-primary-300 rounded-full p-3"
+            onPress={() => {
+              if (isValidIP()) {
+                Alert.alert(
+                  'Sei Sicuro?',
+                  `Sei sicuro di voler usare ${ip} come indirizzo IP?\n(puoi sempre cambiarlo succesivamente)`,
+                  [
+                    {
+                      text: 'Annulla',
+                      onPress: () => console.log('Cancel Pressed'),
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Continua',
+                      onPress: () => {
+                        saveData('ip', ip);
+                        saveData('FW', 'yes');
+                        handleSave();
+                        navigation.navigate('ZoneStack');
+                        console.log('IP changed to:', currentIp);
+                      },
+                    },
+                  ],
+                );
+              } else {
+                Alert.alert('Ip non valido', "Controlla l'ip inserito");
+              }
+            }}>
+            <Image
+              source={icons.backArrow}
+              className="size-6 rotate-180"
+              tintColor={'#FFFF'}
+            />
+          </TouchableOpacity> */}
+        </View>
       </View>
-    </View>
+    </AndroidSafeArea>
   );
 }
