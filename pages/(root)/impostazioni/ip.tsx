@@ -11,11 +11,19 @@ import icons from '../../../constants/icons';
 import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
-import { useApply, useRefresh } from '../../../lib/useIsLoading';
+import {
+  useApply,
+  useRefresh,
+  useLoading,
+  useIp,
+} from '../../../lib/useIsLoading';
 
 let currentIp = '';
 
-export function getIp() {
+export function getIp({ip}: {ip?: string} = {}) {
+  if (ip && ip?.length > 0) {
+    currentIp = ip;
+  }
   return currentIp;
 }
 
@@ -24,12 +32,18 @@ export default function IpPage() {
     ZoneStack: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const {setIsUseApplying} = useApply()
-  const {setIsUseRefreshing} = useRefresh()
+  const {setIsUseApplying} = useApply();
+  const {setIsUseRefreshing} = useRefresh();
+  const {setIsUseLoading} = useLoading();
+  const {isUseIp, setIsUseIp} = useIp();
   useEffect(() => {
-    
     retrieveIp();
-    
+
+    return () => {
+      setIsUseIp(false)
+      setIsUseLoading(false)
+      setIsUseRefreshing(false)
+    }
   }, []);
 
   const [ip, setIp] = useState('');
@@ -47,7 +61,6 @@ export default function IpPage() {
         retrieveData('ip').then(ipData => {
           if (ipData !== null && ipData !== '') {
             handleIpChange(ipData);
-            navigation.navigate('ZoneStack');
           }
         });
       }
@@ -55,10 +68,21 @@ export default function IpPage() {
   }
 
   const handleIpChange = (text: string) => {
+    setIsUseRefreshing(true);
+    setIsUseIp(true);
     setIp(text);
-    if (isValidIP(text)) {
+    /* if (isValidIP(text)) {
       currentIp = text; // Aggiorna currentIp solo se l'IP è valido
+      getIp()
       udpEvents.emit('ipChanged', text);
+    } */
+  };
+
+  const handleSave = () => {
+    if (isValidIP(ip)) {
+      currentIp = ip; // Aggiorna currentIp solo se l'IP è valido
+      getIp();
+      udpEvents.emit('ipChanged', ip);
     }
   };
 
@@ -129,9 +153,9 @@ export default function IpPage() {
                     onPress: () => {
                       saveData('ip', ip);
                       saveData('FW', 'yes');
+                      handleSave()
                       navigation.navigate('ZoneStack');
-                      console.log('IP changed to:', ip);
-                      setIsUseRefreshing(true)
+                      console.log('IP changed to:', currentIp);
                     },
                   },
                 ],

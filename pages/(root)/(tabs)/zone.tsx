@@ -32,7 +32,12 @@ import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 import React, {createContext, useContext} from 'react';
-import {useLoading, useRefresh, useApply} from '../../../lib/useIsLoading';
+import {
+  useLoading,
+  useRefresh,
+  useApply,
+  useIp,
+} from '../../../lib/useIsLoading';
 
 export const udpEvents = new EventEmitter();
 
@@ -53,13 +58,15 @@ const Zone = () => {
 
   const {isUseLoading, setIsUseLoading} = useLoading();
   const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
-  const {isUseApplying, setIsUseApplying} = useApply()
+  const {isUseApplying, setIsUseApplying} = useApply();
+  const {isUseIp, setIsUseIp} = useIp();
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
+  const isUseIpRef = useRef(isUseIp);
 
   const loadZoneData = async () => {
     if (isUseApplying) {
@@ -78,19 +85,24 @@ const Zone = () => {
     const volumes: number[] = [...zoneVolumes];
     const bytes5: number[] = [...zoneBytes5];
     names.fill('');
+
     for (const zoneId of zones) {
       let nomeChanged = false;
       let volumeChanged = false;
       let Byte5Changed = false;
+
       while (
         !nomeChanged &&
         !volumeChanged &&
         zoneId !== 49 &&
         ip.length >= 7
       ) {
+        
+
         if (Nome === 'mem_free' && zoneId < 48) {
           sendThreeBytes(61, zoneId, 0);
         }
+
         ip = getIp();
         leggiStatoZona(zoneId);
         await new Promise(resolve => setTimeout(resolve, 25));
@@ -127,44 +139,90 @@ const Zone = () => {
 
       if (zoneId === 48) {
         setIsLoading(false);
-        setIsUseRefreshing(false);
         setIsUseLoading(false);
       }
     }
+    return setIsUseRefreshing(false);
   };
 
   const refreshZoneData = async () => {
     console.log('Aggiornamento dei valori di Volume e Byte5 per ogni zona...');
-    
+
     const updatedVolumes: number[] = [...zoneVolumes];
     const updatedBytes5: number[] = [...zoneBytes5];
-  
+    /* retrieveData('updatedVolumes').then(volumes => {
+      if (volumes) {
+        try {
+          const parsed = JSON.parse(volumes); // Parse the stringified data
+          if (
+            Array.isArray(parsed) &&
+            parsed.every(v => typeof v === 'number')
+          ) {
+            setZoneVolumes(parsed);
+          }
+        } catch (e) {
+          console.error('Errore nel parsing di updatedVolumes:', e);
+        }
+      }
+    });
+    retrieveData('updatedBytes5').then(bytes5 => {
+      if (bytes5) {
+        try {
+          const parsed = JSON.parse(bytes5); // Parse the stringified data
+          if (
+            Array.isArray(parsed) &&
+            parsed.every(v => typeof v === 'number')
+          ) {
+            setZoneBytes5(parsed);
+          }
+        } catch (e) {
+          console.error('Errore nel parsing di updatedBytes5:', e);
+        }
+      }
+    }); */
+
     for (let zone = 1; zone <= numZone; zone++) {
       if (isUseRefreshingRef.current) {
-        console.log('Interruzione di refreshZoneData: isUseRefreshingRef.current è true');
+        console.log(
+          'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
+        );
         return; // Interrompe immediatamente la funzione
       }
 
       ip = getIp();
       await leggiStatoZona(zone);
-      await new Promise(resolve => setTimeout(resolve, 15));
-  
+      await new Promise(resolve => setTimeout(resolve, 50));
+
       // Aggiorna Volume se è cambiato
-      if (Volume !== undefined && Volume !== null && Volume !== updatedVolumes[zone - 1]) {
+      if (
+        Volume !== undefined &&
+        Volume !== null &&
+        Volume !== updatedVolumes[zone - 1]
+      ) {
         updatedVolumes[zone - 1] = Volume;
         console.log(`Zona ${zone}: Volume aggiornato a ${Volume}`);
       }
-  
+
       // Aggiorna Byte5 se è cambiato
-      if (Byte5 !== undefined && Byte5 !== null && Byte5 !== updatedBytes5[zone - 1]) {
+      if (
+        Byte5 !== undefined &&
+        Byte5 !== null &&
+        Byte5 !== updatedBytes5[zone - 1]
+      ) {
         updatedBytes5[zone - 1] = Byte5;
         console.log(`Zona ${zone}: Byte5 aggiornato a ${Byte5}`);
       }
     }
-  
+
     // Aggiorna lo stato con i nuovi valori
-    setZoneVolumes(updatedVolumes);
+    /* setZoneVolumes(updatedVolumes);
     setZoneBytes5(updatedBytes5);
+    if (updatedBytes5) {
+      saveData('updatedBytes5', JSON.stringify(updatedBytes5)); // Stringify before saving
+    }
+    if (updatedVolumes) {
+      saveData('updatedVolumes', JSON.stringify(updatedVolumes)); // Stringify before saving
+    } */
   };
 
   function retrieveNumZone() {
@@ -235,6 +293,10 @@ const Zone = () => {
   }
 
   useEffect(() => {
+    setIsUseIp(false);
+  });
+
+  useEffect(() => {
     setIsUseRefreshing(true);
     new Promise(resolve => setTimeout(resolve, 500));
     loadZoneData();
@@ -246,16 +308,28 @@ const Zone = () => {
     const executeRefresh = async () => {
       while (!isUseRefreshingRef.current) {
         console.log('Esecuzione ripetitiva');
-        await new Promise(resolve => setTimeout(resolve, 25));
+        await new Promise(resolve => setTimeout(resolve, 50));
         await refreshZoneData(); // Aspetta che la funzione termini
-        await new Promise(resolve => setTimeout(resolve, 25));  // Attendi prima di ripetere
+        await new Promise(resolve => setTimeout(resolve, 50)); // Attendi prima di ripetere
       }
     };
 
     if (!isUseRefreshing && !isUseLoading && !isUseApplying) {
       executeRefresh();
+    } else {
+      console.log(
+        'ip',
+        isUseIp,
+        'refresh',
+        isUseRefreshing,
+        'loading',
+        isUseLoading,
+        'applying',
+        isUseApplying,
+        'STOP',
+      );
     }
-  }, [isUseRefreshing]);
+  }, [isUseRefreshing, isUseLoading, isUseApplying]);
 
   if (isLoading) {
     return (

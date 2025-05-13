@@ -20,6 +20,9 @@ import IpPage from '../impostazioni/ip';
 import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
 import {useLoading, LoadingProvider} from '../../../lib/useIsLoading';
+import { getIp } from '../impostazioni/ip';
+import { useState, useEffect } from 'react';
+import { retrieveData } from '../../../lib/db';
 
 const TabIcon = ({
   focused,
@@ -115,10 +118,31 @@ function ZoneTabNavigator() {
 }
 
 const App = () => {
+  const [ipCheck, setIpCheck] = useState<string | null>(null);
+
+  function retrieveIp() {
+    retrieveData('ip').then(ipData => {
+      setIpCheck(ipData ?? '');
+      if (ipData !== null) {
+        getIp({ ip: ipData });
+      }
+    });
+  }
+
+  useEffect(() => {
+    retrieveIp();
+  }, []);
+
+  if (ipCheck === null) {
+    return 
+  }
+
+  const initialRoute = ipCheck.length > 0 ? 'ZoneStack' : 'IpPage';
+
   return (
     <LoadingProvider>
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName={initialRoute}>
           <Stack.Screen
             name="IpPage"
             component={IpPage}
