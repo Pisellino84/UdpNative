@@ -329,10 +329,21 @@ const Zone = () => {
         {/* <View className="flex flex-col items-center justify-center mt-2">
           <Image source={icons.backArrow} className="-rotate-90 size-6" />
           <Text className="text-black-200 font-extrabold text-sm">
-            trascina verso il basso per aggiornare
+          trascina verso il basso per aggiornare
           </Text>
-        </View> */}
+          </View> */}
         <View className="my-5 flex flex-col">
+          <View className="flex flex-row items-center mb-5">
+            <TouchableOpacity
+              className="bg-primary-300 p-3 rounded-xl w-full"
+              onPress={() => {
+                modificaNumZone();
+              }}>
+              <Text className="text-white font-bold text-md text-center uppercase">
+                Numero Zone
+              </Text>
+            </TouchableOpacity>
+          </View>
           {zones.slice(0, numZone).map(zona => (
             <TouchableOpacity
               key={zona}
@@ -405,17 +416,6 @@ const Zone = () => {
               <Image source={icons.rightArrow} className="size-6" />
             </TouchableOpacity>
           ))}
-        </View>
-        <View className="flex flex-row items-center mb-10">
-          <TouchableOpacity
-            className="bg-primary-300 p-3 rounded-xl w-full"
-            onPress={() => {
-              modificaNumZone();
-            }}>
-            <Text className="text-white font-bold text-md text-center uppercase">
-              Numero Zone
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </AndroidSafeArea>
