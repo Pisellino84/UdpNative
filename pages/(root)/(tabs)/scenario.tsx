@@ -155,6 +155,7 @@ export default function Scenario() {
 
     const time = 30;
     setIsUseApplying(true)
+    setIsUseRefreshing(true)
     setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
@@ -187,6 +188,7 @@ export default function Scenario() {
       console.log('---');
     }
     setIsUseApplying(false)
+    setIsUseRefreshing(false)
     setIsLoading(false);
   }
 

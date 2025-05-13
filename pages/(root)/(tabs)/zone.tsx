@@ -53,6 +53,14 @@ const Zone = () => {
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
+
+  const [refreshBytes5, setRefreshBytes5] = useState<number[]>(
+    Array(48).fill(0),
+  );
+  const [refreshVolumes, setRefreshVolumes] = useState<number[]>(
+    Array(48).fill(0),
+  );
+
   const [zoneIds, setZoneIds] = useState<number[]>(Array(48).fill(0));
   const [numZone, setNumZone] = useState(6);
 
@@ -97,8 +105,6 @@ const Zone = () => {
         zoneId !== 49 &&
         ip.length >= 7
       ) {
-        
-
         if (Nome === 'mem_free' && zoneId < 48) {
           sendThreeBytes(61, zoneId, 0);
         }
@@ -148,40 +154,11 @@ const Zone = () => {
   const refreshZoneData = async () => {
     console.log('Aggiornamento dei valori di Volume e Byte5 per ogni zona...');
 
-    const updatedVolumes: number[] = [...zoneVolumes];
-    const updatedBytes5: number[] = [...zoneBytes5];
-    /* retrieveData('updatedVolumes').then(volumes => {
-      if (volumes) {
-        try {
-          const parsed = JSON.parse(volumes); // Parse the stringified data
-          if (
-            Array.isArray(parsed) &&
-            parsed.every(v => typeof v === 'number')
-          ) {
-            setZoneVolumes(parsed);
-          }
-        } catch (e) {
-          console.error('Errore nel parsing di updatedVolumes:', e);
-        }
-      }
-    });
-    retrieveData('updatedBytes5').then(bytes5 => {
-      if (bytes5) {
-        try {
-          const parsed = JSON.parse(bytes5); // Parse the stringified data
-          if (
-            Array.isArray(parsed) &&
-            parsed.every(v => typeof v === 'number')
-          ) {
-            setZoneBytes5(parsed);
-          }
-        } catch (e) {
-          console.error('Errore nel parsing di updatedBytes5:', e);
-        }
-      }
-    }); */
+    const updatedVolumes: number[] = [...refreshVolumes];
+    const updatedBytes5: number[] = [...refreshBytes5];
 
     for (let zone = 1; zone <= numZone; zone++) {
+      console.log('refreshZoneData ciclo', { zone, isUseRefreshing: isUseRefreshingRef.current });
       if (isUseRefreshingRef.current) {
         console.log(
           'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
@@ -215,14 +192,8 @@ const Zone = () => {
     }
 
     // Aggiorna lo stato con i nuovi valori
-    /* setZoneVolumes(updatedVolumes);
+    setZoneVolumes(updatedVolumes);
     setZoneBytes5(updatedBytes5);
-    if (updatedBytes5) {
-      saveData('updatedBytes5', JSON.stringify(updatedBytes5)); // Stringify before saving
-    }
-    if (updatedVolumes) {
-      saveData('updatedVolumes', JSON.stringify(updatedVolumes)); // Stringify before saving
-    } */
   };
 
   function retrieveNumZone() {
@@ -306,11 +277,12 @@ const Zone = () => {
   useEffect(() => {
     isUseRefreshingRef.current = isUseRefreshing;
     const executeRefresh = async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
       while (!isUseRefreshingRef.current) {
-        console.log('Esecuzione ripetitiva');
-        await new Promise(resolve => setTimeout(resolve, 50));
-        await refreshZoneData(); // Aspetta che la funzione termini
-        await new Promise(resolve => setTimeout(resolve, 50)); // Attendi prima di ripetere
+        await new Promise(resolve => setTimeout(resolve, 25));
+        console.log('Refreshing');
+        await refreshZoneData();
+        await new Promise(resolve => setTimeout(resolve, 25));
       }
     };
 
@@ -347,16 +319,19 @@ const Zone = () => {
     <AndroidSafeArea>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={loadZoneData} />
-        }>
+        /* refreshControl={
+          <RefreshControl
+            refreshing={refreshing} /* onRefresh={loadZoneData}  */
+        // />
+        // }
+      >
         <MainHeader title="Zone" icon={icons.zone} />
-        <View className="flex flex-col items-center justify-center mt-2">
+        {/* <View className="flex flex-col items-center justify-center mt-2">
           <Image source={icons.backArrow} className="-rotate-90 size-6" />
           <Text className="text-black-200 font-extrabold text-sm">
             trascina verso il basso per aggiornare
           </Text>
-        </View>
+        </View> */}
         <View className="my-5 flex flex-col">
           {zones.slice(0, numZone).map(zona => (
             <TouchableOpacity
