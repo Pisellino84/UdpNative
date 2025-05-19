@@ -10,6 +10,7 @@ Usare dispotivo android fisico
 ```sh
 # Using npm
 npm run android 
+```
 
 Aprire un nuovo terminale e connettersi al dispositivo 
 
