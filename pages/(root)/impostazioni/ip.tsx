@@ -41,7 +41,6 @@ export default function IpPage() {
     retrieveIp();
 
     return () => {
-      setIsUseIp(false);
       setIsUseLoading(false);
       setIsUseRefreshing(false);
     };
@@ -72,7 +71,6 @@ export default function IpPage() {
   // Aggiorna lo stato locale e globale quando cambia l'IP
   const handleIpChange = (text: string) => {
     setIsUseRefreshing(true);
-    setIsUseIp(true);
     setIp(text);
   };
 
