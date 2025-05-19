@@ -75,6 +75,8 @@ const Zone = () => {
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
   const isUseIpRef = useRef(isUseIp);
+  const refreshInProgress = useRef(false);
+
 
   useEffect(() => {
     isUseIpRef.current = isUseIp;
@@ -89,6 +91,7 @@ const Zone = () => {
       return;
     }
     setIsUseLoading(true);
+    setIsUseIp(false)
     setIsLoading(true);
     setPerc(0);
 
@@ -99,17 +102,10 @@ const Zone = () => {
     names.fill('');
 
     for (const zoneId of zones) {
-      let nomeChanged = false;
-      let volumeChanged = false;
-      let Byte5Changed = false;
+      let tentativi = 0;
+      let rispostaRicevuta = false;
 
-      while (
-        !nomeChanged &&
-        !volumeChanged &&
-        zoneId !== 49 &&
-        !isUseIpRef.current &&
-        ip.length >= 7
-      ) {
+      while (!rispostaRicevuta && zoneId !== 49 && !isUseIpRef.current && ip.length >= 7) {
         if (Nome === 'mem_free' && zoneId < 48) {
           sendThreeBytes(61, zoneId, 0);
         }
@@ -118,23 +114,18 @@ const Zone = () => {
         leggiStatoZona(zoneId);
         await new Promise(resolve => setTimeout(resolve, 50));
         sendThreeBytes(61, zoneId, 0);
-        console.log('NOME DELLA ZONA: ', Nome, zoneId);
 
-        if (Nome && Nome !== lastNome.current) {
+        // Condizione: tutti i dati devono essere presenti e diversi dal precedente
+        if (
+          Nome &&
+          Nome !== lastNome.current &&
+          typeof Volume === 'number' &&
+          typeof Byte5 === 'number'
+        ) {
           names[zoneId - 1] = Nome;
           ids[zoneId - 1] = zoneId;
-          if (Byte5) {
-            bytes5[zoneId - 1] = Byte5;
-            console.log('byte5', Byte5);
-          } else {
-            bytes5[zoneId - 1] = 0;
-          }
-
-          if (Volume) {
-            volumes[zoneId - 1] = Volume;
-          } else {
-            volumes[zoneId - 1] = 0;
-          }
+          bytes5[zoneId - 1] = Byte5;
+          volumes[zoneId - 1] = Volume;
 
           setZoneIds([...ids]);
           setZoneNames([...names]);
@@ -142,21 +133,23 @@ const Zone = () => {
           setZoneBytes5([...bytes5]);
           setPerc(prevPerc => prevPerc + 1);
           lastNome.current = Nome;
-          nomeChanged = true;
-          volumeChanged = true;
-          Byte5Changed = true;
-        }
+          rispostaRicevuta = true;
+        } 
       }
 
       if (zoneId === 48) {
         setIsLoading(false);
         setIsUseLoading(false);
+        setIsUseRefreshing(false);
       }
     }
-    return setIsUseRefreshing(false);
   };
 
   const refreshZoneData = async () => {
+    if (refreshInProgress.current) {
+      return; // Evita esecuzioni concorrenti
+    }
+    refreshInProgress.current = true;
     console.log('Aggiornamento dei valori di Volume e Byte5 per ogni zona...');
 
     const updatedVolumes: number[] = [...refreshVolumes];
@@ -171,34 +164,37 @@ const Zone = () => {
         return; // Interrompe immediatamente la funzione
       }
 
-      ip = getIp();
-      await leggiStatoZona(zone);
-      await new Promise(resolve => setTimeout(resolve, 50));
+      let tentativi = 0;
+      let rispostaRicevuta = false;
+await new Promise(resolve => setTimeout(resolve, 50));
+      while (!rispostaRicevuta && !isUseRefreshingRef.current && ip.length >= 7) {
+        ip = getIp();
+        await leggiStatoZona(zone);
+        await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Aggiorna Volume se è cambiato
-      if (
-        Volume !== undefined &&
-        Volume !== null &&
-        Volume !== updatedVolumes[zone - 1]
-      ) {
-        updatedVolumes[zone - 1] = Volume;
-        console.log(`Zona ${zone}: Volume aggiornato a ${Volume}`);
-      }
-
-      // Aggiorna Byte5 se è cambiato
-      if (
-        Byte5 !== undefined &&
-        Byte5 !== null &&
-        Byte5 !== updatedBytes5[zone - 1]
-      ) {
-        updatedBytes5[zone - 1] = Byte5;
-        console.log(`Zona ${zone}: Byte5 aggiornato a ${Byte5}`);
+        // Condizione: Volume e Byte5 devono essere presenti e diversi dal precedente
+        if (
+          typeof Volume === 'number' &&
+          typeof Byte5 === 'number' &&
+          (Volume !== updatedVolumes[zone - 1] || Byte5 !== updatedBytes5[zone - 1])
+        ) {
+          updatedVolumes[zone - 1] = Volume;
+          updatedBytes5[zone - 1] = Byte5;
+          console.log(`Zona ${zone}: Volume aggiornato a ${Volume}, Byte5 aggiornato a ${Byte5}`);
+          rispostaRicevuta = true;
+        } else {
+          tentativi++;
+          if (tentativi > 20) {
+            rispostaRicevuta = true; // esce comunque dal ciclo per evitare blocchi
+          }
+        }
       }
     }
 
     // Aggiorna lo stato con i nuovi valori
     setZoneVolumes(updatedVolumes);
     setZoneBytes5(updatedBytes5);
+    refreshInProgress.current = false;
   };
 
   function retrieveNumZone() {
@@ -286,26 +282,17 @@ const Zone = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       while (!isUseRefreshingRef.current) {
         await new Promise(resolve => setTimeout(resolve, 25));
-        console.log('Refreshing');
-        await refreshZoneData();
+        // Avvia refreshZoneData solo se non è già in corso
+        if (!refreshInProgress.current) {
+          await refreshZoneData();
+        }
         await new Promise(resolve => setTimeout(resolve, 25));
       }
     };
 
+    // Modifica: avvia executeRefresh ogni volta che isUseRefreshing torna a false
     if (!isUseRefreshing && !isUseLoading && !isUseApplying) {
       executeRefresh();
-    } else {
-      console.log(
-        'ip',
-        isUseIp,
-        'refresh',
-        isUseRefreshing,
-        'loading',
-        isUseLoading,
-        'applying',
-        isUseApplying,
-        'STOP',
-      );
     }
   }, [isUseRefreshing, isUseLoading, isUseApplying]);
 
