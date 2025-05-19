@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Salva un valore associato a una chiave in AsyncStorage
 export async function saveData(key: string, value: any) {
   try {
     await AsyncStorage.setItem(key, value);
@@ -9,6 +10,7 @@ export async function saveData(key: string, value: any) {
   }
 }
 
+// Recupera un valore da AsyncStorage tramite la chiave
 export async function retrieveData(key: string) {
   try {
     const value = await AsyncStorage.getItem(key);
@@ -25,6 +27,7 @@ export async function retrieveData(key: string) {
   }
 }
 
+// Rimuove tutti i dati salvati in AsyncStorage
 export async function clearAllData() {
   try {
     await AsyncStorage.clear();

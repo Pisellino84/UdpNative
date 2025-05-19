@@ -13,8 +13,10 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRefresh, useLoading, useIp} from '../../../lib/useConst';
 
+// Variabile globale per l'IP corrente
 let currentIp = '';
 
+// Funzione per ottenere o impostare l'IP corrente
 export function getIp({ip}: {ip?: string} = {}) {
   if (ip && ip?.length > 0) {
     currentIp = ip;
@@ -22,14 +24,19 @@ export function getIp({ip}: {ip?: string} = {}) {
   return currentIp;
 }
 
+// Pagina per l'inserimento e la gestione dell'indirizzo IP
 export default function IpPage() {
+  // Definizione delle rotte disponibili nello stack
   type RootStackParamList = {
     ZoneStack: undefined;
   };
+  // Hook di navigazione
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  // Hook per gestire gli stati globali di refresh, loading e ip
   const {setIsUseRefreshing} = useRefresh();
   const {setIsUseLoading} = useLoading();
   const {setIsUseIp} = useIp();
+
   useEffect(() => {
     retrieveIp();
 
@@ -42,6 +49,7 @@ export default function IpPage() {
 
   const [ip, setIp] = useState('');
 
+  // Recupera l'IP salvato e aggiorna lo stato
   function retrieveIp() {
     retrieveData('FW').then(fw => {
       if (fw === 'no') {
@@ -61,12 +69,14 @@ export default function IpPage() {
     });
   }
 
+  // Aggiorna lo stato locale e globale quando cambia l'IP
   const handleIpChange = (text: string) => {
     setIsUseRefreshing(true);
     setIsUseIp(true);
     setIp(text);
   };
 
+  // Salva l'IP se valido e aggiorna lo stato globale
   const handleSave = () => {
     if (isValidIP(ip)) {
       currentIp = ip; // Aggiorna currentIp solo se l'IP è valido
@@ -75,6 +85,7 @@ export default function IpPage() {
     }
   };
 
+  // Funzione di validazione dell'indirizzo IP
   function isValidIP(ipToValidate: string = ip) {
     console.log('isValideip: ', ipToValidate);
     let check = 0;

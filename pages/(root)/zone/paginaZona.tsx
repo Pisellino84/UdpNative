@@ -1,3 +1,4 @@
+// Pagina di dettaglio per la gestione di una singola zona audio
 import {
   View,
   Text,
@@ -8,8 +9,8 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 
-import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
-import {Dropdown} from 'react-native-element-dropdown'; // https://github.com/hoaphantn7604/react-native-element-dropdown
+import Slider from '@react-native-community/slider'; // Slider per il volume
+import {Dropdown} from 'react-native-element-dropdown'; // Dropdown per la sorgente audio
 
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
 import icons from '../../../constants/icons';
@@ -29,22 +30,27 @@ import {useZonaMonitor} from '../../../lib/useZonaMonitor';
 import {useRefresh} from '../../../lib/useConst';
 
 export default function PaginaZona() {
+  // Hook per gestire lo stato di refresh globale
   const {setIsUseRefreshing} = useRefresh();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Definizione dei parametri di navigazione
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
   };
 
+  // Recupera l'id della zona dalla route
   const route = useRoute<RouteProp<RootStackParamList, 'PaginaZona'>>();
   const {zoneId} = route.params;
 
+  // Reset dello stato di refresh quando cambia la zona
   React.useEffect(() => {
     return () => {
       setIsUseRefreshing(false);
     };
   }, [zoneId]);
 
+  // Opzioni disponibili per la sorgente audio
   const Sources = [
     {label: 'Tuner', value: 0},
     {label: 'CD', value: 1},
@@ -56,14 +62,18 @@ export default function PaginaZona() {
     {label: 'TV', value: 7},
   ];
 
+  // Stati locali per power, mute, source, volume, nome e slider
   const [power, setPower] = useState(0);
   const [mute, setMute] = useState(0);
   const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
 
+  // Hook custom per monitorare la zona
   useZonaMonitor(zoneId, 200, volume);
   const [nome, setNome] = useState(Nome);
   const [slider, setSlider] = useState(volume);
+
+  // Recupera il volume salvato per la zona
   function retrieveVolume() {
     retrieveData(`volume_${zoneId}`).then(volumeString => {
       if (volumeString !== null) {
@@ -80,21 +90,25 @@ export default function PaginaZona() {
     });
   }
 
+  // Salva i dati correnti della zona
   function saveSetting() {
     saveData(`byte5_${zoneId}`, Byte5?.toString());
     saveData(`volume_${zoneId}`, Volume?.toString());
   }
 
-  async function bomboclat() {
+  // Simula un caricamento per 1500 ms
+  async function caricamento() {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
     setIsLoading(false);
   }
 
+  // Effetto per gestire aggiornamenti e listener UDP
   useEffect(() => {
-    bomboclat();
+    caricamento();
     leggiStatoZona(zoneId);
 
+    // Gestione dei cambiamenti dei byte ricevuti via UDP
     const handleByte5Change = () => {
       if (Byte5 == 33 || Byte5 == 1) {
         setPower(0);
@@ -134,6 +148,7 @@ export default function PaginaZona() {
       setNome(newNome);
     };
 
+    // Registrazione degli eventi UDP
     udpEvents.on('Byte5Changed', handleByte5Change);
     udpEvents.on('Byte6Changed', handleByte6Change);
     udpEvents.on('VolumeChanged', handleVolumeChange);
@@ -146,6 +161,7 @@ export default function PaginaZona() {
     };
   }, []);
 
+  // Mostra spinner durante il caricamento
   if (isLoading) {
     return (
       <View className="h-screen w-screen flex justify-center items-center">
@@ -154,11 +170,13 @@ export default function PaginaZona() {
     );
   }
 
+  // Render principale della pagina zona
   return (
     <AndroidSafeArea>
       <View className="px-5">
         <SecondaryHeader title={nome ?? 'Default Title'} />
         <View className="flex flex-row my-5 gap-5 justify-between border-b pb-5 border-black-50">
+          {/* Pulsante accensione/spegnimento */}
           <TouchableOpacity
             onPress={() => {
               if (power == 0) {
@@ -185,6 +203,7 @@ export default function PaginaZona() {
             </Text>
           </TouchableOpacity>
 
+          {/* Pulsante mute */}
           <TouchableOpacity
             onPress={() => {
               if (power) {
@@ -216,6 +235,7 @@ export default function PaginaZona() {
           </TouchableOpacity>
         </View>
         <View className="my-2.5">
+          {/* Slider per il volume */}
           <Text className="text-black-300 text-lg font-medium mb-1">
             Volume:{' '}
             <Text className="text-2xl font-extrabold text-primary-300">
@@ -241,6 +261,7 @@ export default function PaginaZona() {
           />
         </View>
         <View className="my-2.5">
+          {/* Dropdown per la sorgente audio */}
           <Text className="text-black-300 text-lg font-medium">Source:</Text>
           {power === 0 && (
             <Text className="text-red-500 text-md font-medium -mt-1">

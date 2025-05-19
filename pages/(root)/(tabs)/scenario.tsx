@@ -1,6 +1,8 @@
 import AndroidSafeArea from '../../../components/AndroidSafeArea';
+// Import dei componenti header e delle icone
 import {MainHeader, SecondaryHeader} from '../../../components/Header';
 import icons from '../../../constants/icons';
+// Import dei componenti React Native
 import {
   Text,
   View,
@@ -11,24 +13,31 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+// Import di hook di navigazione e stato
 import {
   NavigationProp,
   useNavigation,
   useFocusEffect,
 } from '@react-navigation/native';
 import {useState, useCallback} from 'react';
+// Import di componenti di terze parti
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
+// Import di funzioni di persistenza e UDP
 import {retrieveData, saveData} from '../../../lib/db';
 import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
 import {useLoading, useRefresh, useApply} from '../../../lib/useConst';
 
+// Variabile globale per la lista degli scenari
 let scenari: any[] = [];
 
+// Componente principale Scenario: mostra la lista degli scenari e permette la gestione
 export default function Scenario() {
   const navigation = useNavigation<NavigationProp<any>>();
+  // Stato per forzare il rerender
   const [, setRenderTrigger] = useState(0);
 
+  // Recupera gli scenari salvati da AsyncStorage
   const retrieveScenari = useCallback(() => {
     retrieveData('scenari').then(array => {
       if (array !== null) {
@@ -39,14 +48,15 @@ export default function Scenario() {
     });
   }, []);
 
+  // Aggiorna la lista scenari ogni volta che si torna su questa schermata
   useFocusEffect(
     useCallback(() => {
       retrieveScenari();
-
       return () => {};
     }, [retrieveScenari]),
   );
 
+  // Gestione creazione nuovo scenario
   const handleCreateScenario = (newScenario: {nome: string}) => {
     const isDuplicateName = scenari.some(
       scenario =>
@@ -74,6 +84,7 @@ export default function Scenario() {
     console.log('Scenari dopo la creazione:', scenari);
   };
 
+  // Aggiorna le impostazioni di uno scenario
   const handleUpdateScenarioSettings = (index: number, newSetting: any) => {
     const updatedScenari = scenari.map((scenario, i) =>
       i === index
@@ -87,6 +98,7 @@ export default function Scenario() {
     console.log("Scenari dopo l'aggiornamento:", scenari);
   };
 
+  // Elimina uno scenario dalla lista
   function handleDeleteScenario(indexToDelete: number) {
     Alert.alert(
       'Elimina Scenario',
@@ -114,13 +126,19 @@ export default function Scenario() {
     );
   }
 
+  // Hook custom per gestire loading/apply/refresh globali
   const {isUseLoading} = useLoading();
   const {setIsUseRefreshing} = useRefresh();
   const {setIsUseApplying} = useApply();
+
+  // Funzione di utilità per delay asincrono
   async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+  // Stato per mostrare spinner durante l'applicazione scenario
   const [isLoading, setIsLoading] = useState(false);
+
+  // Applica uno scenario inviando i comandi UDP
   async function Applica(scenario: any) {
     try {
       const statoZona = await leggiStatoZona(1);
@@ -164,6 +182,7 @@ export default function Scenario() {
     setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
+    // Ciclo di invio comandi UDP per ogni impostazione dello scenario
     for (const setting of scenario.settings) {
       console.log('Impostazione:', setting);
       console.log('  ID:', setting.id);
@@ -197,6 +216,7 @@ export default function Scenario() {
     setIsLoading(false);
   }
 
+  // Mostra spinner durante l'applicazione scenario
   if (isLoading) {
     return (
       <AndroidSafeArea>
@@ -210,6 +230,7 @@ export default function Scenario() {
     );
   }
 
+  // Render principale: lista scenari e pulsanti di gestione
   return (
     <AndroidSafeArea>
       <ScrollView
@@ -245,6 +266,7 @@ export default function Scenario() {
                 </View>
               </View>
               <View className="flex flex-row mt-3 items-center justify-between">
+                {/* Pulsante modifica scenario */}
                 <TouchableOpacity
                   className="p-2 rounded-full bg-gray-300"
                   onPress={() =>
@@ -256,6 +278,7 @@ export default function Scenario() {
                   }>
                   <Image source={icons.edit} className="size-6" />
                 </TouchableOpacity>
+                {/* Pulsante applica scenario */}
                 <TouchableOpacity
                   className="flex items-center w-32 justify-center py-5 rounded-xl bg-primary-300"
                   onPress={() => {
@@ -263,6 +286,7 @@ export default function Scenario() {
                   }}>
                   <Text className="text-white font-extrabold">APPLICA</Text>
                 </TouchableOpacity>
+                {/* Pulsante elimina scenario */}
                 <TouchableOpacity
                   className="p-2 rounded-full bg-red-100"
                   onPress={() => {
@@ -279,6 +303,7 @@ export default function Scenario() {
   );
 }
 
+// Componente per la creazione di un nuovo scenario
 export function CreateScenario({route}: {route: any}) {
   const [nome, setNome] = useState('');
   const {updateScenari} = route.params;
@@ -308,6 +333,7 @@ export function CreateScenario({route}: {route: any}) {
   );
 }
 
+// Interfaccia per una singola impostazione di scenario
 interface Setting {
   id: number | null;
   note: string;
@@ -317,8 +343,11 @@ interface Setting {
   source: number;
 }
 
+// Componente per la modifica di uno scenario e delle sue impostazioni
 export function EditScenario({route}: {route: any}) {
+  // Props ricevute dalla navigazione: nome iniziale, indice scenario, funzione di update
   const {nome: initialNome, index, updateScenarioSettings} = route.params;
+  // Stato per i campi del form di aggiunta/modifica impostazione
   const [nome, setNome] = useState(initialNome);
   const [id, setId] = useState<number | null>(null);
   const [note, setNote] = useState('');
@@ -326,11 +355,13 @@ export function EditScenario({route}: {route: any}) {
   const [mute, setMute] = useState(0);
   const [volume, setVolume] = useState(0);
   const [source, setSource] = useState(0);
+  // Stato per le impostazioni correnti dello scenario selezionato
   const [currentScenarioSettings, setCurrentScenarioSettings] = useState<any[]>(
     [],
   );
   const navigation = useNavigation<NavigationProp<any>>();
 
+  // Opzioni disponibili per la sorgente audio
   const Sources = [
     {label: 'Tuner', value: 0},
     {label: 'CD', value: 1},
@@ -342,6 +373,7 @@ export function EditScenario({route}: {route: any}) {
     {label: 'TV', value: 7},
   ];
 
+  // Aggiorna le impostazioni correnti quando cambia lo scenario selezionato
   useFocusEffect(
     useCallback(() => {
       if (scenari[index] && scenari[index].settings) {
@@ -350,6 +382,7 @@ export function EditScenario({route}: {route: any}) {
     }, [index]),
   );
 
+  // Salva una nuova impostazione per lo scenario
   function handleSaveSetting() {
     if (id !== null) {
       const isDuplicateId = currentScenarioSettings.some(
@@ -386,6 +419,7 @@ export function EditScenario({route}: {route: any}) {
     }
   }
 
+  // Elimina una singola impostazione dallo scenario
   function handleDelete(settingIndex: any) {
     const newSettings = [...currentScenarioSettings];
     newSettings.splice(settingIndex, 1);
@@ -399,6 +433,7 @@ export function EditScenario({route}: {route: any}) {
     }
   }
 
+  // Salva il nuovo nome dello scenario
   function handleSaveNome() {
     if (!nome.trim()) {
       Alert.alert(

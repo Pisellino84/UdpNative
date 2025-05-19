@@ -24,6 +24,7 @@ import {getIp} from '../impostazioni/ip';
 import {useState, useEffect} from 'react';
 import {retrieveData} from '../../../lib/db';
 
+// Componente per l'icona e il titolo delle tab
 const TabIcon = ({
   focused,
   icon,
@@ -52,10 +53,12 @@ const TabIcon = ({
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+// Navigatore delle tab principali (Zone, Scenario, Impostazioni)
 function ZoneTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
+        // Opzioni di stile e comportamento della tab bar
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: 'white',
@@ -64,6 +67,7 @@ function ZoneTabNavigator() {
           borderTopWidth: 1,
           minHeight: 100,
         },
+        // Personalizzazione del bottone della tab
         tabBarButton: ({children, onPress}) => (
           <TouchableOpacity
             className="flex-1 pb-4 justify-center items-center"
@@ -73,6 +77,7 @@ function ZoneTabNavigator() {
         ),
         headerShown: false,
       }}>
+      {/* Tab Zone */}
       <Tab.Screen
         name="Zone"
         component={Zone}
@@ -84,6 +89,7 @@ function ZoneTabNavigator() {
           ),
         }}
       />
+      {/* Tab Scenario */}
       <Tab.Screen
         name="Scenario"
         component={Scenario}
@@ -95,6 +101,7 @@ function ZoneTabNavigator() {
           ),
         }}
       />
+      {/* Tab Impostazioni */}
       <Tab.Screen
         name="Impostazioni"
         component={Impostazioni}
@@ -114,9 +121,12 @@ function ZoneTabNavigator() {
   );
 }
 
+// Componente principale dell'applicazione
 const App = () => {
+  // Stato per verificare la presenza dell'IP
   const [ipCheck, setIpCheck] = useState<string | null>(null);
 
+  // Recupera l'IP salvato in memoria e lo imposta
   function retrieveIp() {
     retrieveData('ip').then(ipData => {
       setIpCheck(ipData ?? '');
@@ -126,30 +136,38 @@ const App = () => {
     });
   }
 
+  // Effettua il recupero dell'IP al primo render
   useEffect(() => {
     retrieveIp();
   }, []);
 
+  // Se lo stato è ancora null, non renderizzare nulla
   if (ipCheck === null) {
     return;
   }
 
+  // Scegli la schermata iniziale in base alla presenza dell'IP
   const initialRoute = ipCheck.length > 0 ? 'ZoneStack' : 'IpPage';
 
   return (
+    // Provider globale per gli stati di caricamento, refresh, ecc.
     <LoadingProvider>
       <NavigationContainer>
+        {/* Stack principale dell'app */}
         <Stack.Navigator initialRouteName={initialRoute}>
+          {/* Schermata per inserimento IP */}
           <Stack.Screen
             name="IpPage"
             component={IpPage}
             options={{headerShown: false}}
           />
+          {/* Stack delle tab principali */}
           <Stack.Screen
             name="ZoneStack"
             component={ZoneTabNavigator}
             options={{headerShown: false}}
           />
+          {/* Altre schermate */}
           <Stack.Screen
             name="PaginaZona"
             component={PaginaZona}
