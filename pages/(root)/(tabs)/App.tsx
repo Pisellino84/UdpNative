@@ -19,7 +19,7 @@ import Impostazioni from '../impostazioni/impostazioni';
 import IpPage from '../impostazioni/ip';
 import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
-import {LoadingProvider} from '../../../lib/useIsLoading';
+import {LoadingProvider} from '../../../lib/useConst';
 import {getIp} from '../impostazioni/ip';
 import {useState, useEffect} from 'react';
 import {retrieveData} from '../../../lib/db';

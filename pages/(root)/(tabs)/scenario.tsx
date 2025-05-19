@@ -21,7 +21,7 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {leggiStatoZona, sendThreeBytes} from '../../../lib/udpClient';
-import {useLoading, useRefresh, useApply} from '../../../lib/useIsLoading';
+import {useLoading, useRefresh, useApply} from '../../../lib/useConst';
 
 let scenari: any[] = [];
 

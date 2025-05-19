@@ -36,7 +36,7 @@ import {
   useRefresh,
   useApply,
   useIp,
-} from '../../../lib/useIsLoading';
+} from '../../../lib/useConst';
 
 export const udpEvents = new EventEmitter();
 

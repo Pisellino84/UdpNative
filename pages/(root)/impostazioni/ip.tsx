@@ -11,7 +11,7 @@ import icons from '../../../constants/icons';
 import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
-import {useRefresh, useLoading, useIp} from '../../../lib/useIsLoading';
+import {useRefresh, useLoading, useIp} from '../../../lib/useConst';
 
 let currentIp = '';
 

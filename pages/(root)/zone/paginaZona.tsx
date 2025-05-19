@@ -26,7 +26,7 @@ import {
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useZonaMonitor} from '../../../lib/useZonaMonitor';
-import {useRefresh} from '../../../lib/useIsLoading';
+import {useRefresh} from '../../../lib/useConst';
 
 export default function PaginaZona() {
   const {setIsUseRefreshing} = useRefresh();
