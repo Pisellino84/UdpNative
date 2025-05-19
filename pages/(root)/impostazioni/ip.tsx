@@ -12,6 +12,7 @@ import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRefresh, useLoading, useIp} from '../../../lib/useConst';
+import RNAppRestart from '@brandingbrand/react-native-app-restart';
 
 // Variabile globale per l'IP corrente
 let currentIp = '';
@@ -47,23 +48,16 @@ export default function IpPage() {
   }, []);
 
   const [ip, setIp] = useState('');
+  const [firstView, setFirstView] = useState(true);
 
   // Recupera l'IP salvato e aggiorna lo stato
   function retrieveIp() {
-    retrieveData('FW').then(fw => {
-      if (fw === 'no') {
-        retrieveData('ip').then(ipData => {
-          if (ipData !== null && ipData !== '') {
-            handleIpChange(ipData);
-            saveData('FW', 'yes');
-          }
-        });
-      } else if (fw === 'yes') {
-        retrieveData('ip').then(ipData => {
-          if (ipData !== null && ipData !== '') {
-            handleIpChange(ipData);
-          }
-        });
+    retrieveData('ip').then(ipData => {
+      if (ipData == null || ipData == '') {
+        setFirstView(true);
+      } else {
+        setFirstView(false);
+        setIp(ipData);
       }
     });
   }
@@ -139,7 +133,11 @@ export default function IpPage() {
             if (isValidIP()) {
               Alert.alert(
                 'Sei Sicuro?',
-                `Sei sicuro di voler usare ${ip} come indirizzo IP?\n(puoi sempre cambiarlo succesivamente)`,
+                `Sei sicuro di voler usare ${ip} come indirizzo IP?\n${
+                  firstView
+                    ? '(Puoi sempre cambiarlo successivamente)'
+                    : "(L'Applicazione si riavvierà automaticamente)"
+                }`,
                 [
                   {
                     text: 'Annulla',
@@ -149,11 +147,19 @@ export default function IpPage() {
                   {
                     text: 'Continua',
                     onPress: () => {
-                      saveData('ip', ip);
-                      saveData('FW', 'yes');
-                      handleSave();
-                      navigation.navigate('ZoneStack');
-                      console.log('IP changed to:', currentIp);
+                      if (!firstView) {
+                        saveData('ip', ip);
+                        saveData('FW', 'yes');
+                        handleSave();
+                        console.log('IP changed to:', currentIp);
+                        RNAppRestart.restartApplication();
+                      } else {
+                        saveData('ip', ip);
+                        saveData('FW', 'yes');
+                        handleSave();
+                        console.log('IP changed to:', currentIp);
+                        navigation.navigate('ZoneStack');
+                      }
                     },
                   },
                 ],
