@@ -5,42 +5,11 @@ Bug dell'emulatore
 Usare dispotivo android fisico
 
 - **SOLUZIONE2**
-> **IMPORTATE**: i primi tre passaggi sono per gli avd con un api 25+, in caso possiedi un avd con api 24- puoi saltare i passaggi e cominciare da telnet localhost e avviare direttamente metro con npm run android.
 
-Avvia metro
-
-```sh
-# Using npm
-npm start 
-
-# OR using Yarn
-yarn start
-```
-Se è la prima volta che usi l'avd avvia metro con 
 
 ```sh
 # Using npm
 npm run android 
-
-# OR using Yarn
-yarn run android
-```
-
-Dopo avere finito di configurare e installare l'apk chiudi l'emulatore e segui i passaggi.
-
-Aprire il cmd ed entrare nella directory degli umulatori di android (".....\Android\Sdk\emulator")
-
-Avvia l'emulatore con la feauture Wifi 
-
-```sh
-emulator.exe -avd <nome+emulatore> -feature -Wifi
-```
-
-Per vedere i nomi degli emulatori
-
-```sh
-emulator.exe -list-avds
-```
 
 Aprire un nuovo terminale e connettersi al dispositivo 
 
@@ -58,6 +27,15 @@ redir add udp:<port>:<port>
 Esci dal telnet
 
 ```sh
+quit
+```
+
+ESEMPIO
+
+```sh
+telnet localhost 5554
+auth Xt6qJrCst0dgJNbs
+redir add udp:53280:53280
 quit
 ```
 
