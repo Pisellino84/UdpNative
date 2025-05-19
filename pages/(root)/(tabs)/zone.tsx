@@ -2,7 +2,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -31,7 +30,7 @@ import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
 import {getIp} from '../impostazioni/ip';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
-import React, {createContext, useContext} from 'react';
+import React from 'react';
 import {
   useLoading,
   useRefresh,
@@ -42,45 +41,54 @@ import {
 export const udpEvents = new EventEmitter();
 
 const Zone = () => {
+  // Definizione dei parametri di navigazione per la pagina delle zone
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   let ip = getIp();
 
+  // Array di zone da 1 a 49 (in realtà si usano solo 48)
   const zones = Array.from({length: 49}, (_, i) => i + 1);
 
+  // Stati per nomi, volumi, byte5 e id delle zone
   const [zoneNames, setZoneNames] = useState<string[]>(Array(48).fill(''));
   const [zoneVolumes, setZoneVolumes] = useState<number[]>(Array(48).fill(0));
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
 
-  const [refreshBytes5, setRefreshBytes5] = useState<number[]>(
+  // Stati per refresh dei valori delle zone
+  const [refreshBytes5] = useState<number[]>(
     Array(48).fill(0),
   );
-  const [refreshVolumes, setRefreshVolumes] = useState<number[]>(
+  const [refreshVolumes] = useState<number[]>(
     Array(48).fill(0),
   );
 
+  // Stato per gli id delle zone e il numero di zone attive
   const [zoneIds, setZoneIds] = useState<number[]>(Array(48).fill(0));
   const [numZone, setNumZone] = useState(6);
 
+  // Hook personalizzati per gestire loading, refreshing, applying e ip
   const {isUseLoading, setIsUseLoading} = useLoading();
   const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
-  const {isUseApplying, setIsUseApplying} = useApply();
+  const {isUseApplying} = useApply();
   const {isUseIp, setIsUseIp} = useIp();
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
   const [showNoConnection, setShowNoConnection] = useState(false);
 
+  // Ref per gestire valori persistenti tra render
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
   const isUseIpRef = useRef(isUseIp);
   const refreshInProgress = useRef(false);
 
+  // Aggiorna il valore corrente di isUseIpRef quando cambia isUseIp
   useEffect(() => {
     isUseIpRef.current = isUseIp;
   }, [isUseIp]);
 
+  // Carica i dati delle zone dalla rete
   const loadZoneData = async () => {
     try {
       if (isUseApplying) {
@@ -95,18 +103,26 @@ const Zone = () => {
       setIsLoading(true);
       setPerc(0);
 
+      // Copia degli stati correnti per modificarli localmente
       const ids: number[] = [...zoneIds];
       const names: string[] = [...zoneNames];
       const volumes: number[] = [...zoneVolumes];
       const bytes5: number[] = [...zoneBytes5];
       names.fill('');
 
+      // Ciclo su tutte le zone
       for (const zoneId of zones) {
-        let tentativi = 0;
         let rispostaRicevuta = false;
 
-        while (!rispostaRicevuta && zoneId !== 49 && !isUseIpRef.current && ip.length >= 7) {
+        // Prova a leggere lo stato della zona finché non riceve risposta o supera i tentativi
+        while (
+          !rispostaRicevuta &&
+          zoneId !== 49 &&
+          !isUseIpRef.current &&
+          ip.length >= 7
+        ) {
           try {
+            // Se Nome è "mem_free" e la zona è < 48, invia comando di reset
             if (Nome === 'mem_free' && zoneId < 48) {
               sendThreeBytes(61, zoneId, 0);
             }
@@ -116,7 +132,7 @@ const Zone = () => {
             await new Promise(resolve => setTimeout(resolve, 50));
             sendThreeBytes(61, zoneId, 0);
 
-            // Condizione: tutti i dati devono essere presenti e diversi dal precedente
+            // Se riceve dati validi e diversi dal precedente, aggiorna gli array locali
             if (
               Nome &&
               Nome !== lastNome.current &&
@@ -128,6 +144,7 @@ const Zone = () => {
               bytes5[zoneId - 1] = Byte5;
               volumes[zoneId - 1] = Volume;
 
+              // Aggiorna gli stati React
               setZoneIds([...ids]);
               setZoneNames([...names]);
               setZoneVolumes([...volumes]);
@@ -137,10 +154,12 @@ const Zone = () => {
               rispostaRicevuta = true;
             }
           } catch (err) {
+            // Logga eventuali errori di rete o parsing
             console.log(`Errore durante il caricamento della zona ${zoneId}:`);
           }
         }
 
+        // Quando arriva all'ultima zona, termina il loading
         if (zoneId === 48) {
           setIsLoading(false);
           setIsUseLoading(false);
@@ -156,6 +175,7 @@ const Zone = () => {
     }
   };
 
+  // Aggiorna periodicamente i valori di Volume e Byte5 delle zone
   const refreshZoneData = async () => {
     if (refreshInProgress.current) {
       return; // Evita esecuzioni concorrenti
@@ -163,50 +183,62 @@ const Zone = () => {
     refreshInProgress.current = true;
     console.log('Aggiornamento dei valori di Volume e Byte5 per ogni zona...');
 
+    // Copia degli stati correnti per modificarli localmente
     const updatedVolumes: number[] = [...refreshVolumes];
     const updatedBytes5: number[] = [...refreshBytes5];
 
     try {
       for (let zone = 1; zone <= numZone; zone++) {
-        console.log('refreshZoneData ciclo', { zone, isUseRefreshing: isUseRefreshingRef.current });
+        console.log('refreshZoneData ciclo', {
+          zone,
+          isUseRefreshing: isUseRefreshingRef.current,
+        });
         if (isUseRefreshingRef.current) {
+          // Se viene richiesto il refresh, interrompe la funzione
           console.log(
             'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
           );
           refreshInProgress.current = false;
-          return; // Interrompe immediatamente la funzione
+          return;
         }
 
-        let tentativi = 0;
         let rispostaRicevuta = false;
         await new Promise(resolve => setTimeout(resolve, 50));
-        while (!rispostaRicevuta && !isUseRefreshingRef.current && ip.length >= 7) {
+        // Prova a leggere lo stato della zona finché non riceve risposta o supera i tentativi
+        while (
+          !rispostaRicevuta &&
+          !isUseRefreshingRef.current &&
+          ip.length >= 7
+        ) {
           try {
             ip = getIp();
             await leggiStatoZona(zone);
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Condizione: Volume e Byte5 devono essere presenti e diversi dal precedente
+            // Se riceve dati validi e diversi dal precedente, aggiorna gli array locali
             if (
               typeof Volume === 'number' &&
               typeof Byte5 === 'number' &&
-              (Volume !== updatedVolumes[zone - 1] || Byte5 !== updatedBytes5[zone - 1])
+              (Volume !== updatedVolumes[zone - 1] ||
+                Byte5 !== updatedBytes5[zone - 1])
             ) {
               updatedVolumes[zone - 1] = Volume;
               updatedBytes5[zone - 1] = Byte5;
-              console.log(`Zona ${zone}: Volume aggiornato a ${Volume}, Byte5 aggiornato a ${Byte5}`);
+              console.log(
+                `Zona ${zone}: Volume aggiornato a ${Volume}, Byte5 aggiornato a ${Byte5}`,
+              );
               rispostaRicevuta = true;
-              setShowNoConnection(false)
+              setShowNoConnection(false);
             }
           } catch (err) {
+            // Se c'è un errore di rete, mostra il messaggio di connessione assente
             console.log(`Errore durante il refresh della zona ${zone}:`, err);
-            setShowNoConnection(true)
-
+            setShowNoConnection(true);
           }
         }
       }
 
-      // Aggiorna lo stato con i nuovi valori
+      // Aggiorna gli stati React con i nuovi valori
       setZoneVolumes(updatedVolumes);
       setZoneBytes5(updatedBytes5);
     } catch (err) {
@@ -216,26 +248,30 @@ const Zone = () => {
     }
   };
 
+  // Recupera il numero di zone salvato nel database locale
   function retrieveNumZone() {
     try {
-      retrieveData(`numZone`).then(numString => {
-        if (numString !== null) {
-          const numZone = parseInt(numString, 10);
-          if (!isNaN(numZone)) {
-            setNumZone(numZone);
-            console.log('dato caricato', numString);
-          } else {
-            console.error('Il numZone recuperato non è un numero valido.');
+      retrieveData(`numZone`)
+        .then(numString => {
+          if (numString !== null) {
+            const numZone = parseInt(numString, 10);
+            if (!isNaN(numZone)) {
+              setNumZone(numZone);
+              console.log('dato caricato', numString);
+            } else {
+              console.error('Il numZone recuperato non è un numero valido.');
+            }
           }
-        }
-      }).catch(err => {
-        console.error('Errore nel recupero di numZone:', err);
-      });
+        })
+        .catch(err => {
+          console.error('Errore nel recupero di numZone:', err);
+        });
     } catch (err) {
       console.error('Errore in retrieveNumZone:', err);
     }
   }
 
+  // Permette all'utente di modificare il numero di zone tramite prompt
   function modificaNumZone() {
     setIsUseRefreshing(true);
     try {
@@ -267,13 +303,20 @@ const Zone = () => {
                   {
                     text: 'OK',
                     onPress: e => {
+                      // Valida il numero inserito e aggiorna lo stato
                       const num = parseInt(e ?? '', 10);
                       if (!isNaN(num) && num >= 1 && num <= 48) {
                         setNumZone(num);
+                        // Salva il nuovo numero di zone e aggiorna i dati
                         saveData('numZone', num.toString()).catch(err => {
-                          console.error('Errore nel salvataggio di numZone:', err);
+                          console.error(
+                            'Errore nel salvataggio di numZone:',
+                            err,
+                          );
                         });
-                        loadZoneData().then(() => {setIsUseRefreshing(false)});
+                        loadZoneData().then(() => {
+                          setIsUseRefreshing(false);
+                        });
                       } else {
                         Alert.alert(
                           'Numero non valido',
@@ -295,10 +338,12 @@ const Zone = () => {
     }
   }
 
+  // Ogni volta che cambia isUseIp, lo resetta a false
   useEffect(() => {
     setIsUseIp(false);
   });
 
+  // All'avvio, carica i dati delle zone e il numero di zone dal database
   useEffect(() => {
     setIsUseRefreshing(true);
     new Promise(resolve => setTimeout(resolve, 500));
@@ -306,6 +351,7 @@ const Zone = () => {
     retrieveNumZone();
   }, []);
 
+  // Gestisce il refresh periodico dei dati delle zone
   useEffect(() => {
     isUseRefreshingRef.current = isUseRefreshing;
     const executeRefresh = async () => {
@@ -320,12 +366,13 @@ const Zone = () => {
       }
     };
 
-    // Modifica: avvia executeRefresh ogni volta che isUseRefreshing torna a false
+    // Avvia il refresh automatico quando non ci sono operazioni in corso
     if (!isUseRefreshing && !isUseLoading && !isUseApplying) {
       executeRefresh();
     }
   }, [isUseRefreshing, isUseLoading, isUseApplying]);
 
+  // Se è in caricamento, mostra spinner e barra di progresso
   if (isLoading) {
     return (
       <AndroidSafeArea>
@@ -338,14 +385,18 @@ const Zone = () => {
     );
   }
 
+  // Render principale della pagina delle zone
   return (
     <AndroidSafeArea>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView showsVerticalScrollIndicator={false}>
         <MainHeader title="Zone" icon={icons.zone} />
         <View className="my-5 flex flex-col">
-          {showNoConnection ? <Text className="text-center mb-5 text-red-400">Controlla la Connesione</Text> : null}
+          {/* Mostra un messaggio se manca la connessione */}
+          {showNoConnection ? (
+            <Text className="text-center mb-5 text-red-400">
+              Controlla la Connesione
+            </Text>
+          ) : null}
           <View className="flex flex-row items-center mb-5">
             <TouchableOpacity
               className="bg-primary-300 p-3 rounded-xl w-full"
@@ -357,6 +408,7 @@ const Zone = () => {
               </Text>
             </TouchableOpacity>
           </View>
+          {/* Lista delle zone */}
           {zones.slice(0, numZone).map(zona => (
             <TouchableOpacity
               key={zona}
@@ -385,6 +437,7 @@ const Zone = () => {
                   </Text>
                 </View>
                 <View className="flex flex-col gap-2">
+                  {/* Icona accensione */}
                   <Image
                     source={icons.power}
                     className="size-6"
@@ -397,6 +450,7 @@ const Zone = () => {
                         : '#D4D4D8'
                     }
                   />
+                  {/* Icona mute */}
                   <Image
                     source={icons.mute}
                     className="size-6 ml-1"
@@ -410,6 +464,7 @@ const Zone = () => {
                     }
                   />
                 </View>
+                {/* Slider volume */}
                 <View className="flex flex-row">
                   <Slider
                     maximumTrackTintColor="#228BE6"
