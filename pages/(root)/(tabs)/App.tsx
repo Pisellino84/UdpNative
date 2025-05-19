@@ -19,10 +19,10 @@ import Impostazioni from '../impostazioni/impostazioni';
 import IpPage from '../impostazioni/ip';
 import {CreateScenario} from './scenario';
 import About from '../impostazioni/about';
-import {useLoading, LoadingProvider} from '../../../lib/useIsLoading';
-import { getIp } from '../impostazioni/ip';
-import { useState, useEffect } from 'react';
-import { retrieveData } from '../../../lib/db';
+import {LoadingProvider} from '../../../lib/useIsLoading';
+import {getIp} from '../impostazioni/ip';
+import {useState, useEffect} from 'react';
+import {retrieveData} from '../../../lib/db';
 
 const TabIcon = ({
   focused,
@@ -53,7 +53,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function ZoneTabNavigator() {
-  const {isUseLoading} = useLoading();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -68,9 +67,7 @@ function ZoneTabNavigator() {
         tabBarButton: ({children, onPress}) => (
           <TouchableOpacity
             className="flex-1 pb-4 justify-center items-center"
-            onPress={onPress}
-            /* disabled={isLoading} */
-          >
+            onPress={onPress}>
             {children}
           </TouchableOpacity>
         ),
@@ -124,7 +121,7 @@ const App = () => {
     retrieveData('ip').then(ipData => {
       setIpCheck(ipData ?? '');
       if (ipData !== null) {
-        getIp({ ip: ipData });
+        getIp({ip: ipData});
       }
     });
   }
@@ -134,7 +131,7 @@ const App = () => {
   }, []);
 
   if (ipCheck === null) {
-    return 
+    return;
   }
 
   const initialRoute = ipCheck.length > 0 ? 'ZoneStack' : 'IpPage';

@@ -11,12 +11,7 @@ import icons from '../../../constants/icons';
 import {udpEvents} from '../../../lib/udpClient';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {retrieveData, saveData} from '../../../lib/db';
-import {
-  useApply,
-  useRefresh,
-  useLoading,
-  useIp,
-} from '../../../lib/useIsLoading';
+import {useRefresh, useLoading, useIp} from '../../../lib/useIsLoading';
 
 let currentIp = '';
 
@@ -32,18 +27,17 @@ export default function IpPage() {
     ZoneStack: undefined;
   };
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const {setIsUseApplying} = useApply();
   const {setIsUseRefreshing} = useRefresh();
   const {setIsUseLoading} = useLoading();
-  const {isUseIp, setIsUseIp} = useIp();
+  const {setIsUseIp} = useIp();
   useEffect(() => {
     retrieveIp();
 
     return () => {
-      setIsUseIp(false)
-      setIsUseLoading(false)
-      setIsUseRefreshing(false)
-    }
+      setIsUseIp(false);
+      setIsUseLoading(false);
+      setIsUseRefreshing(false);
+    };
   }, []);
 
   const [ip, setIp] = useState('');
@@ -71,11 +65,6 @@ export default function IpPage() {
     setIsUseRefreshing(true);
     setIsUseIp(true);
     setIp(text);
-    /* if (isValidIP(text)) {
-      currentIp = text; // Aggiorna currentIp solo se l'IP è valido
-      getIp()
-      udpEvents.emit('ipChanged', text);
-    } */
   };
 
   const handleSave = () => {
@@ -153,7 +142,7 @@ export default function IpPage() {
                     onPress: () => {
                       saveData('ip', ip);
                       saveData('FW', 'yes');
-                      handleSave()
+                      handleSave();
                       navigation.navigate('ZoneStack');
                       console.log('IP changed to:', currentIp);
                     },

@@ -15,9 +15,8 @@ import {
   NavigationProp,
   useNavigation,
   useFocusEffect,
-  TabActions,
 } from '@react-navigation/native';
-import {useEffect, useState, useCallback} from 'react';
+import {useState, useCallback} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import Slider from '@react-native-community/slider';
 import {retrieveData, saveData} from '../../../lib/db';
@@ -28,7 +27,7 @@ let scenari: any[] = [];
 
 export default function Scenario() {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [renderTrigger, setRenderTrigger] = useState(0);
+  const [, setRenderTrigger] = useState(0);
 
   const retrieveScenari = useCallback(() => {
     retrieveData('scenari').then(array => {
@@ -115,13 +114,9 @@ export default function Scenario() {
     );
   }
 
-  async function Wait(ms: number) {
-    await new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  const {isUseLoading, setIsUseLoading} = useLoading();
-  const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
-  const {isUseApplying, setIsUseApplying} = useApply()
+  const {isUseLoading} = useLoading();
+  const {setIsUseRefreshing} = useRefresh();
+  const {setIsUseApplying} = useApply();
   async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -143,13 +138,15 @@ export default function Scenario() {
           [{text: 'OK'}],
         );
         return;
-      } 
-      if (!scenario.settings || !Array.isArray(scenario.settings) || scenario.settings.length === 0) {
-        Alert.alert(
-          'Errore',
-          'Nessuna impostazione selezionata',
-          [{text: 'OK'}],
-        );
+      }
+      if (
+        !scenario.settings ||
+        !Array.isArray(scenario.settings) ||
+        scenario.settings.length === 0
+      ) {
+        Alert.alert('Errore', 'Nessuna impostazione selezionata', [
+          {text: 'OK'},
+        ]);
         return;
       }
     } catch (error) {
@@ -162,8 +159,8 @@ export default function Scenario() {
     }
 
     const time = 30;
-    setIsUseApplying(true)
-    setIsUseRefreshing(true)
+    setIsUseApplying(true);
+    setIsUseRefreshing(true);
     setIsLoading(true);
     console.log(`Applicando lo scenario: ${scenario.nome}`);
 
@@ -195,8 +192,8 @@ export default function Scenario() {
 
       console.log('---');
     }
-    setIsUseApplying(false)
-    setIsUseRefreshing(false)
+    setIsUseApplying(false);
+    setIsUseRefreshing(false);
     setIsLoading(false);
   }
 
@@ -318,11 +315,6 @@ interface Setting {
   mute: number;
   volume: number;
   source: number;
-}
-
-interface ScenarioType {
-  nome: string;
-  settings: any[];
 }
 
 export function EditScenario({route}: {route: any}) {

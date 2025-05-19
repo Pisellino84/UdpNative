@@ -98,7 +98,7 @@ export async function leggiStatoZona(Zona: number): Promise<any> {
     const timeout = setTimeout(() => {
       udpEvents.off('Byte5Changed', onResponse);
       reject(null);
-    }, 3000); 
+    }, 3000);
 
     const onResponse = (byte5: number) => {
       clearTimeout(timeout);

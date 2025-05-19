@@ -58,7 +58,6 @@ export const useIp = () => {
   return context;
 };
 
-
 /* -------------------------------------------------------------------- */
 
 export const LoadingProvider: React.FC<{children: React.ReactNode}> = ({
@@ -67,7 +66,7 @@ export const LoadingProvider: React.FC<{children: React.ReactNode}> = ({
   const [isUseRefreshing, setIsUseRefreshing] = useState(false);
   const [isUseLoading, setIsUseLoading] = useState(false);
   const [isUseApplying, setIsUseApplying] = useState(false);
-  const [isUseIp, setIsUseIp] = useState(false)
+  const [isUseIp, setIsUseIp] = useState(false);
   return (
     <LoadingContext.Provider value={{isUseLoading, setIsUseLoading}}>
       <RefreshingContext.Provider value={{isUseRefreshing, setIsUseRefreshing}}>

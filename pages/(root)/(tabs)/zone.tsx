@@ -57,12 +57,8 @@ const Zone = () => {
   const [zoneBytes5, setZoneBytes5] = useState<number[]>(Array(48).fill(0));
 
   // Stati per refresh dei valori delle zone
-  const [refreshBytes5] = useState<number[]>(
-    Array(48).fill(0),
-  );
-  const [refreshVolumes] = useState<number[]>(
-    Array(48).fill(0),
-  );
+  const [refreshBytes5] = useState<number[]>(Array(48).fill(0));
+  const [refreshVolumes] = useState<number[]>(Array(48).fill(0));
 
   // Stato per gli id delle zone e il numero di zone attive
   const [zoneIds, setZoneIds] = useState<number[]>(Array(48).fill(0));

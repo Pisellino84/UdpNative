@@ -11,10 +11,6 @@ interface Props {
 }
 
 export function MainHeader({icon = icons.standard, title}: Props) {
-  type RootStackParamList = {
-    Impostazioni: undefined;
-  };
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
     <View className="flex flex-row justify-between items-center border-b pb-5 border-primary-200">
       <View className="flex flex-row gap-3 items-center">

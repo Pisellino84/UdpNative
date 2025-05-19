@@ -1,4 +1,11 @@
-import {View, Text, TouchableOpacity, Image, Alert, ActivityIndicator} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 import Slider from '@react-native-community/slider'; // https://github.com/callstack/react-native-slider
@@ -19,13 +26,11 @@ import {
 import {retrieveData, saveData} from '../../../lib/db';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useZonaMonitor} from '../../../lib/useZonaMonitor';
-import { useRefresh } from '../../../lib/useIsLoading';
+import {useRefresh} from '../../../lib/useIsLoading';
 
 export default function PaginaZona() {
-  const {isUseRefreshing, setIsUseRefreshing} = useRefresh();
-  const [isLoading, setIsLoading] = useState(false)
-
-  
+  const {setIsUseRefreshing} = useRefresh();
+  const [isLoading, setIsLoading] = useState(false);
 
   type RootStackParamList = {
     PaginaZona: {zoneId: number};
@@ -35,10 +40,9 @@ export default function PaginaZona() {
   const {zoneId} = route.params;
 
   React.useEffect(() => {
-
     return () => {
       setIsUseRefreshing(false);
-    }
+    };
   }, [zoneId]);
 
   const Sources = [
@@ -56,8 +60,6 @@ export default function PaginaZona() {
   const [mute, setMute] = useState(0);
   const [source, setSource] = useState(0);
   const [volume, setVolume] = useState(Volume);
-
-
 
   useZonaMonitor(zoneId, 200, volume);
   const [nome, setNome] = useState(Nome);
@@ -84,13 +86,13 @@ export default function PaginaZona() {
   }
 
   async function bomboclat() {
-    setIsLoading(true)
+    setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false)
+    setIsLoading(false);
   }
 
   useEffect(() => {
-    bomboclat()
+    bomboclat();
     leggiStatoZona(zoneId);
 
     const handleByte5Change = () => {
@@ -144,14 +146,14 @@ export default function PaginaZona() {
     };
   }, []);
 
-  if(isLoading)
-    {
-      return(
-      <View className='h-screen w-screen flex justify-center items-center'>
-        <ActivityIndicator className='size-24' />
-      </View>)
-    }
-  
+  if (isLoading) {
+    return (
+      <View className="h-screen w-screen flex justify-center items-center">
+        <ActivityIndicator className="size-24" />
+      </View>
+    );
+  }
+
   return (
     <AndroidSafeArea>
       <View className="px-5">
