@@ -199,7 +199,7 @@ const Zone = () => {
         }
 
         let rispostaRicevuta = false;
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 25));
         // Prova a leggere lo stato della zona finché non riceve risposta o supera i tentativi
         while (
           !rispostaRicevuta &&
@@ -209,7 +209,7 @@ const Zone = () => {
           try {
             ip = getIp();
             await leggiStatoZona(zone);
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise(resolve => setTimeout(resolve, 25));
 
             // Se riceve dati validi e diversi dal precedente, aggiorna gli array locali
             if (
