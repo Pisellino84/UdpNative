@@ -70,78 +70,89 @@ const Zone = () => {
   const {isUseIp, setIsUseIp} = useIp();
   const [isLoading, setIsLoading] = useState(true);
   const [perc, setPerc] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
+  const [showNoConnection, setShowNoConnection] = useState(false);
 
   const lastNome = useRef<string | null>(null);
   const isUseRefreshingRef = useRef(isUseRefreshing);
   const isUseIpRef = useRef(isUseIp);
   const refreshInProgress = useRef(false);
 
-
   useEffect(() => {
     isUseIpRef.current = isUseIp;
   }, [isUseIp]);
 
   const loadZoneData = async () => {
-    if (isUseApplying) {
-      Alert.alert(
-        'Attenzione',
-        "L'applicazione dello scenario è in corso, attendere il termine del processo",
-      );
-      return;
-    }
-    setIsUseLoading(true);
-    setIsUseIp(false)
-    setIsLoading(true);
-    setPerc(0);
+    try {
+      if (isUseApplying) {
+        Alert.alert(
+          'Attenzione',
+          "L'applicazione dello scenario è in corso, attendere il termine del processo",
+        );
+        return;
+      }
+      setIsUseLoading(true);
+      setIsUseIp(false);
+      setIsLoading(true);
+      setPerc(0);
 
-    const ids: number[] = [...zoneIds];
-    const names: string[] = [...zoneNames];
-    const volumes: number[] = [...zoneVolumes];
-    const bytes5: number[] = [...zoneBytes5];
-    names.fill('');
+      const ids: number[] = [...zoneIds];
+      const names: string[] = [...zoneNames];
+      const volumes: number[] = [...zoneVolumes];
+      const bytes5: number[] = [...zoneBytes5];
+      names.fill('');
 
-    for (const zoneId of zones) {
-      let tentativi = 0;
-      let rispostaRicevuta = false;
+      for (const zoneId of zones) {
+        let tentativi = 0;
+        let rispostaRicevuta = false;
 
-      while (!rispostaRicevuta && zoneId !== 49 && !isUseIpRef.current && ip.length >= 7) {
-        if (Nome === 'mem_free' && zoneId < 48) {
-          sendThreeBytes(61, zoneId, 0);
+        while (!rispostaRicevuta && zoneId !== 49 && !isUseIpRef.current && ip.length >= 7) {
+          try {
+            if (Nome === 'mem_free' && zoneId < 48) {
+              sendThreeBytes(61, zoneId, 0);
+            }
+
+            ip = getIp();
+            await leggiStatoZona(zoneId);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            sendThreeBytes(61, zoneId, 0);
+
+            // Condizione: tutti i dati devono essere presenti e diversi dal precedente
+            if (
+              Nome &&
+              Nome !== lastNome.current &&
+              typeof Volume === 'number' &&
+              typeof Byte5 === 'number'
+            ) {
+              names[zoneId - 1] = Nome;
+              ids[zoneId - 1] = zoneId;
+              bytes5[zoneId - 1] = Byte5;
+              volumes[zoneId - 1] = Volume;
+
+              setZoneIds([...ids]);
+              setZoneNames([...names]);
+              setZoneVolumes([...volumes]);
+              setZoneBytes5([...bytes5]);
+              setPerc(prevPerc => prevPerc + 1);
+              lastNome.current = Nome;
+              rispostaRicevuta = true;
+            }
+          } catch (err) {
+            console.log(`Errore durante il caricamento della zona ${zoneId}:`);
+          }
         }
 
-        ip = getIp();
-        leggiStatoZona(zoneId);
-        await new Promise(resolve => setTimeout(resolve, 50));
-        sendThreeBytes(61, zoneId, 0);
-
-        // Condizione: tutti i dati devono essere presenti e diversi dal precedente
-        if (
-          Nome &&
-          Nome !== lastNome.current &&
-          typeof Volume === 'number' &&
-          typeof Byte5 === 'number'
-        ) {
-          names[zoneId - 1] = Nome;
-          ids[zoneId - 1] = zoneId;
-          bytes5[zoneId - 1] = Byte5;
-          volumes[zoneId - 1] = Volume;
-
-          setZoneIds([...ids]);
-          setZoneNames([...names]);
-          setZoneVolumes([...volumes]);
-          setZoneBytes5([...bytes5]);
-          setPerc(prevPerc => prevPerc + 1);
-          lastNome.current = Nome;
-          rispostaRicevuta = true;
-        } 
+        if (zoneId === 48) {
+          setIsLoading(false);
+          setIsUseLoading(false);
+          setIsUseRefreshing(false);
+        }
       }
-
-      if (zoneId === 48) {
-        setIsLoading(false);
-        setIsUseLoading(false);
-        setIsUseRefreshing(false);
-      }
+    } catch (err) {
+      setIsLoading(false);
+      setIsUseLoading(false);
+      setIsUseRefreshing(false);
+      console.error('Errore in loadZoneData:', err);
+      Alert.alert('Errore', 'Errore durante il caricamento delle zone.');
     }
   };
 
@@ -155,64 +166,79 @@ const Zone = () => {
     const updatedVolumes: number[] = [...refreshVolumes];
     const updatedBytes5: number[] = [...refreshBytes5];
 
-    for (let zone = 1; zone <= numZone; zone++) {
-      console.log('refreshZoneData ciclo', { zone, isUseRefreshing: isUseRefreshingRef.current });
-      if (isUseRefreshingRef.current) {
-        console.log(
-          'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
-        );
-        return; // Interrompe immediatamente la funzione
-      }
+    try {
+      for (let zone = 1; zone <= numZone; zone++) {
+        console.log('refreshZoneData ciclo', { zone, isUseRefreshing: isUseRefreshingRef.current });
+        if (isUseRefreshingRef.current) {
+          console.log(
+            'Interruzione di refreshZoneData: isUseRefreshingRef.current è true',
+          );
+          refreshInProgress.current = false;
+          return; // Interrompe immediatamente la funzione
+        }
 
-      let tentativi = 0;
-      let rispostaRicevuta = false;
-await new Promise(resolve => setTimeout(resolve, 50));
-      while (!rispostaRicevuta && !isUseRefreshingRef.current && ip.length >= 7) {
-        ip = getIp();
-        await leggiStatoZona(zone);
+        let tentativi = 0;
+        let rispostaRicevuta = false;
         await new Promise(resolve => setTimeout(resolve, 50));
+        while (!rispostaRicevuta && !isUseRefreshingRef.current && ip.length >= 7) {
+          try {
+            ip = getIp();
+            await leggiStatoZona(zone);
+            await new Promise(resolve => setTimeout(resolve, 50));
 
-        // Condizione: Volume e Byte5 devono essere presenti e diversi dal precedente
-        if (
-          typeof Volume === 'number' &&
-          typeof Byte5 === 'number' &&
-          (Volume !== updatedVolumes[zone - 1] || Byte5 !== updatedBytes5[zone - 1])
-        ) {
-          updatedVolumes[zone - 1] = Volume;
-          updatedBytes5[zone - 1] = Byte5;
-          console.log(`Zona ${zone}: Volume aggiornato a ${Volume}, Byte5 aggiornato a ${Byte5}`);
-          rispostaRicevuta = true;
-        } else {
-          tentativi++;
-          if (tentativi > 20) {
-            rispostaRicevuta = true; // esce comunque dal ciclo per evitare blocchi
+            // Condizione: Volume e Byte5 devono essere presenti e diversi dal precedente
+            if (
+              typeof Volume === 'number' &&
+              typeof Byte5 === 'number' &&
+              (Volume !== updatedVolumes[zone - 1] || Byte5 !== updatedBytes5[zone - 1])
+            ) {
+              updatedVolumes[zone - 1] = Volume;
+              updatedBytes5[zone - 1] = Byte5;
+              console.log(`Zona ${zone}: Volume aggiornato a ${Volume}, Byte5 aggiornato a ${Byte5}`);
+              rispostaRicevuta = true;
+              setShowNoConnection(false)
+            }
+          } catch (err) {
+            console.log(`Errore durante il refresh della zona ${zone}:`, err);
+            setShowNoConnection(true)
+
           }
         }
       }
-    }
 
-    // Aggiorna lo stato con i nuovi valori
-    setZoneVolumes(updatedVolumes);
-    setZoneBytes5(updatedBytes5);
-    refreshInProgress.current = false;
+      // Aggiorna lo stato con i nuovi valori
+      setZoneVolumes(updatedVolumes);
+      setZoneBytes5(updatedBytes5);
+    } catch (err) {
+      console.error('Errore in refreshZoneData:', err);
+    } finally {
+      refreshInProgress.current = false;
+    }
   };
 
   function retrieveNumZone() {
-    retrieveData(`numZone`).then(numString => {
-      if (numString !== null) {
-        const numZone = parseInt(numString, 10);
-        if (!isNaN(numZone)) {
-          setNumZone(numZone);
-          console.log('dato caricato', numString);
-        } else {
-          console.error('Il numZone recuperato non è un numero valido.');
+    try {
+      retrieveData(`numZone`).then(numString => {
+        if (numString !== null) {
+          const numZone = parseInt(numString, 10);
+          if (!isNaN(numZone)) {
+            setNumZone(numZone);
+            console.log('dato caricato', numString);
+          } else {
+            console.error('Il numZone recuperato non è un numero valido.');
+          }
         }
-      }
-    });
+      }).catch(err => {
+        console.error('Errore nel recupero di numZone:', err);
+      });
+    } catch (err) {
+      console.error('Errore in retrieveNumZone:', err);
+    }
   }
 
   function modificaNumZone() {
-    setIsUseRefreshing(true),
+    setIsUseRefreshing(true);
+    try {
       Alert.alert(
         'Modifica numero zone',
         'Modifica il numero di zone da 1 a 48',
@@ -241,14 +267,13 @@ await new Promise(resolve => setTimeout(resolve, 50));
                   {
                     text: 'OK',
                     onPress: e => {
-                      setIsUseRefreshing(false);
                       const num = parseInt(e ?? '', 10);
                       if (!isNaN(num) && num >= 1 && num <= 48) {
-                        if (num <= 9) setNumZone(num);
-                        else if (num == 48) setNumZone(num);
-                        else setNumZone(num);
-                        saveData('numZone', num.toString());
-                        loadZoneData()
+                        setNumZone(num);
+                        saveData('numZone', num.toString()).catch(err => {
+                          console.error('Errore nel salvataggio di numZone:', err);
+                        });
+                        loadZoneData().then(() => {setIsUseRefreshing(false)});
                       } else {
                         Alert.alert(
                           'Numero non valido',
@@ -263,6 +288,11 @@ await new Promise(resolve => setTimeout(resolve, 50));
           },
         ],
       );
+    } catch (err) {
+      setIsUseRefreshing(false);
+      console.error('Errore in modificaNumZone:', err);
+      Alert.alert('Errore', 'Errore durante la modifica del numero di zone.');
+    }
   }
 
   useEffect(() => {
@@ -315,6 +345,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
       >
         <MainHeader title="Zone" icon={icons.zone} />
         <View className="my-5 flex flex-col">
+          {showNoConnection ? <Text className="text-center mb-5 text-red-400">Controlla la Connesione</Text> : null}
           <View className="flex flex-row items-center mb-5">
             <TouchableOpacity
               className="bg-primary-300 p-3 rounded-xl w-full"
