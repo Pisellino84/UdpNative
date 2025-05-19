@@ -39,10 +39,10 @@ export default function IpPage() {
 
   useEffect(() => {
     retrieveIp();
+    setIsUseRefreshing(true);
 
     return () => {
       setIsUseLoading(false);
-      setIsUseRefreshing(false);
     };
   }, []);
 

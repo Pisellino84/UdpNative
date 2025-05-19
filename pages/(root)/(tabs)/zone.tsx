@@ -366,7 +366,7 @@ const Zone = () => {
     if (!isUseRefreshing && !isUseLoading && !isUseApplying) {
       executeRefresh();
     }
-  }, [isUseRefreshing, isUseLoading, isUseApplying]);
+  }, [isUseRefreshing, isUseLoading, isUseApplying, ]);
 
   // Se è in caricamento, mostra spinner e barra di progresso
   if (isLoading) {
